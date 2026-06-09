@@ -79,33 +79,46 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
 .vc .meta .ok{color:var(--green)}
 .vc .meta .no{color:var(--red)}
 
-/* ── POPUPS ── */
+/* ── HOME POPUP ── */
 .leaflet-popup-content-wrapper{border-radius:2px!important;box-shadow:5px 5px 0 rgba(26,26,26,.85)!important;padding:0!important;overflow:hidden;border:2px solid var(--ink)!important}
 .leaflet-popup-tip{display:none}
-.leaflet-popup-content{margin:0!important;width:300px!important;max-height:400px;overflow-y:auto;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
-.pop-h{background:var(--ink);color:#fff;padding:14px 16px;display:flex;gap:11px;align-items:center}
-.pop-h .bullet{border:2px solid #fff;width:32px;height:32px}
-.pop-h h3{font-size:15px;font-weight:700;line-height:1.25;letter-spacing:-.2px}
-.pop-h .cat{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:#B8B2A4;margin-top:3px;font-weight:700}
-.pop-b{padding:14px 16px;font-size:13px;line-height:1.55;color:#3D3A30;background:#fff}
-.pop-b .desc{margin-bottom:13px;padding-bottom:13px;border-bottom:1.5px solid var(--ink)}
-.pop-b h4{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink);margin-bottom:6px}
-.pop-b .hrs{margin-bottom:13px}
-.pop-b .hr-row{display:flex;gap:8px;padding:1px 0;font-size:12px}
-.pop-b .hr-row .d{width:36px;font-weight:700;color:var(--ink);flex-shrink:0}
-.pop-b .hr-row.tdy{background:var(--paper);margin:0 -6px;padding:1px 6px}
-.pop-b .hr-row .closed{color:var(--red);font-weight:700}
-.pop-b .pr-row{display:flex;justify-content:space-between;padding:2px 0;font-size:12px}
-.pop-b .pr-row .v{font-weight:700}
-.pop-b .note{font-size:11px;color:var(--green);margin-top:6px;font-weight:700}
-.pop-f{padding:11px 16px;background:var(--paper);border-top:2px solid var(--ink);display:flex;align-items:center;justify-content:space-between}
-.pop-f a{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;text-decoration:none;padding:8px 16px;background:var(--ink);border-radius:999px}
-.pop-f a:hover{background:var(--red)}
-.pop-f .tbadge{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.leaflet-popup-content{margin:0!important;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+
+/* ── DETAIL SHEET ── */
+#sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:2px solid var(--ink);z-index:1200;transform:translateY(108%);transition:transform .22s ease,visibility .22s;max-height:62dvh;display:flex;flex-direction:column;visibility:hidden}
+#sheet.open{transform:translateY(0);visibility:visible}
+.sh-h{background:var(--ink);color:#fff;padding:13px 16px;display:flex;gap:11px;align-items:center;flex-shrink:0}
+.sh-h .bullet{border:2px solid #fff;width:32px;height:32px}
+.sh-t{flex:1;min-width:0}
+.sh-h h3{font-size:16px;font-weight:700;line-height:1.25;letter-spacing:-.2px}
+.sh-h .cat{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:#B8B2A4;margin-top:3px;font-weight:700}
+.sh-x{flex-shrink:0;width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;line-height:1;font-family:inherit;padding:0}
+.sh-x:hover{background:var(--red);border-color:var(--red)}
+.sh-b{padding:14px 16px;overflow-y:auto;font-size:13px;line-height:1.55;color:#3D3A30}
+.sh-b .desc{margin-bottom:12px}
+.sh-meta{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px;margin-bottom:13px;padding-bottom:13px;border-bottom:1.5px solid var(--ink)}
+.sh-meta .ok{color:var(--green)}
+.sh-meta .no{color:var(--red)}
+.sh-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.sh-b h4{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink);margin-bottom:6px}
+.sh-b .hr-row{display:flex;gap:8px;padding:1px 0;font-size:12px}
+.sh-b .hr-row .d{width:36px;font-weight:700;color:var(--ink);flex-shrink:0}
+.sh-b .hr-row.tdy{background:var(--paper);margin:0 -6px;padding:1px 6px}
+.sh-b .hr-row .closed{color:var(--red);font-weight:700}
+.sh-b .pr-row{display:flex;justify-content:space-between;gap:8px;padding:2px 0;font-size:12px}
+.sh-b .pr-row .v{font-weight:700;text-align:right}
+.sh-b .note{font-size:11px;color:var(--green);margin-top:6px;font-weight:700}
+.sh-f{padding:11px 16px;background:var(--paper);border-top:2px solid var(--ink);display:flex;gap:8px;flex-shrink:0}
+.sh-f .btn{flex:1;text-align:center;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;text-decoration:none;padding:9px 12px;background:var(--ink);border-radius:999px;white-space:nowrap}
+.sh-f .btn:hover{background:var(--red)}
+.sh-f .btn.alt{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.sh-f .btn.alt:hover{background:var(--ink);color:#fff}
 
 /* ── MAP MARKERS ── */
 .cm{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.35);border:2px solid #fff}
 .cm.home{background:var(--red);width:40px;height:40px;font-size:19px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.cm{cursor:pointer;transition:transform .15s}
+.cm.sel{transform:scale(1.3);box-shadow:0 0 0 3px var(--ink),0 2px 8px rgba(0,0,0,.4)}
 .leaflet-container{background:#EAE6DB;font-family:inherit}
 
 .empty-msg{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;line-height:2}
@@ -118,6 +131,7 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
   .list-wrap{flex:1;order:1;padding:16px 20px}
   .grid{grid-template-columns:1fr 1fr}
   .search input{width:200px}
+  #sheet{left:auto;right:14px;bottom:14px;width:370px;border:2px solid var(--ink);box-shadow:5px 5px 0 rgba(26,26,26,.85);max-height:calc(100dvh - 200px)}
 }
 @media(min-width:1500px){
   .grid{grid-template-columns:1fr 1fr 1fr}
@@ -186,6 +200,7 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
   <div id="map"></div>
   <div class="list-wrap" id="list-wrap"><div class="grid" id="grid"></div></div>
 </div>
+<div id="sheet" role="dialog" aria-label="Venue details"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
@@ -437,14 +452,53 @@ L.marker([40.7831,-73.9812],{icon:L.divIcon({className:'',html:'<div class="cm h
 const MK={};
 D.forEach(v=>{
   const g=grp(v);const fg=g==="classes"?"#1A1A1A":"#fff";
-  const mk=L.marker([v.lt,v.ln],{icon:L.divIcon({className:'',html:`<div class="cm" style="background:${GC[g]};color:${fg}">${v.id}</div>`,iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-15]})}).addTo(map);
+  const mk=L.marker([v.lt,v.ln],{icon:L.divIcon({className:'',html:`<div class="cm" style="background:${GC[g]};color:${fg}">${v.id}</div>`,iconSize:[30,30],iconAnchor:[15,15]})}).addTo(map);
+  mk.on('click',()=>select(v,'map'));
+  MK[v.id]=mk;
+});
+
+// ── Detail sheet ──
+const sheet=document.getElementById('sheet');
+let selId=null;
+function clearSel(){
+  selId=null;
+  document.querySelectorAll('.vc.on').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.cm.sel').forEach(x=>x.classList.remove('sel'));
+}
+function closeSheet(){sheet.classList.remove('open');clearSel();}
+function renderSheet(v){
+  const s=openSt(v);
   const hH=v.days.map((h,i)=>`<div class="hr-row${i===todayIdx?' tdy':''}"><span class="d">${DAYS[i]}</span>${h===null?'<span class="closed">Closed</span>':h==="v"?"Varies":h}</div>`).join('');
   const pH=v.pr.map(([l,val])=>`<div class="pr-row"><span>${l}</span><span class="v">${val}</span></div>`).join('');
   const ioL=v.io==="i"?"Indoor":v.io==="o"?"Outdoor":"Indoor + Outdoor";
   const tpL=v.tp==="p"?"Open Play":v.tp==="c"?"Classes":"Play + Classes";
-  mk.bindPopup(`<div class="pop-h">${bullet(v)}<div><h3>${v.n}</h3><div class="cat">${v.cat} &middot; ${ioL} &middot; ${tpL}</div></div></div><div class="pop-b"><div class="desc">${v.d}</div><div class="hrs"><h4>Hours</h4>${hH}</div><div><h4>Pricing</h4>${pH}${v.pn?`<div class="note">${v.pn}</div>`:''}</div></div><div class="pop-f"><a href="${v.w}" target="_blank" rel="noopener">Website &rarr;</a><span class="tbadge">${v.t} min from home</span></div>`,{maxWidth:310,minWidth:280});
-  MK[v.id]=mk;
-});
+  sheet.innerHTML=`
+  <div class="sh-h">${bullet(v)}<div class="sh-t"><h3>${v.n}</h3><div class="cat">${v.cat} &middot; ${ioL} &middot; ${tpL}</div></div><button class="sh-x" aria-label="Close">&#x2715;</button></div>
+  <div class="sh-b">
+    <div class="desc">${v.d}</div>
+    <div class="sh-meta"><span class="${s.o?'ok':'no'}">${s.t}</span><span>${v.t} min from home</span><span>${v.a}</span></div>
+    <div class="sh-cols">
+      <div><h4>Hours</h4>${hH}</div>
+      <div><h4>Pricing</h4>${pH}${v.pn?`<div class="note">${v.pn}</div>`:''}</div>
+    </div>
+  </div>
+  <div class="sh-f"><a class="btn" href="${v.w}" target="_blank" rel="noopener">Website &rarr;</a><a class="btn alt" href="https://www.google.com/maps/dir/?api=1&destination=${v.lt},${v.ln}" target="_blank" rel="noopener">Directions &rarr;</a></div>`;
+  sheet.querySelector('.sh-x').onclick=closeSheet;
+}
+function select(v,from){
+  clearSel();
+  selId=v.id;
+  const c=document.querySelector(`.vc[data-id="${v.id}"]`);
+  if(c){c.classList.add('on');if(from==='map')c.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  const el=MK[v.id].getElement();
+  if(el&&el.firstChild)el.firstChild.classList.add('sel');
+  MK[v.id].setZIndexOffset(900);
+  map.flyTo([v.lt,v.ln],Math.max(map.getZoom(),14),{duration:.4});
+  renderSheet(v);
+  sheet.classList.add('open');
+}
+map.on('click',closeSheet);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();});
 
 let searchQ='';
 
@@ -455,7 +509,7 @@ function render(){
     return matchF(v);
   });
   document.getElementById('count').textContent=f.length;
-  D.forEach(v=>{const m=MK[v.id];const show=f.includes(v);if(show){if(!map.hasLayer(m))m.addTo(map);}else{if(map.hasLayer(m))map.removeLayer(m);}});
+  D.forEach(v=>{const m=MK[v.id];const show=f.includes(v);if(show){if(!map.hasLayer(m))m.addTo(map);if(v.id===selId){const el=m.getElement();if(el&&el.firstChild)el.firstChild.classList.add('sel');}}else{if(map.hasLayer(m))map.removeLayer(m);}});
   if(!f.length){g.innerHTML='<div class="empty-msg" style="grid-column:1/-1"><span>!</span>No stops match your filters.<br>Try widening the search.</div>';return;}
   if(sortBy==="near")f.sort((a,b)=>a.t-b.t||a.id-b.id);
   else if(sortBy==="price")f.sort((a,b)=>a.$-b.$||a.t-b.t);
@@ -479,7 +533,8 @@ function render(){
         <span>${tp}</span>
         ${v.af?'<span>Adults too</span>':''}
       </div>`;
-    c.onclick=()=>{document.querySelectorAll('.vc').forEach(x=>x.classList.remove('on'));c.classList.add('on');map.flyTo([v.lt,v.ln],15,{duration:.5});MK[v.id].openPopup();};
+    if(v.id===selId)c.classList.add('on');
+    c.onclick=()=>select(v,'list');
     g.appendChild(c);
   });
   const fn=document.createElement('div');fn.className='foot-note';fn.textContent='Hours and prices drift — check the website before heading out';g.appendChild(fn);
@@ -514,9 +569,6 @@ document.getElementById('sort').addEventListener('change',e=>{sortBy=e.target.va
 
 // Search
 document.getElementById('q').addEventListener('input',e=>{searchQ=e.target.value.toLowerCase().trim();render();});
-
-// Popup <-> card sync
-map.on('popupopen',e=>{const ll=e.popup._latlng;const v=D.find(x=>Math.abs(x.lt-ll.lat)<.0002&&Math.abs(x.ln-ll.lng)<.0002);if(v){document.querySelectorAll('.vc').forEach(x=>x.classList.remove('on'));const c=document.querySelector(`.vc[data-id="${v.id}"]`);if(c){c.classList.add('on');c.scrollIntoView({behavior:'smooth',block:'nearest'});}}});
 
 render();
 </script>
