@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bloop Adventures — 200 rainy-day stops for toddlers</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23EE352E'/><text x='50' y='72' font-size='52' text-anchor='middle'>&#x1F353;</text></svg>">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#1A1A1A;--paper:#F5F1E8;--card:#FFFFFF;
+  --red:#EE352E;--orange:#FF6319;--yellow:#FCCC0A;--green:#00933C;
+  --blue:#0039A6;--purple:#B933AD;--lgreen:#6CBE45;
+  --muted:#6F6857;--rule:#1A1A1A;
+}
+html,body{height:100dvh;overflow:hidden}
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+
+/* ── HEADER: station signage ── */
+.hdr{background:var(--ink);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:14px;position:relative;z-index:1001;border-bottom:4px solid #fff}
+.hdr .logo{width:42px;height:42px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:2px solid #fff}
+.hdr h1{font-size:21px;font-weight:700;letter-spacing:-.5px;line-height:1.1}
+.hdr .sub{font-size:9px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#B8B2A4;margin-top:3px}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:7px 14px;min-width:0}
+.search svg{width:14px;height:14px;color:var(--ink);flex-shrink:0}
+.search input{border:0;background:0;outline:0;font:inherit;font-size:13px;font-weight:500;color:var(--ink);width:160px;min-width:0}
+.search input::placeholder{color:#999}
+.cnt-badge{background:#fff;color:var(--ink);font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;flex-shrink:0;white-space:nowrap}
+.cnt-badge small{font-weight:500;font-size:10px;letter-spacing:.5px}
+
+/* ── TOOLBAR ── */
+.toolbar{background:var(--paper);border-bottom:2px solid var(--ink);position:relative;z-index:1000}
+.frow{display:flex;gap:6px;padding:8px 20px;overflow-x:auto;scrollbar-width:none;align-items:center}
+.frow::-webkit-scrollbar{display:none}
+.frow.cats{padding-bottom:2px}
+.frow .sep{width:2px;height:18px;background:var(--ink);opacity:.25;flex-shrink:0;margin:0 4px}
+.pill{padding:6px 13px;border-radius:999px;font-size:12px;font-weight:700;border:1.5px solid var(--ink);background:var(--card);color:var(--ink);cursor:pointer;white-space:nowrap;transition:background .12s,color .12s;flex-shrink:0;font-family:inherit;display:flex;align-items:center;gap:7px}
+.pill:hover{background:#EFE9DB}
+.pill.on{background:var(--ink);color:#fff}
+.pill .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.15)}
+.pill[data-v="play"].on{background:var(--orange);border-color:var(--orange);color:#fff}
+.pill[data-v="museum"].on{background:var(--blue);border-color:var(--blue);color:#fff}
+.pill[data-v="nature"].on{background:var(--green);border-color:var(--green);color:#fff}
+.pill[data-v="books"].on{background:var(--purple);border-color:var(--purple);color:#fff}
+.pill[data-v="classes"].on{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.pill[data-v="shows"].on{background:var(--lgreen);border-color:var(--lgreen);color:#fff}
+.pill.on .dot{border-color:rgba(255,255,255,.6)}
+.pill.today::after{content:"";display:block;width:5px;height:5px;border-radius:50%;background:var(--red)}
+.pill.today.on::after{background:#fff}
+.slider-wrap{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.slider-lbl{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;min-width:74px}
+.slider{-webkit-appearance:none;width:90px;height:4px;border-radius:2px;background:var(--ink);outline:none;cursor:pointer}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--ink);cursor:pointer}
+.slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--ink);cursor:pointer}
+.sortsel{font:inherit;font-size:12px;font-weight:700;border:1.5px solid var(--ink);border-radius:999px;background:var(--card);color:var(--ink);padding:6px 10px;cursor:pointer;flex-shrink:0;-webkit-appearance:none;appearance:none}
+
+/* ── LAYOUT ── */
+.main{display:flex;flex-direction:column;flex:1;min-height:0}
+#map{height:38%;min-height:200px;flex-shrink:0;border-bottom:2px solid var(--ink)}
+.list-wrap{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+.grid{display:grid;gap:12px}
+.foot-note{grid-column:1/-1;text-align:center;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;padding:18px 0 8px}
+
+/* ── CARDS ── */
+.vc{background:var(--card);border:1.5px solid var(--ink);border-radius:2px;padding:14px 16px;cursor:pointer;transition:box-shadow .12s,transform .12s;display:flex;flex-direction:column;gap:9px;position:relative}
+.vc::before{content:"";position:absolute;left:-1.5px;top:-1.5px;bottom:-1.5px;width:5px;background:var(--gc,var(--ink))}
+.vc:hover{box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}
+.vc.on{box-shadow:4px 4px 0 var(--gc,var(--ink));transform:translate(-2px,-2px);border-width:2px}
+.vc .vc-top{display:flex;align-items:center;gap:11px}
+.bullet{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.vc .vc-title{flex:1;min-width:0}
+.vc .nm{font-size:15px;font-weight:700;letter-spacing:-.2px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vc .cat-line{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vc .vc-price{text-align:right;flex-shrink:0;font-size:16px;font-weight:800;letter-spacing:-.3px}
+.vc .vc-price.free{color:var(--green)}
+.vc .desc-line{font-size:13px;color:#3D3A30;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vc .meta{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px}
+.vc .meta .ok{color:var(--green)}
+.vc .meta .no{color:var(--red)}
+
+/* ── POPUPS ── */
+.leaflet-popup-content-wrapper{border-radius:2px!important;box-shadow:5px 5px 0 rgba(26,26,26,.85)!important;padding:0!important;overflow:hidden;border:2px solid var(--ink)!important}
+.leaflet-popup-tip{display:none}
+.leaflet-popup-content{margin:0!important;width:300px!important;max-height:400px;overflow-y:auto;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+.pop-h{background:var(--ink);color:#fff;padding:14px 16px;display:flex;gap:11px;align-items:center}
+.pop-h .bullet{border:2px solid #fff;width:32px;height:32px}
+.pop-h h3{font-size:15px;font-weight:700;line-height:1.25;letter-spacing:-.2px}
+.pop-h .cat{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:#B8B2A4;margin-top:3px;font-weight:700}
+.pop-b{padding:14px 16px;font-size:13px;line-height:1.55;color:#3D3A30;background:#fff}
+.pop-b .desc{margin-bottom:13px;padding-bottom:13px;border-bottom:1.5px solid var(--ink)}
+.pop-b h4{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink);margin-bottom:6px}
+.pop-b .hrs{margin-bottom:13px}
+.pop-b .hr-row{display:flex;gap:8px;padding:1px 0;font-size:12px}
+.pop-b .hr-row .d{width:36px;font-weight:700;color:var(--ink);flex-shrink:0}
+.pop-b .hr-row.tdy{background:var(--paper);margin:0 -6px;padding:1px 6px}
+.pop-b .hr-row .closed{color:var(--red);font-weight:700}
+.pop-b .pr-row{display:flex;justify-content:space-between;padding:2px 0;font-size:12px}
+.pop-b .pr-row .v{font-weight:700}
+.pop-b .note{font-size:11px;color:var(--green);margin-top:6px;font-weight:700}
+.pop-f{padding:11px 16px;background:var(--paper);border-top:2px solid var(--ink);display:flex;align-items:center;justify-content:space-between}
+.pop-f a{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;text-decoration:none;padding:8px 16px;background:var(--ink);border-radius:999px}
+.pop-f a:hover{background:var(--red)}
+.pop-f .tbadge{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+
+/* ── MAP MARKERS ── */
+.cm{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.35);border:2px solid #fff}
+.cm.home{background:var(--red);width:40px;height:40px;font-size:19px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.leaflet-container{background:#EAE6DB;font-family:inherit}
+
+.empty-msg{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;line-height:2}
+.empty-msg span{display:block;width:44px;height:44px;border-radius:50%;background:var(--ink);color:#fff;font-size:22px;line-height:44px;margin:0 auto 14px}
+
+/* ── RESPONSIVE ── */
+@media(min-width:769px){
+  .main{flex-direction:row}
+  #map{height:100%!important;width:46%;flex:none;order:2;border-bottom:0;border-left:2px solid var(--ink)}
+  .list-wrap{flex:1;order:1;padding:16px 20px}
+  .grid{grid-template-columns:1fr 1fr}
+  .search input{width:200px}
+}
+@media(min-width:1500px){
+  .grid{grid-template-columns:1fr 1fr 1fr}
+  #map{width:42%}
+}
+@media(max-width:768px){
+  .hdr{padding:10px 14px;gap:10px;flex-wrap:wrap}
+  .hdr h1{font-size:17px}
+  .hdr .logo{width:34px;height:34px;font-size:17px}
+  .hdr .sub{font-size:8px;letter-spacing:1.2px}
+  .cnt-badge{margin-left:auto}
+  .search{order:5;flex-basis:100%;margin-left:0}
+  .search input{flex:1;width:auto}
+  .frow{padding:7px 14px}
+  .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <span class="logo">&#x1F353;</span>
+  <div><h1>Bloop Adventures</h1><div class="sub">79 St&ndash;Broadway &middot; 200 rainy-day stops for toddlers</div></div>
+  <span class="cnt-badge"><b id="count">200</b> <small>STOPS</small></span>
+  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="q" placeholder="Search stops, places, addresses&hellip;"></div>
+</div>
+<div class="toolbar">
+  <div class="frow cats">
+    <button class="pill on" data-g="g" data-v="any">All stops</button>
+    <button class="pill" data-g="g" data-v="play"><span class="dot" style="background:#FF6319"></span>Play</button>
+    <button class="pill" data-g="g" data-v="museum"><span class="dot" style="background:#0039A6"></span>Museums</button>
+    <button class="pill" data-g="g" data-v="nature"><span class="dot" style="background:#00933C"></span>Animals &amp; Nature</button>
+    <button class="pill" data-g="g" data-v="books"><span class="dot" style="background:#B933AD"></span>Books</button>
+    <button class="pill" data-g="g" data-v="classes"><span class="dot" style="background:#FCCC0A"></span>Classes &amp; Gyms</button>
+    <button class="pill" data-g="g" data-v="shows"><span class="dot" style="background:#6CBE45"></span>Music &amp; Shows</button>
+  </div>
+  <div class="frow">
+    <button class="pill on" data-g="day" data-v="any">Any day</button>
+    <button class="pill" data-g="day" data-v="0">Mon</button>
+    <button class="pill" data-g="day" data-v="1">Tue</button>
+    <button class="pill" data-g="day" data-v="2">Wed</button>
+    <button class="pill" data-g="day" data-v="3">Thu</button>
+    <button class="pill" data-g="day" data-v="4">Fri</button>
+    <button class="pill" data-g="day" data-v="5">Sat</button>
+    <button class="pill" data-g="day" data-v="6">Sun</button>
+    <div class="sep"></div>
+    <button class="pill on" data-g="t" data-v="99">Any trip</button>
+    <button class="pill" data-g="t" data-v="15">&le;15 min</button>
+    <button class="pill" data-g="t" data-v="30">&le;30 min</button>
+    <div class="sep"></div>
+    <button class="pill on" data-g="io" data-v="any">In + out</button>
+    <button class="pill" data-g="io" data-v="indoor">Indoor</button>
+    <button class="pill" data-g="io" data-v="outdoor">Outdoor</button>
+    <div class="sep"></div>
+    <button class="pill on" data-g="tp" data-v="any">All types</button>
+    <button class="pill" data-g="tp" data-v="play">Open play</button>
+    <button class="pill" data-g="tp" data-v="class">Classes</button>
+    <div class="sep"></div>
+    <button class="pill" data-g="af" data-v="1">Adults enjoy too</button>
+    <div class="sep"></div>
+    <span class="slider-wrap"><span class="slider-lbl" id="price-lbl">Any price</span><input type="range" id="price-slider" min="0" max="100" value="100" step="5" class="slider"></span>
+    <div class="sep"></div>
+    <select class="sortsel" id="sort" aria-label="Sort by"><option value="near">Sort: Nearest</option><option value="price">Sort: Cheapest</option><option value="name">Sort: A&ndash;Z</option></select>
+  </div>
+</div>
+<div class="main">
+  <div id="map"></div>
+  <div class="list-wrap" id="list-wrap"><div class="grid" id="grid"></div></div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const today=new Date().getDay();
+const todayIdx=today===0?6:today-1;
+let filters={day:"any",io:"any",tp:"any",pr:100,af:"any",g:"any",t:99};
+let sortBy="near";
+
+// Venue data: io: i=indoor o=outdoor b=both | tp: p=play c=class b=both | $=basic price (0=free)
+// days: [Mon..Sun] null=closed, string=hours, "v"=varies
+const D=[
+{id:1,n:"Children's Museum of Manhattan",a:"212 W 83rd St",lt:40.7853,ln:-73.9741,cat:"Children's Museum",ic:"\ud83c\udfe0",t:5,io:"i",tp:"p",af:1,$:17,d:"PlayWorks floor for toddlers: fire truck, water play, sand table. Best toddler museum in the city.",days:[null,"10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Online","$17"],["Door","$18"],["Under 1","Free"]],pn:"Save $1 online",w:"https://cmom.org"},
+{id:2,n:"American Museum of Natural History",a:"200 Central Park West",lt:40.7813,ln:-73.974,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:5,io:"i",tp:"p",af:1,$:0,d:"Dinosaurs, blue whale, Discovery Room pre-K drop-ins. Under 3 free.",days:["10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30"],pr:[["Adult","$25 suggested"],["Under 3","Free"]],pn:"NY residents: pay what you wish",w:"https://www.amnh.org"},
+{id:3,n:"The Little Gym",a:"2121 Broadway",lt:40.781,ln:-73.9812,cat:"Gym",ic:"\ud83e\udd38",t:3,io:"i",tp:"c",af:0,$:0,d:"Parent-child gymnastics ages 4mo+. Tumbling, balance beams, padded environment.",days:["9-7","9-7","9-7","9-7","9-7","9-7","9-7"],pr:[["Trial","Free"],["Monthly","Call"]],pn:"Free intro class",w:"https://www.thelittlegym.com/new-york-upper-westside/"},
+{id:4,n:"Barnes & Noble 82nd St",a:"2289 Broadway",lt:40.7847,ln:-73.978,cat:"Bookstore",ic:"\ud83d\udcda",t:4,io:"i",tp:"p",af:1,$:0,d:"Free weekend storytimes, large children's section. Reliable free fallback.",days:["9-9","9-9","9-9","9-9","9-9","9-9","10-8"],pr:[["Everything","Free"]],pn:"No purchase required",w:"https://stores.barnesandnoble.com/store/1979"},
+{id:5,n:"Playday UWS",a:"469 Amsterdam Ave",lt:40.786,ln:-73.9773,cat:"Play Space",ic:"\ud83e\uddf8",t:5,io:"i",tp:"b",af:0,$:25,d:"Drop-in art & sensory play for ages 1-4. Cozy neighborhood spot.",days:["9-5","9-5","9-5","9-5","9-5","9-1",null],pr:[["Drop-in","~$25-40"]],pn:"Walk-ins welcome",w:"https://www.playdaynyc.com"},
+{id:6,n:"Little Shop of Plaster & Pottery",a:"711 Amsterdam Ave",lt:40.7925,ln:-73.9725,cat:"Art Studio",ic:"\ud83c\udfa8",t:8,io:"i",tp:"p",af:0,$:25,d:"Walk-in pottery painting for all ages. Pick a piece, paint it, they fire it.",days:["11-7","11-7","11-7","11-7","11-7","10-7","10-7"],pr:[["Per piece","$25-45"]],pn:"No reservation needed",w:"https://littleshopny.com"},
+{id:7,n:"Play Street Museum UWS",a:"805 Columbus Ave",lt:40.7938,ln:-73.9631,cat:"Play Space",ic:"\ud83e\uddf8",t:10,io:"i",tp:"p",af:0,$:35,d:"Themed play rooms: slime lab, sensory kits, pretend-play. Ages 18mo-6yr.",days:["8:30-6","8:30-6","8:30-6","8:30-6","8:30-6","9-6:30","9-6:30"],pr:[["Child","$35"],["Adult","$10"]],pn:"Sessions capped at 20",w:"https://www.uws.playstreetmuseum.com"},
+{id:8,n:"Kidville UWS",a:"205 W 88th St",lt:40.7883,ln:-73.9747,cat:"Gym",ic:"\ud83e\udd38",t:8,io:"i",tp:"b",af:0,$:29,d:"Indoor swings, climbing, giant blocks, messy art. Ages 12-36 months.",days:["9:15-5:30","9:15-5:30","9:15-5:30","9:15-5:30","9:15-5:30",null,null],pr:[["Drop-in","$29"],["5-pack","$140"]],pn:"Socks required",w:"https://kidville.com/westside/"},
+{id:9,n:"Gymboree Play & Music",a:"120 Riverside Blvd",lt:40.778,ln:-73.9895,cat:"Music",ic:"\ud83c\udfb5",t:10,io:"i",tp:"b",af:0,$:59,d:"Open Gym with climbing plus music and sensory classes, ages 0-5.",days:[null,null,null,null,null,"9:30-11",null],pr:[["Open Gym","$59"]],pn:"Sat Open Gym only for drop-in",w:"https://www.gymboreeclasses.com/en/locations/NY/Upper-West-Side/"},
+{id:10,n:"Swedish Cottage Marionette Theatre",a:"W 79th St, Central Park",lt:40.7793,ln:-73.9717,cat:"Theater",ic:"\ud83c\udfad",t:5,io:"i",tp:"p",af:1,$:12,d:"Intimate puppet shows in a charming cottage. Current: Little Red's Hood.",days:[null,null,null,null,null,"10:30-1","10:30-1"],pr:[["Ticket","$12"]],pn:"Weekend shows only; advance tickets",w:"https://cityparksfoundation.org/swedish-cottage-marionette-theatre/"},
+{id:11,n:"Ballet Hispanico",a:"167 W 89th St",lt:40.7895,ln:-73.9722,cat:"Dance",ic:"\ud83e\ude70",t:8,io:"i",tp:"c",af:0,$:30,d:"Los Pasitos creative movement ages 2-5. Bilingual English/Spanish.",days:["v","v","v","v","v","v",null],pr:[["Per class","~$30"]],pn:"Trimester enrollment",w:"https://www.ballethispanico.org"},
+{id:12,n:"JCC Manhattan",a:"334 Amsterdam Ave",lt:40.7854,ln:-73.9786,cat:"Community Center",ic:"\ud83c\udfe2",t:5,io:"i",tp:"b",af:1,$:24,d:"Toddler swim, playgroup, music & art classes. Indoor pool.",days:["v","v","v","v","v","v","v"],pr:[["Swim","~$24-36"]],pn:"Non-members welcome",w:"https://www.jccmanhattan.org"},
+{id:13,n:"YMCA West Side",a:"5 W 63rd St",lt:40.7725,ln:-73.9795,cat:"Swim",ic:"\ud83c\udfca",t:10,io:"i",tp:"c",af:0,$:35,d:"Parent-child swim ages 6mo-3yr. Warm pool, structured lessons.",days:["6-10","6-10","6-10","6-10","6-10","7-7","8-6"],pr:[["Per class","~$35"]],pn:"Financial assistance available",w:"https://ymcanyc.org"},
+{id:14,n:"Lucy Moses School",a:"129 W 67th St",lt:40.7738,ln:-73.9818,cat:"Dance",ic:"\ud83c\udfb5",t:10,io:"i",tp:"c",af:0,$:30,d:"Baby ballet, Dalcroze music, creative dance from 18 months. Lincoln Center.",days:["v","v","v","v","v","v",null],pr:[["Per class","~$30"]],pn:"Semester enrollment",w:"https://kaufmanmusiccenter.org/lucy-moses-school/"},
+{id:15,n:"Discovery Programs",a:"251 W 100th St",lt:40.7963,ln:-73.9694,cat:"Classes",ic:"\ud83e\udd38",t:10,io:"i",tp:"c",af:0,$:46,d:"Gym, art, dance, sports for toddlers. Multi-activity programs.",days:["9-5","9-5","9-5","9-5","9-5","9-1",null],pr:[["Per class","$46"]],pn:"Drop-in available",w:"https://discoveryprograms.com"},
+{id:16,n:"NYPL Bloomingdale Library",a:"150 W 100th St",lt:40.7956,ln:-73.9709,cat:"Library",ic:"\ud83d\udcda",t:15,io:"i",tp:"p",af:1,$:0,d:"Children's floor with board books, toddler storytime. Calm, low-stimulation.",days:["10-7","10-7","11-7","11-7","10-5","10-5",null],pr:[["Everything","Free"]],pn:"Library card free for NYC residents",w:"https://www.nypl.org/locations/bloomingdale"},
+{id:17,n:"Central Park Zoo",a:"64th St & 5th Ave",lt:40.7678,ln:-73.9718,cat:"Zoo",ic:"\ud83e\udd81",t:15,io:"b",tp:"p",af:1,$:0,d:"Indoor Tropic Zone with birds & lemurs. Tisch Children's Zoo petting area.",days:["10-5","10-5","10-5","10-5","10-5","10-5:30","10-5:30"],pr:[["Adult","$19.95"],["Under 3","Free"]],pn:"Includes Children's Zoo",w:"https://centralparkzoo.com"},
+{id:18,n:"Museum of the City of New York",a:"1220 Fifth Ave",lt:40.7925,ln:-73.9519,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:15,io:"i",tp:"p",af:1,$:0,d:"Interactive NYC exhibits. Under 20 free. Free Wednesdays.",days:[null,"10-6","10-6","10-6","10-6","10-6","10-6"],pr:[["Under 20","Free"]],pn:"Free Wed & always free under 20",w:"https://www.mcny.org"},
+{id:19,n:"The Metropolitan Museum of Art",a:"1000 Fifth Ave",lt:40.7794,ln:-73.9632,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:15,io:"i",tp:"b",af:1,$:0,d:"Egyptian Temple of Dendur, armor hall. Storytime for 18mo+. Under 12 free.",days:[null,"10-5","10-5","10-5","10-5","10-9","10-5"],pr:[["Under 12","Free"]],pn:"NY residents: pay what you wish",w:"https://www.metmuseum.org"},
+{id:20,n:"Guggenheim Museum",a:"1071 Fifth Ave",lt:40.783,ln:-73.959,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:12,io:"i",tp:"p",af:1,$:0,d:"The spiral ramp entertains toddlers. Weekend family programs. Under 12 free.",days:[null,"11-6","11-6","11-6","11-8","11-6","11-6"],pr:[["Under 12","Free"]],pn:"Pay what you wish Sat 6-8pm",w:"https://www.guggenheim.org"},
+{id:21,n:"92nd Street Y",a:"1395 Lexington Ave",lt:40.7852,ln:-73.9547,cat:"Classes",ic:"\ud83c\udfe2",t:15,io:"i",tp:"c",af:0,$:30,d:"Toddler swim, art, music, movement. Excellent instructors.",days:["v","v","v","v","v","v","v"],pr:[["Per class","~$30"]],pn:"Non-member rates available",w:"https://www.92ny.org"},
+{id:22,n:"Asphalt Green",a:"555 E 90th St",lt:40.7808,ln:-73.9457,cat:"Swim",ic:"\ud83c\udfca",t:15,io:"i",tp:"c",af:0,$:28,d:"Water Tots swim (20-35mo). Olympic pool plus warm toddler pool.",days:["v","v","v","v","v","v","v"],pr:[["Per class","$24-28"]],pn:"Ages 20-35 months",w:"https://www.asphaltgreen.org"},
+{id:23,n:"My Gym Harlem",a:"258 St Nicholas Ave",lt:40.799,ln:-73.9551,cat:"Gym",ic:"\ud83e\udd38",t:15,io:"i",tp:"b",af:0,$:35,d:"Mommy & Me tumbling and free play for babies and toddlers.",days:["9-6","9-6","9-6","9-6","9-6","9-3","9-1"],pr:[["Drop-in","~$35-45"]],pn:"Free trial class",w:"https://www.mygym.com"},
+{id:24,n:"Apple Fifth Avenue",a:"767 Fifth Ave",lt:40.7639,ln:-73.9722,cat:"Workshop",ic:"\ud83d\udcf1",t:15,io:"i",tp:"c",af:0,$:0,d:"Free Today at Apple family sessions: drawing, music, coding basics.",days:["10-9","10-9","10-9","10-9","10-9","10-9","10-9"],pr:[["Everything","Free"]],pn:"Reserve online",w:"https://www.apple.com/retail/fifthavenue/"},
+{id:25,n:"NYPL 53rd Street",a:"18 W 53rd St",lt:40.7615,ln:-73.9775,cat:"Library",ic:"\ud83d\udcda",t:15,io:"i",tp:"p",af:1,$:0,d:"Toddler Time and Baby Lapsit storytime. Midtown location.",days:[null,"11-6","11-6","11-6","11-6","11-6",null],pr:[["Everything","Free"]],pn:"All programs free",w:"https://www.nypl.org/locations/53rd-street"},
+{id:26,n:"School of American Ballet",a:"70 Lincoln Center Plaza",lt:40.7729,ln:-73.9834,cat:"Dance",ic:"\ud83e\ude70",t:10,io:"i",tp:"c",af:0,$:40,d:"Littlest Dancers ages 2-3. Intro to movement at world-famous SAB.",days:[null,"v","v","v","v","v",null],pr:[["Semester","~$1,400"]],pn:"Semester only",w:"https://www.sab.org"},
+{id:27,n:"Madame Tussauds",a:"234 W 42nd St",lt:40.7564,ln:-73.9888,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:15,io:"i",tp:"p",af:1,$:0,d:"Life-size wax figures, MARVEL 4D. Under 3 free.",days:["10-8","10-8","10-8","10-8","10-10","9-10","10-8"],pr:[["Under 3","Free"],["Adult","~$37"]],pn:"Under 3 free",w:"https://www.madametussauds.com/new-york/"},
+{id:28,n:"Intrepid Museum",a:"Pier 86, W 46th St",lt:40.7645,ln:-73.9996,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:20,io:"b",tp:"p",af:1,$:0,d:"Aircraft carrier, planes, helicopters. Under 5 free. NYC residents 50% off.",days:["10-5","10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Under 5","Free"],["Adult","$38"]],pn:"NYC residents 50% off",w:"https://intrepidmuseum.org"},
+{id:29,n:"The Art Farm",a:"431 E 91st St",lt:40.7808,ln:-73.9489,cat:"Animals / Art",ic:"\ud83d\udc3e",t:20,io:"i",tp:"b",af:1,$:20,d:"NYC's only indoor petting zoo: bearded dragons, chinchillas, chickens. Plus crafts.",days:[null,"12:30-3","12:30-3","12:30-3",null,"8-10","8-10"],pr:[["Drop-in","$20"]],pn:"Ages 6mo+",w:"https://www.theartfarms.com"},
+{id:30,n:"Union Square Play",a:"245 E 84th St",lt:40.7775,ln:-73.9524,cat:"Play Space",ic:"\ud83e\uddf8",t:20,io:"i",tp:"b",af:0,$:45,d:"Drop-in music, art, movement for ages 0-5. Multiple Manhattan locations.",days:["9:30-5","9:30-5","9:30-5","9:30-5","9:30-5","1-5","1-5"],pr:[["Drop-in","~$45"]],pn:"Space permitting",w:"https://www.usquareplay.com"},
+{id:31,n:"The Craft Studio",a:"1657 Third Ave",lt:40.7828,ln:-73.9514,cat:"Art Studio",ic:"\ud83c\udfa8",t:20,io:"i",tp:"p",af:0,$:15,d:"Drop-in pottery painting, mosaics for ages 1.5+. Open 7 days.",days:["10-6","10-6","10-6","10-6","10-6","10-6","10-6"],pr:[["Per project","$15-35"]],pn:"Walk-in welcome",w:"https://www.thecraftstudionyc.com"},
+{id:32,n:"Color Factory",a:"251 Spring St",lt:40.7252,ln:-73.9999,cat:"Immersive Art",ic:"\ud83c\udfa8",t:25,io:"i",tp:"p",af:1,$:35,d:"Immersive color rooms, ball pits, interactive installations. No strollers.",days:["9-8","9-8","9-8","9-8","9-8","9-8","9-8"],pr:[["Age 2+","$35-45"],["Under 2","Free"]],pn:"Weekdays cheapest",w:"https://www.colorfactory.co"},
+{id:33,n:"CAMP (5th Ave)",a:"110 5th Ave",lt:40.7376,ln:-73.9929,cat:"Play / Retail",ic:"\ud83c\udf6d",t:20,io:"i",tp:"p",af:1,$:38,d:"Themed play behind a 'magic door' (currently Bluey). Plus free toy store.",days:["10-7","10-6","10-7","10-6","10-7","9-7","9-6"],pr:[["Experience","~$38/pair"],["Store","Free"]],pn:"25% off 4+ tickets",w:"https://camp.com"},
+{id:34,n:"Scandinavia House",a:"58 Park Ave",lt:40.749,ln:-73.9793,cat:"Sensory Play",ic:"\u2728",t:25,io:"i",tp:"p",af:1,$:15,d:"Nordic play space: sensory tunnel, LEGO corner, BRIO trains, climbing wall.",days:["10-5","10-5",null,"10-5","10-5","10-5","10-5"],pr:[["Child","$15"],["Adult","Free"]],pn:"Ages 1-5; must be walking",w:"https://www.scandinaviahouse.org"},
+{id:35,n:"Chelsea Piers Toddler Gym",a:"Pier 62, W 22nd St",lt:40.7467,ln:-74.0082,cat:"Gym",ic:"\ud83e\udd38",t:25,io:"i",tp:"p",af:0,$:12,d:"Toddler gym (6mo-4yr): soft climbing, slides. Best value at $12/session.",days:["9:30-5","9:30-5","9:30-5","9:30-5",null,null,null],pr:[["Session","$12"]],pn:"Mon-Thu only",w:"https://www.chelseapiers.com"},
+{id:36,n:"Sugar Hill Children's Museum",a:"898 St Nicholas Ave",lt:40.8305,ln:-73.9386,cat:"Children's Museum",ic:"\ud83c\udfe0",t:25,io:"i",tp:"p",af:1,$:0,d:"Art-focused, storytelling exhibits. Kids under 8 free. Intimate, uncrowded.",days:[null,null,null,"10-5","10-5","10-5","10-5"],pr:[["Under 8","Free"],["Adult","$9"]],pn:"Kids under 8 free",w:"https://www.sugarhillmuseum.org"},
+{id:37,n:"Museum of Ice Cream",a:"558 Broadway",lt:40.7234,ln:-73.9988,cat:"Immersive",ic:"\ud83c\udf66",t:25,io:"i",tp:"p",af:1,$:0,d:"Ball pit, pastel rooms, unlimited ice cream. Under 3 free.",days:["10-6","10-6","10-6","10-8","10-8","10-8","10-8"],pr:[["Under 3","Free"],["3+","$35-47"]],pn:"No strollers",w:"https://www.museumoficecream.com"},
+{id:38,n:"ARTECHOUSE NYC",a:"439 W 15th St",lt:40.7425,ln:-74.0062,cat:"Immersive Art",ic:"\ud83c\udfa8",t:25,io:"i",tp:"p",af:1,$:0,d:"Immersive light/sound projections. Under 4 free. Mesmerizing for toddlers.",days:["10-10","10-10","10-10","10-10","10-10","10-10","10-10"],pr:[["Under 4","Free"],["Adult","$25-35"]],pn:"Under 4 free",w:"https://www.artechouse.com"},
+{id:39,n:"Joffrey Ballet School",a:"434 6th Ave",lt:40.734,ln:-73.9983,cat:"Dance",ic:"\ud83e\ude70",t:22,io:"i",tp:"c",af:0,$:30,d:"Children's ballet from age 2. Creative movement, pre-ballet.",days:["v","v","v","v","v","v",null],pr:[["Per class","~$30"]],pn:"Check toddler schedule",w:"https://www.joffreyballetschool.com"},
+{id:40,n:"Kids at Work NYC",a:"147 W 24th St",lt:40.744,ln:-73.9932,cat:"Classes",ic:"\ud83e\udd38",t:22,io:"i",tp:"c",af:0,$:53,d:"Drop-in cooking, dance, art for ages 2-5.",days:["9-5","9-5","9-5","9-5","9-5","9-3",null],pr:[["Per class","$53"]],pn:"No membership needed",w:"https://kidsatworknyc.com"},
+{id:41,n:"Taste Buds Kitchen",a:"109 W 27th St",lt:40.7453,ln:-73.9925,cat:"Cooking",ic:"\ud83c\udf73",t:22,io:"i",tp:"c",af:1,$:65,d:"Caregiver & Me cooking ages 2+. Real recipes, real ingredients.",days:["v","v","v","v","v","v","v"],pr:[["Class","$65-95"]],pn:"Ages 2+",w:"https://tastebudskitchen.com"},
+{id:42,n:"MoMath",a:"11 E 26th St",lt:40.7444,ln:-73.9883,cat:"Museum",ic:"\ud83d\udd22",t:20,io:"i",tp:"p",af:1,$:22,d:"Coaster roller, light-up floors, shape puzzles. Surprisingly fun for toddlers.",days:["10-5","10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Child 2-12","$22"],["Under 2","Free"]],pn:"Under 2 free",w:"https://momath.org"},
+{id:43,n:"NYPL Stavros Niarchos",a:"455 5th Ave",lt:40.7517,ln:-73.9819,cat:"Library",ic:"\ud83d\udcda",t:20,io:"i",tp:"p",af:1,$:0,d:"Modern library, Children's Center, Baby & Me storytime, rooftop terrace.",days:["8-9","8-9","8-9","8-9","8-8",null,"10-6"],pr:[["Everything","Free"]],pn:"Closed Saturdays",w:"https://www.nypl.org/locations/snfl"},
+{id:44,n:"NYPL Jefferson Market",a:"425 6th Ave",lt:40.7343,ln:-73.9993,cat:"Library",ic:"\ud83d\udcda",t:20,io:"i",tp:"p",af:1,$:0,d:"Victorian Gothic building with children's room. Toddler storytime.",days:["10-8","10-8","10-8","10-8","10-5","10-5","1-5"],pr:[["Everything","Free"]],pn:"Beautiful building",w:"https://www.nypl.org/locations/jefferson-market"},
+{id:45,n:"Books of Wonder",a:"42 W 17th St",lt:40.7389,ln:-73.9936,cat:"Bookstore",ic:"\ud83d\udcda",t:20,io:"i",tp:"p",af:1,$:0,d:"NYC's oldest independent children's bookstore. Author events, storytime.",days:["10-7","10-7","10-7","10-7","10-7","10-7","11-6"],pr:[["Everything","Free"]],pn:"Author signings",w:"https://www.booksofwonder.com"},
+{id:46,n:"Barnes & Noble Union Square",a:"33 E 17th St",lt:40.7371,ln:-73.9906,cat:"Bookstore",ic:"\ud83d\udcda",t:20,io:"i",tp:"p",af:1,$:0,d:"4-floor flagship, big kids section. Free Sat storytime 11am.",days:["9-10","9-10","9-10","9-10","9-10","9-10","10-9"],pr:[["Everything","Free"]],pn:"Free Sat 11am storytime",w:"https://stores.barnesandnoble.com/store/2675"},
+{id:47,n:"Strand Bookstore",a:"828 Broadway",lt:40.7334,ln:-73.991,cat:"Bookstore",ic:"\ud83d\udcda",t:20,io:"i",tp:"p",af:1,$:0,d:"18 miles of books! Children's section 2nd floor. Weekly storytimes.",days:["10-10","10-10","10-10","10-10","10-10","10-10","11-9"],pr:[["Everything","Free"]],pn:"Kids storytimes weekly",w:"https://www.strandbooks.com"},
+{id:48,n:"Brooklyn Children's Museum",a:"145 Brooklyn Ave",lt:40.6726,ln:-73.9441,cat:"Children's Museum",ic:"\ud83c\udfe0",t:30,io:"i",tp:"p",af:1,$:15,d:"Totally Tots: 9 sensory areas ages 0-6. Sand, water, dress-up, climbing.",days:[null,null,"10-5","10-5","10-5","10-5","10-5"],pr:[["General","$15"],["Under 1","Free"]],pn:"Free Thu 2-5pm",w:"https://www.brooklynkids.org"},
+{id:49,n:"NY Hall of Science",a:"47-01 111th St, Queens",lt:40.7472,ln:-73.8517,cat:"Science Museum",ic:"\ud83d\udd2c",t:35,io:"i",tp:"p",af:1,$:19,d:"Preschool Place: shadow/light play, train table, tinkering. STEM for tiny hands.",days:[null,null,"10-5","10-5","10-5","10-5","10-5"],pr:[["Adult","$19"],["Child 2-17","$16"],["Under 2","Free"]],pn:"Free Fri 2-5pm & Sun 10-11am",w:"https://nysci.org"},
+{id:50,n:"NY Transit Museum",a:"99 Schermerhorn St, Brooklyn",lt:40.6903,ln:-73.99,cat:"Museum",ic:"\ud83d\ude87",t:30,io:"i",tp:"p",af:1,$:10,d:"Real vintage subway cars to climb on. Ultimate 'choo choo' experience.",days:[null,null,"10-4","10-4","10-4","10-4","10-4"],pr:[["Adult","$10"],["Child 2-17","$5"]],pn:"Timed tickets required",w:"https://www.nytransitmuseum.org"},
+{id:51,n:"Brooklyn Museum",a:"200 Eastern Pkwy",lt:40.6712,ln:-73.9636,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:35,io:"i",tp:"b",af:1,$:0,d:"Pay-what-you-wish. Under 12 free. Egyptian wing, stroller tours.",days:[null,null,"11-6","11-6","11-6","11-6","11-6"],pr:[["Under 12","Free"]],pn:"First Sat free 5-11pm",w:"https://www.brooklynmuseum.org"},
+{id:52,n:"Prospect Park Zoo",a:"450 Flatbush Ave, Brooklyn",lt:40.6653,ln:-73.9653,cat:"Zoo",ic:"\ud83e\udd81",t:35,io:"b",tp:"p",af:1,$:0,d:"Small zoo with indoor Discovery Center. Prairie dogs, sea lions, petting zoo.",days:["10-4:30","10-4:30","10-4:30","10-4:30","10-4:30","10-4:30","10-4:30"],pr:[["Under 3","Free"],["Adult","$10.95"]],pn:"Advance tickets required",w:"https://prospectparkzoo.com"},
+{id:53,n:"Complete Playground",a:"30 Broad St, FiDi",lt:40.7067,ln:-74.0113,cat:"Indoor Playground",ic:"\ud83c\udfa0",t:30,io:"i",tp:"p",af:0,$:30,d:"40,000 sq ft, 4 levels. Padded toddler zone, sensory tables, bounce areas.",days:["9:30-7:30","9:30-7:30","9:30-7:30","9:30-7:30","9:30-8:30","9-8:30","9-7:30"],pr:[["Weekday 2hr","$30"],["Weekend","$35"]],pn:"Sensory-friendly 1st hour daily",w:"https://completeplayground.org"},
+{id:54,n:"Museum of the Moving Image",a:"36-01 35th Ave, Astoria",lt:40.7564,ln:-73.9238,cat:"Museum",ic:"\ud83c\udfac",t:30,io:"i",tp:"p",af:1,$:0,d:"Flip-book stations, sound effects, animation displays. Under 3 free.",days:[null,null,"10:30-5","10:30-5","10:30-8","10:30-6","10:30-6"],pr:[["Under 3","Free"],["Adult","$18"]],pn:"Free Fri 4-8pm",w:"https://movingimage.us"},
+{id:55,n:"Mercer Labs",a:"21 Dey St, FiDi",lt:40.7098,ln:-74.0071,cat:"Immersive Art",ic:"\ud83c\udfa8",t:30,io:"i",tp:"p",af:1,$:0,d:"25,000-ball pit, 15 sensory rooms, 4D sound. Under 3 free.",days:["10-8","10-8","10-8","10-8","10-9","10-9","10-8"],pr:[["Under 3","Free"],["Adult","$36"]],pn:"Timed entry",w:"https://www.mercerlabs.com"},
+{id:56,n:"National Museum of the American Indian",a:"1 Bowling Green",lt:40.7041,ln:-74.0134,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:30,io:"i",tp:"p",af:1,$:0,d:"Always free (Smithsonian). imagiNATIONS Activity Center with hands-on crafts.",days:["10-5","10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Everyone","Free"]],pn:"Always free, no tickets needed",w:"https://americanindian.si.edu"},
+{id:57,n:"MoMA PS1",a:"22-25 Jackson Ave, LIC",lt:40.7455,ln:-73.9472,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:25,io:"i",tp:"p",af:1,$:0,d:"Free admission through 2028. Contemporary art in a former school.",days:[null,null,null,"12-6","12-8","12-6","12-6"],pr:[["Everyone","Free"]],pn:"Free since Jan 2026",w:"https://www.momaps1.org"},
+{id:58,n:"Queens Zoo",a:"53-51 111th St, Queens",lt:40.7406,ln:-73.8508,cat:"Zoo",ic:"\ud83e\udd81",t:30,io:"b",tp:"p",af:1,$:0,d:"Indoor aviary dome, small petting zoo. Under 3 free.",days:["10-4:30","10-4:30","10-4:30","10-4:30","10-4:30","10-4:30","10-4:30"],pr:[["Under 3","Free"],["Adult","$10.95"]],pn:"Next to NYSCI",w:"https://queenszoo.com"},
+{id:59,n:"Brooklyn Botanic Garden",a:"990 Washington Ave",lt:40.6694,ln:-73.9627,cat:"Garden",ic:"\ud83c\udf3f",t:35,io:"b",tp:"p",af:1,$:0,d:"Steinhardt Conservatory: 3 warm indoor pavilions. Under 12 free.",days:[null,"10-6","10-6","10-6","10-6","10-6","10-6"],pr:[["Under 12","Free"],["Adult","$22"]],pn:"Free Fri 10am-noon",w:"https://www.bbg.org"},
+{id:60,n:"Peekabooo LIC",a:"4009 21st St, LIC",lt:40.7521,ln:-73.9476,cat:"Play Space",ic:"\ud83e\uddf8",t:25,io:"i",tp:"p",af:0,$:25,d:"Castle, slides, ball pit for under 7s. Cozy LIC spot.",days:["9-6","9-6","9-6","9-6","9-6","9-6","9-6"],pr:[["Child","$25-30"]],pn:"Walk-ins welcome",w:"https://www.peekabooolic.com"},
+{id:61,n:"Kanga's Indoor Playcenter",a:"32-15 37th Ave, LIC",lt:40.753,ln:-73.9234,cat:"Play Space",ic:"\ud83e\uddf8",t:25,io:"i",tp:"p",af:0,$:11,d:"10,000 sq ft with toddler gate. Incredible value at $10.90.",days:["10-6","10-6","10-6","10-6","10-6","10-6","10-6"],pr:[["Child","$10.90"]],pn:"Best value play space",w:"https://kangasindoorplaycenter.com"},
+{id:62,n:"Bounce N Play Astoria",a:"20-21 Steinway St",lt:40.7726,ln:-73.9158,cat:"Play Space",ic:"\ud83e\uddf8",t:30,io:"i",tp:"p",af:0,$:12,d:"Bounce houses, toddler area, ball pit. Budget-friendly $12/2hrs.",days:["10-7","10-7","10-7","10-7","10-7","10-7","10-7"],pr:[["2 hours","$12"]],pn:"Great budget option",w:"https://www.bouncenplaylic.com"},
+{id:63,n:"Space Club DUMBO",a:"256 Plymouth St, Brooklyn",lt:40.7023,ln:-73.987,cat:"Play Space",ic:"\ud83e\uddf8",t:35,io:"i",tp:"p",af:0,$:39,d:"28,000 sq ft: bead pit, jungle gym, imaginative play. Premium.",days:["9-6","9-6","9-6","9-6","9-6","9-6","9-6"],pr:[["Child 2hr","$39"]],pn:"Book ahead",w:"https://www.spaceclub.co"},
+{id:64,n:"The Canopy NYC",a:"118 N 11th St, Williamsburg",lt:40.7198,ln:-73.9579,cat:"Play Space",ic:"\ud83e\uddf8",t:35,io:"i",tp:"p",af:0,$:30,d:"Ages 0-4 only. Calm, Montessori-inspired space.",days:["9-5","9-5","9-5","9-5","9-5","9-3","9-3"],pr:[["First visit","$30"]],pn:"Ages 0-4 only",w:"https://www.thecanopynyc.com"},
+{id:65,n:"Good Day Play Cafe",a:"591 5th Ave, Brooklyn",lt:40.6621,ln:-73.9914,cat:"Play Cafe",ic:"\u2615",t:35,io:"i",tp:"p",af:1,$:30,d:"Korean-inspired play cafe. Great coffee for parents, clean toddler space.",days:["9-5","9-5","9-5","9-5","9-5","9-5","9-5"],pr:[["Per hour","~$30-45"]],pn:"Coffee & snacks for parents",w:"https://www.gooddayplaycafe.com"},
+{id:66,n:"PlayWell Brooklyn",a:"94 9th St, Brooklyn",lt:40.6718,ln:-73.982,cat:"Sensory Play",ic:"\u2728",t:30,io:"i",tp:"b",af:1,$:32,d:"Therapist-designed inclusive sensory space. Great for sensory-seeking toddlers.",days:["9-5","9-5","9-5","9-5","9-5","9-3",null],pr:[["Session","$32"]],pn:"Inclusive & sensory-friendly",w:"https://www.playwellbrooklyn.com"},
+{id:67,n:"Jewish Children's Museum",a:"792 Eastern Pkwy, Brooklyn",lt:40.669,ln:-73.9427,cat:"Children's Museum",ic:"\ud83c\udfe0",t:35,io:"i",tp:"p",af:1,$:15,d:"Craft stations, mini grocery, climbing areas.",days:[null,null,null,null,null,null,"10-5"],pr:[["Child 2+","$15"],["Under 2","Free"]],pn:"Sun only for general public",w:"https://www.jcm.museum"},
+{id:68,n:"Queens Library Hunters Point",a:"47-40 Center Blvd, LIC",lt:40.7424,ln:-73.9576,cat:"Library",ic:"\ud83d\udcda",t:25,io:"i",tp:"p",af:1,$:0,d:"Stunning architecture, early-childhood area. Toddler Time Wed 10:30am.",days:["10-8","10-8","10-8","10-8","10-6","10-6","10-6"],pr:[["Everything","Free"]],pn:"All free",w:"https://www.queenslibrary.org/about-us/locations/hunters-point"},
+{id:69,n:"Brooklyn Public Library Central",a:"10 Grand Army Plaza",lt:40.6728,ln:-73.9683,cat:"Library",ic:"\ud83d\udcda",t:35,io:"i",tp:"p",af:1,$:0,d:"Spacious children's room. Toddler Time (18-36mo). Beautiful building.",days:["9-9","9-9","9-9","9-9","10-6","10-6","1-5"],pr:[["Everything","Free"]],pn:"Free toddler programs",w:"https://www.bklynlibrary.org/locations/central"},
+{id:70,n:"Puppetworks Park Slope",a:"338 6th Ave, Brooklyn",lt:40.6703,ln:-73.9812,cat:"Theater",ic:"\ud83c\udfad",t:35,io:"i",tp:"p",af:1,$:11,d:"Classic marionette theater since 1980. Intimate shows that enchant toddlers.",days:[null,null,null,null,null,"12:30-2","12:30-2"],pr:[["Ticket","$11"]],pn:"Weekend shows only",w:"https://www.puppetworks.org"},
+{id:71,n:"Liberty Science Center",a:"222 Jersey City Blvd, NJ",lt:40.7065,ln:-74.0551,cat:"Science Museum",ic:"\ud83d\udd2c",t:45,io:"i",tp:"p",af:1,$:31,d:"I Explore toddler gallery: water play, blocks, rock wall. Biggest planetarium in West. Hemisphere.",days:[null,null,"10-4","10-4","10-4","10-5","10-5"],pr:[["Adult","$31"],["Child 2-12","$26"]],pn:"$5 off online",w:"https://lsc.org"},
+{id:72,n:"Legoland Discovery NJ",a:"1 American Dream Way, NJ",lt:40.8117,ln:-74.0689,cat:"Theme Park",ic:"\ud83e\uddf1",t:45,io:"i",tp:"p",af:0,$:30,d:"DUPLO zone, LEGO rides, 4D cinema. Ages 2 and under free.",days:["10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-7","10-6:30"],pr:[["Online","~$30-40"],["Under 2","Free"]],pn:"Adult must be with child",w:"https://www.legolanddiscoverycenter.com/new-jersey/"},
+{id:73,n:"Legoland Discovery Westchester",a:"39 Fitzgerald St, Yonkers",lt:40.9312,ln:-73.8987,cat:"Theme Park",ic:"\ud83e\uddf1",t:35,io:"i",tp:"p",af:0,$:30,d:"DUPLO Village, LEGO rides. Closer via Metro-North than NJ location.",days:["10-5","10-5","10-5","10-5","10-5","10-7","10-6"],pr:[["Online","From $29.99"],["Under 2","Free"]],pn:"Metro-North to Yonkers",w:"https://www.legolanddiscoverycenter.com/westchester/"},
+{id:74,n:"SEA LIFE Aquarium",a:"1 American Dream Way, NJ",lt:40.8119,ln:-74.069,cat:"Aquarium",ic:"\ud83d\udc20",t:45,io:"i",tp:"p",af:1,$:0,d:"3,000+ creatures, underwater tunnel, touch pools. Under 2 free.",days:["10-6","10-6","10-6","10-6","10-6","10-7","10-7"],pr:[["Online","From $31"],["Under 2","Free"]],pn:"Combo w/ Legoland saves $",w:"https://www.visitsealife.com/american-dream/"},
+{id:75,n:"Nickelodeon Universe",a:"1 American Dream Way, NJ",lt:40.8118,ln:-74.0688,cat:"Theme Park",ic:"\ud83c\udfa2",t:45,io:"i",tp:"p",af:0,$:50,d:"PAW Patrol Adventure Bay for toddlers. Under 2 free.",days:["11-8","11-8","11-8","11-8","11-9","10-9","11-8"],pr:[["General","$50-69"],["Under 2","Free"]],pn:"PAW Patrol section for toddlers",w:"https://www.americandream.com/venue/nickelodeonuniverse"},
+{id:76,n:"Bubble Planet",a:"1 American Dream Way, NJ",lt:40.812,ln:-74.069,cat:"Immersive",ic:"\ud83e\udee7",t:45,io:"i",tp:"p",af:1,$:30,d:"8 immersive bubble rooms. Colorful sensory experience.",days:["11-7","11-7","11-7","11-7","11-8","10-8","11-7"],pr:[["General","$30-40"],["Under 2","Free"]],pn:"Timed entry",w:"https://www.bubbleplanet.io"},
+{id:77,n:"Bronx Children's Museum",a:"725 Exterior St, Bronx",lt:40.8175,ln:-73.9262,cat:"Children's Museum",ic:"\ud83c\udfe0",t:40,io:"i",tp:"p",af:1,$:8,d:"Water table, The Nest toddler area, art activities. Affordable, uncrowded.",days:[null,"10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Everyone","$8"],["Under 1","Free"]],pn:"Low-key alternative",w:"https://bronxchildrensmuseum.org"},
+{id:78,n:"Wave Hill",a:"675 W 252nd St, Bronx",lt:40.8977,ln:-73.9118,cat:"Garden",ic:"\ud83c\udf3f",t:40,io:"b",tp:"b",af:1,$:0,d:"Conservatory with tropical plants, art gallery. Under 6 free. Family art workshops.",days:[null,"9-5:30","9-5:30","9-5:30","9-5:30","9-5:30","9-5:30"],pr:[["Under 6","Free"],["Adult","$10"]],pn:"Free Tue & Sat 9-10am",w:"https://www.wavehill.org"},
+{id:79,n:"Cloudbound",a:"50 Nardozzi Pl, New Rochelle",lt:40.9107,ln:-73.7826,cat:"Play Space",ic:"\ud83e\uddf8",t:35,io:"i",tp:"p",af:0,$:10,d:"Brand new play space ages 0-6. Beautiful design. $10 first visit.",days:["9-5","9-5","9-5","9-5","9-5","9-5","9-5"],pr:[["First visit","$10"],["Regular","$35"]],pn:"Ages 0-6; $10 intro rate",w:"https://www.cloudbound.com"},
+{id:80,n:"Puppetsburg",a:"Various Brooklyn/Manhattan",lt:40.688,ln:-73.978,cat:"Theater",ic:"\ud83c\udfad",t:30,io:"i",tp:"p",af:1,$:25,d:"Purpose-built puppet shows for babies & toddlers (4mo-4yr).",days:["v","v","v","v","v","v","v"],pr:[["Child","$25"]],pn:"Multiple locations",w:"https://puppetsburg.com"},
+{id:81,n:"Turtle Back Zoo",a:"560 Northfield Ave, West Orange NJ",lt:40.7636,ln:-74.2499,cat:"Zoo",ic:"\ud83e\udd81",t:45,io:"b",tp:"p",af:1,$:0,d:"Reptile House, Penguin House, touch tank, carousel. Under 2 free.",days:["10-4","10-4","10-4","10-4","10-4","10-4","10-4"],pr:[["Child 2-12","$19"],["Under 2","Free"]],pn:"Heated indoor exhibits",w:"https://turtlebackzoo.com"},
+{id:82,n:"Music Together in the City",a:"Multiple Manhattan",lt:40.7831,ln:-73.9812,cat:"Music",ic:"\ud83c\udfb5",t:10,io:"i",tp:"c",af:0,$:42,d:"Research-backed music & movement ages 0-4. Sing, dance, instruments.",days:["v","v","v","v","v",null,null],pr:[["Per class","~$42"]],pn:"Trial class available",w:"https://musictogethercity.com"},
+{id:83,n:"DreamWorks Water Park",a:"1 American Dream Way, NJ",lt:40.8116,ln:-74.069,cat:"Water Park",ic:"\ud83c\udf0a",t:45,io:"i",tp:"p",af:1,$:72,d:"Indoor water park with toddler splash zone. Mon Toddler Time 10am-2pm.",days:["10-2",null,null,null,null,"10-8","10-8"],pr:[["General","$72-99"],["Under 2","Free"]],pn:"Mon Toddler Time best for littles",w:"https://www.americandream.com/venue/dreamworkswaterpark"},
+{id:84,n:"Dream City",a:"108-48 Queens Blvd, Forest Hills",lt:40.7265,ln:-73.8456,cat:"Play Space",ic:"\ud83e\uddf8",t:40,io:"i",tp:"b",af:0,$:35,d:"Under-6 play-and-learn center with themed activity rooms.",days:["10-6","10-6","10-6","10-6","10-6","10-6","10-6"],pr:[["Session","$35"]],pn:"Ages 0-6",w:"https://www.dreamcitylic.com"},
+{id:85,n:"The Rainbow Play Space",a:"343 E 10th St",lt:40.727,ln:-73.9812,cat:"Play Space",ic:"\ud83e\uddf8",t:20,io:"i",tp:"p",af:0,$:30,d:"Ages 0-7 in East Village. Soft play, slides, imaginative play.",days:["9-6","9-6","9-6","9-6","9-6","9-6","9-6"],pr:[["2 hours","$30"]],pn:"Walk-ins welcome",w:"https://www.therainbowplayspace.com"},
+{id:86,n:"Ferox Ninja DUMBO",a:"65 Jay St, Brooklyn",lt:40.703,ln:-73.9867,cat:"Gym",ic:"\ud83e\udd38",t:35,io:"i",tp:"b",af:0,$:20,d:"Ninja gym with toddler-sized obstacles. Ages 2-12.",days:["10-7","10-7","10-7","10-7","10-7","10-5","10-5"],pr:[["Weekday","$20"],["Weekend","$30"]],pn:"Toddler sessions available",w:"https://www.feroxnyc.com"},
+{id:87,n:"Launch Trampoline Bay Ridge",a:"531 86th St, Brooklyn",lt:40.6222,ln:-74.0293,cat:"Trampoline",ic:"\ud83e\udd38",t:40,io:"i",tp:"p",af:0,$:14,d:"Toddler time: age-appropriate bouncing, foam pit, soft play.",days:["10-9","10-9","10-9","10-9","10-10","10-10","10-9"],pr:[["Toddler time","$10-14"]],pn:"Check toddler hours",w:"https://launchtrampolinepark.com"},
+{id:88,n:"Billy Beez Palisades",a:"1000 Palisades Center Dr, West Nyack",lt:40.9981,ln:-73.9873,cat:"Indoor Playground",ic:"\ud83c\udfa0",t:45,io:"i",tp:"p",af:0,$:10,d:"20,000 sq ft soft play park. Toddler zone, ball pit, slides.",days:["10-8","10-8","10-8","10-8","10-8","10-8","10-7"],pr:[["Toddler","$9.95"]],pn:"Great value for under 42in",w:"https://billybeezus.com"},
+{id:89,n:"Brooklearn",a:"380 Court St, Carroll Gardens",lt:40.6773,ln:-73.9963,cat:"Play Space",ic:"\ud83e\uddf8",t:35,io:"i",tp:"b",af:0,$:35,d:"Co-working + playspace. Toddlers play while parents work.",days:["8-6","8-6","8-6","8-6","8-6","9-4",null],pr:[["Play","$35/hr"]],pn:"Co-working included",w:"https://www.brooklearn.com"},
+{id:90,n:"Barnes & Noble Cobble Hill",a:"194 Atlantic Ave, Brooklyn",lt:40.6884,ln:-73.9908,cat:"Bookstore",ic:"\ud83d\udcda",t:35,io:"i",tp:"p",af:1,$:0,d:"Free Sat storytime 11am. Big kids section in walkable Brooklyn.",days:["9-9","9-9","9-9","9-9","9-9","9-9","10-8"],pr:[["Everything","Free"]],pn:"Free Sat 11am storytime",w:"https://stores.barnesandnoble.com/store/2946"},
+{id:91,n:"McNally Jackson Seaport",a:"4 Fulton St",lt:40.7064,ln:-74.0028,cat:"Bookstore",ic:"\ud83d\udcda",t:30,io:"i",tp:"p",af:1,$:0,d:"Curated kids section, occasional storytimes. Waterfront location.",days:["10-9","10-9","10-9","10-9","10-9","10-9","10-8"],pr:[["Everything","Free"]],pn:"Near Pier 17",w:"https://www.mcnallyjackson.com"},
+{id:92,n:"Tam Tam Music Together",a:"Various Brooklyn",lt:40.687,ln:-73.974,cat:"Music",ic:"\ud83c\udfb5",t:35,io:"i",tp:"c",af:0,$:41,d:"Bilingual French/English music classes ages 0-4.",days:["v","v","v","v","v","v",null],pr:[["Per class","~$41"],["Trial","$45"]],pn:"Bilingual French/English",w:"https://tamtammusictogether.com"},
+{id:93,n:"Space Club Fort Greene",a:"143 Waverly Ave, Brooklyn",lt:40.6889,ln:-73.9714,cat:"Play Space",ic:"\ud83e\uddf8",t:35,io:"i",tp:"p",af:0,$:35,d:"36,000 sq ft four-level play space. Climbing, ball pit, imaginative play.",days:["9-6","9-6","9-6","9-6","9-6","9-6","9-6"],pr:[["2 hours","$35"]],pn:"Book ahead weekends",w:"https://www.spaceclub.co"},
+{id:94,n:"Kids N Action",a:"1149 McDonald Ave, Brooklyn",lt:40.6307,ln:-73.9741,cat:"Indoor Playground",ic:"\ud83c\udfa0",t:40,io:"i",tp:"p",af:0,$:25,d:"Multi-level soft play with toddler zone. Ball pit, slides, climbing.",days:["10-7","10-7","10-7","10-7","10-8","10-8","10-7"],pr:[["Child","~$25-35"]],pn:"Separate toddler area",w:"https://www.kidsnaction.com"},
+{id:95,n:"Flying Apple",a:"912 Broadway, Bed-Stuy",lt:40.6874,ln:-73.9309,cat:"Play Space",ic:"\ud83e\uddf8",t:40,io:"i",tp:"p",af:0,$:16,d:"Ages 1-10 with toddler section. Budget-friendly Brooklyn.",days:["10-6","10-6","10-6","10-6","10-6","10-6","10-6"],pr:[["Toddler","$16"]],pn:"Great value",w:"https://www.flyingapple.nyc"},
+{id:96,n:"Sensory Play Studio",a:"786 Rogers Ave, Brooklyn",lt:40.6539,ln:-73.9533,cat:"Sensory Play",ic:"\u2728",t:35,io:"i",tp:"b",af:1,$:25,d:"Sensory enrichment with guided sessions. Great for sensory-seeking toddlers.",days:["9-5","9-5","9-5","9-5","9-5","9-3",null],pr:[["2 hours","$25"]],pn:"Therapist-guided options",w:"https://www.thesensoryplaystudio.com"},
+{id:97,n:"Kidz Klub Jamaica",a:"92-23 168th St, Jamaica",lt:40.7073,ln:-73.7924,cat:"Play Space",ic:"\ud83e\uddf8",t:40,io:"i",tp:"p",af:0,$:24,d:"33,000 sq ft with toddler zone, ball pit, slides, climbing walls.",days:["10-7","10-7","10-7","10-7","10-8","10-8","10-7"],pr:[["Child","$24"]],pn:"Large facility",w:"https://kidzklub.com"},
+{id:98,n:"New York Aquarium",a:"602 Surf Ave, Brooklyn",lt:40.5741,ln:-73.9756,cat:"Aquarium",ic:"\ud83d\udc20",t:45,io:"b",tp:"p",af:1,$:0,d:"Sea lions, sharks, jellyfish, touch tanks. Under 3 free. Glowing tanks mesmerize.",days:["10-5","10-5","10-5","10-5","10-5","10-5:30","10-5:30"],pr:[["Under 3","Free"],["Adult","$29.95"]],pn:"Free Wed after 3pm",w:"https://nyaquarium.com"},
+{id:99,n:"Billy Beez Bay Plaza",a:"200 Baychester Ave, Bronx",lt:40.8619,ln:-73.8282,cat:"Indoor Playground",ic:"\ud83c\udfa0",t:40,io:"i",tp:"p",af:0,$:18,d:"20,000 sq ft with Mini Beez zone ages 0-3. Soft play, climbing.",days:["10-8","10-8","10-8","10-8","10-8","10-8","10-7"],pr:[["Toddler","$17.95"]],pn:"Dedicated 0-3 area",w:"https://billybeezus.com"},
+{id:100,n:"IKEA Brooklyn",a:"1 Beard St, Brooklyn",lt:40.6771,ln:-74.0095,cat:"Play",ic:"\ud83d\udec2",t:35,io:"i",tp:"p",af:0,$:0,d:"Smaland supervised play (free, call ahead). Plus kid-friendly cafeteria.",days:["10-9","10-9","10-9","10-9","10-9","10-9","10-8"],pr:[["Smaland","Free"]],pn:"Must be potty-trained; call ahead",w:"https://www.ikea.com/us/en/stores/brooklyn/"},
+{id:101,n:"NYPL St. Agnes",a:"444 Amsterdam Ave",lt:40.7842,ln:-73.9763,cat:"Library",ic:"\ud83d\udcda",t:5,io:"i",tp:"p",af:1,$:0,d:"Closest NYPL to home. Children's room with board books, toddler storytime, craft programs.",days:["10-6","10-7","10-7","10-7","10-5","10-5",null],pr:[["Everything","Free"]],pn:"Library card free for NYC residents",w:"https://www.nypl.org/locations/st-agnes"},
+{id:102,n:"NYPL Riverside",a:"127 Amsterdam Ave",lt:40.7748,ln:-73.9858,cat:"Library",ic:"\ud83d\udcda",t:10,io:"i",tp:"p",af:1,$:0,d:"Children's room on 2nd floor. Toddler storytime programs. Compact, quiet UWS branch.",days:["10-7","10-7","10-7","10-7","10-5","10-5",null],pr:[["Everything","Free"]],pn:"Small & calm for toddlers",w:"https://www.nypl.org/locations/riverside"},
+{id:103,n:"NYPL Morningside Heights",a:"2900 Broadway",lt:40.8055,ln:-73.9651,cat:"Library",ic:"\ud83d\udcda",t:15,io:"i",tp:"p",af:1,$:0,d:"Story hour room on 2nd floor for children's programs. Near Columbia campus.",days:["10-6","10-6","10-7","10-7","10-6","10-5",null],pr:[["Everything","Free"]],pn:"Story hour room upstairs",w:"https://www.nypl.org/locations/morningside-heights"},
+{id:104,n:"NYPL Countee Cullen",a:"104 W 136th St",lt:40.8143,ln:-73.9424,cat:"Library",ic:"\ud83d\udcda",t:25,io:"i",tp:"p",af:1,$:0,d:"Historic Carnegie library in Harlem. James Weldon Johnson children's collection on 2nd floor.",days:[null,"11-7","11-7","11-7","11-7","11-5","11-5"],pr:[["Everything","Free"]],pn:"Beautiful McKim Mead & White building",w:"https://www.nypl.org/locations/countee-cullen"},
+{id:105,n:"NYPL Hamilton Grange",a:"503 W 145th St",lt:40.8238,ln:-73.9446,cat:"Library",ic:"\ud83d\udcda",t:25,io:"i",tp:"p",af:1,$:0,d:"Children's programs in Hamilton Heights. Storytime, crafts, and early literacy events.",days:["10-7","10-7","10-7","10-7","10-5","10-5",null],pr:[["Everything","Free"]],pn:"All ages welcome",w:"https://www.nypl.org/locations/hamilton-grange"},
+{id:106,n:"NYPL Muhlenberg",a:"209 W 23rd St",lt:40.7443,ln:-73.9947,cat:"Library",ic:"\ud83d\udcda",t:25,io:"i",tp:"p",af:1,$:0,d:"Children's room with story hour space on 2nd floor. Chelsea location near Madison Square Park.",days:["10-7","10-7","10-7","10-7","10-6","10-5",null],pr:[["Everything","Free"]],pn:"Near Madison Square Park playground",w:"https://www.nypl.org/locations/muhlenberg"},
+{id:107,n:"NYPL 96th Street",a:"112 E 96th St",lt:40.7854,ln:-73.9526,cat:"Library",ic:"\ud83d\udcda",t:15,io:"i",tp:"p",af:1,$:0,d:"Modern branch with dedicated children's room and separate story hour space. Toddler storytime ages 1-3.",days:["11-5","11-5","11-5","11-5","11-5","11-5",null],pr:[["Everything","Free"]],pn:"Separate story hour space",w:"https://www.nypl.org/locations/96th-street"},
+{id:108,n:"BPL Park Slope",a:"431 6th Ave, Brooklyn",lt:40.6703,ln:-73.9817,cat:"Library",ic:"\ud83d\udcda",t:35,io:"i",tp:"p",af:1,$:0,d:"Toddler Time Wed 11am in auditorium. Books, songs, early literacy. Registration required.",days:["10-6","1-8","10-6","1-8","10-6","10-5",null],pr:[["Everything","Free"]],pn:"Register online for Toddler Time",w:"https://www.bklynlibrary.org/locations/park-slope"},
+{id:109,n:"Queens Library Broadway",a:"40-20 Broadway, Astoria",lt:40.7592,ln:-73.9186,cat:"Library",ic:"\ud83d\udcda",t:30,io:"i",tp:"p",af:1,$:0,d:"Astoria branch with children's area. Storytime, crafts, and Toddler Learning Center programs.",days:["10-6","1-6","10-6","12-8","10-6","10-5",null],pr:[["Everything","Free"]],pn:"Toddler Learning Center in spring/fall",w:"https://www.queenslibrary.org/about-us/locations/broadway"},
+{id:110,n:"Book Culture on Broadway",a:"2915 Broadway",lt:40.8067,ln:-73.9644,cat:"Bookstore",ic:"\ud83d\udcda",t:15,io:"i",tp:"p",af:1,$:0,d:"Indie bookstore with dedicated children's room (lower level). Sat storytime 3:30pm. Persian & English sessions.",days:["10-9","10-9","10-9","10-9","10-9","10-9","10-8"],pr:[["Everything","Free"]],pn:"Sat 3:30pm English storytime",w:"https://www.bookculture.com/locations/book-culture-broadway"},
+{id:111,n:"Book Culture 112th St",a:"536 W 112th St",lt:40.806,ln:-73.9667,cat:"Bookstore",ic:"\ud83d\udcda",t:15,io:"i",tp:"p",af:1,$:0,d:"Original Book Culture location near Columbia. Children's section upstairs with board books.",days:["9-10","9-10","9-10","9-10","9-10","10-9","10-8"],pr:[["Everything","Free"]],pn:"Browse anytime",w:"https://www.bookculture.com/locations"},
+{id:112,n:"Greenlight Bookstore",a:"686 Fulton St, Brooklyn",lt:40.6862,ln:-73.9775,cat:"Bookstore",ic:"\ud83d\udcda",t:35,io:"i",tp:"p",af:1,$:0,d:"Beloved Fort Greene indie. Regular Sunday storytimes with author visits, crafts, and activities. All ages.",days:["10-10","10-10","10-10","10-10","10-10","10-10","10-10"],pr:[["Everything","Free"]],pn:"Sunday storytimes; check calendar",w:"https://www.greenlightbookstore.com"},
+{id:113,n:"powerHouse on 8th",a:"1111 8th Ave, Brooklyn",lt:40.6648,ln:-73.9802,cat:"Bookstore",ic:"\ud83d\udcda",t:35,io:"i",tp:"p",af:1,$:0,d:"South Slope indie with upper kids' area. Sunday Story Time series. Mini-gallery and community space.",days:["11-6","11-6","11-6","11-6","11-7","10-7","10-6"],pr:[["Everything","Free"]],pn:"Sunday Story Time; kids area upstairs",w:"https://powerhouseon8th.com"},
+{id:114,n:"powerHouse Arena DUMBO",a:"28 Adams St, Brooklyn",lt:40.7023,ln:-73.9876,cat:"Bookstore",ic:"\ud83d\udcda",t:35,io:"i",tp:"p",af:1,$:0,d:"Beautiful DUMBO bookstore & event space. Weekly storytime for kids. Has hosted Mo Willems, Lemony Snicket.",days:["11-7","11-7","11-7","11-7","11-7","10-7","10-7"],pr:[["Everything","Free"]],pn:"Weekly storytime; check schedule",w:"https://powerhousearena.com"},
+{id:115,n:"MoMA",a:"11 W 53rd St",lt:40.7614,ln:-73.9776,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:15,io:"i",tp:"p",af:1,$:0,d:"Under 16 always free. Stroller-friendly, elevators to all floors. Fri 5:30-8:30pm free for NY residents (UNIQLO nights).",days:["10:30-5:30","10:30-5:30","10:30-5:30","10:30-5:30","10:30-8:30","10:30-5:30","10:30-5:30"],pr:[["Under 16","Free"],["Adult","$30"],["Fri eve NYS","Free"]],pn:"Reserve tix even for free entry",w:"https://www.moma.org"},
+{id:116,n:"Whitney Museum",a:"99 Gansevoort St",lt:40.7396,ln:-74.0089,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:25,io:"i",tp:"p",af:1,$:0,d:"Under 25 always free. Fri 5-10pm free for all. Ground floor always free. Outdoor terraces with Hudson views.",days:["10:30-6",null,"10:30-6","10:30-6","10:30-10","10:30-6","10:30-6"],pr:[["Under 25","Free"],["Fri 5-10pm","Free"],["Adult","$30"]],pn:"Under 25 free anytime; Fri eve free all",w:"https://whitney.org"},
+{id:117,n:"El Museo del Barrio",a:"1230 5th Ave",lt:40.7934,ln:-73.9515,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:20,io:"i",tp:"p",af:1,$:0,d:"Under 12 free. Pay-what-you-can for adults. Latin American & Caribbean art. 3rd Sat free Super Sabado.",days:[null,null,null,"11-5","11-5","11-5","11-5"],pr:[["Under 12","Free"],["Adult","Pay what you can"]],pn:"3rd Saturday free for everyone",w:"https://www.elmuseo.org"},
+{id:118,n:"New-York Historical Society",a:"170 Central Park West",lt:40.7794,ln:-73.9735,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:10,io:"i",tp:"p",af:1,$:0,d:"Under 5 free. DiMenna Children's History Museum inside. Fri 5-8pm pay-what-you-wish for all.",days:[null,"11-6","11-6","11-6","11-8","11-6","11-6"],pr:[["Under 5","Free"],["Fri 5-8pm","Pay what you wish"]],pn:"Fri eve pay-what-you-wish",w:"https://www.nyhistory.org"},
+{id:119,n:"Noguchi Museum",a:"9-01 33rd Rd, LIC",lt:40.7676,ln:-73.9374,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:30,io:"i",tp:"p",af:1,$:0,d:"Under 12 free. Tranquil sculpture garden & galleries. First Friday of month free for all.",days:[null,null,"10-5","10-5","10-5","11-6","11-6"],pr:[["Under 12","Free"],["1st Fri","Free for all"]],pn:"1st Friday free; serene space",w:"https://www.noguchi.org"},
+{id:120,n:"Bronx Museum",a:"1040 Grand Concourse, Bronx",lt:40.8312,ln:-73.9198,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:35,io:"i",tp:"p",af:1,$:0,d:"Always free for everyone. Contemporary art in the Bronx. North wing open during renovation.",days:[null,null,"11-6","11-6","11-6","11-6","11-6"],pr:[["Everyone","Free"]],pn:"Always free; renovation in progress",w:"https://bronxmuseum.org"},
+{id:121,n:"Bergen County Zoo",a:"216 Forest Ave, Paramus, NJ",lt:40.9297,ln:-74.0479,cat:"Zoo",ic:"\ud83e\udd81",t:35,io:"b",tp:"p",af:1,$:0,d:"Compact zoo in Van Saun Park with carousel & train. Indoor primate house, reptiles. Under 3 free.",days:["10-4:30","10-4:30","10-4:30","10-4:30","10-4:30","10-4:30","10-4:30"],pr:[["Under 3","Free"],["Child 3-14","$4-7"],["Adult","$6-10"]],pn:"Free in winter; carousel/train $3",w:"https://www.friendsofbergencountyzoo.org"},
+{id:122,n:"Greenburgh Nature Center",a:"99 Dromore Rd, Scarsdale, NY",lt:41.0044,ln:-73.8086,cat:"Nature Center",ic:"\ud83c\udf3f",t:40,io:"b",tp:"p",af:1,$:5,d:"Manor House with live animals (turtles, snakes, owls). 33-acre preserve with short toddler-friendly trails.",days:[null,"10-4","10-4","10-4","10-4","10-4","10-4"],pr:[["Child 2-12","$5"],["Adult","$7"],["Under 2","Free"]],pn:"Grounds free; Manor House fee",w:"https://greenburghnaturecenter.org"},
+{id:123,n:"Stamford Museum & Nature Center",a:"39 Scofieldtown Rd, Stamford, CT",lt:41.1262,ln:-73.5456,cat:"Nature Center",ic:"\ud83d\udc04",t:55,io:"b",tp:"p",af:1,$:0,d:"118-acre working farm with galleries, Heckscher Farm animals, nature trails. Under 3 free.",days:["9-5","9-5","9-5","9-5","9-5","9-5","11-5"],pr:[["Under 3","Free"],["Child 4-17","$8"],["Adult","$14"]],pn:"Farm + galleries + trails",w:"https://www.stamfordmuseum.org"},
+{id:124,n:"Maritime Aquarium at Norwalk",a:"10 N Water St, Norwalk, CT",lt:41.1011,ln:-73.4166,cat:"Aquarium",ic:"\ud83d\udc20",t:55,io:"b",tp:"p",af:1,$:0,d:"Major aquarium focused on Long Island Sound. Seals, sharks, touch tanks, IMAX. Outdoor river walk.",days:["10-5","10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Under 2","Free"],["Child 3-12","$29.95"],["Adult","$39.95"]],pn:"Under 2 free; combo tix w/ IMAX",w:"https://www.maritimeaquarium.org"},
+{id:125,n:"Tenafly Nature Center",a:"313 Hudson Ave, Tenafly, NJ",lt:40.9253,ln:-73.9458,cat:"Nature Center",ic:"\ud83e\udd89",t:25,io:"b",tp:"p",af:1,$:2,d:"Indoor live animal ambassadors in Redfield Visitors' Center. 7+ miles of trails through 55-acre preserve.",days:["9:30-4:30","9:30-4:30","9:30-4:30","9:30-4:30","9:30-4:30","9:30-4:30","9:30-4:30"],pr:[["Non-member","$2/person"],["Family","$10"],["Member","Free"]],pn:"Trails dawn to dusk daily",w:"https://tenaflynaturecenter.org"},
+{id:126,n:"Flat Rock Brook Nature Center",a:"443 Van Nostrand Ave, Englewood, NJ",lt:40.8728,ln:-73.9663,cat:"Nature Center",ic:"\ud83c\udf3f",t:15,io:"b",tp:"p",af:1,$:0,d:"Free 150-acre preserve with interactive indoor exhibit, pond reading nook, playground. 2 mi from GW Bridge.",days:["9-5","9-5","9-5","9-5","9-5","1-5","1-5"],pr:[["Everything","Free"]],pn:"Exhibit room closed weekday summers for camp",w:"https://www.flatrockbrook.org"},
+{id:127,n:"Staten Island Zoo",a:"614 Broadway, Staten Island",lt:40.6258,ln:-74.1147,cat:"Zoo",ic:"\ud83e\udd81",t:50,io:"b",tp:"p",af:1,$:0,d:"Compact zoo packed with indoor aquarium, reptile wing, Africa exhibit + outdoor children's zoo. Under 2 free.",days:["10-4","10-4","10-4","10-4","10-4","10-4","10-4"],pr:[["Under 2","Free"],["Child 3-14","$6"],["Adult","$10"]],pn:"Free Wed after 2pm",w:"https://www.statenislandzoo.org"},
+{id:128,n:"Staten Island Children's Museum",a:"1000 Richmond Ter, Staten Island",lt:40.6437,ln:-74.1018,cat:"Children's Museum",ic:"\ud83c\udfe0",t:50,io:"b",tp:"p",af:1,$:8,d:"10 indoor + 2 outdoor exhibits on Snug Harbor botanical garden campus. Hands-on nature & art play.",days:[null,null,"10-5","10-5","10-5","10-5","10-5"],pr:[["General","$8"],["Under 1","Free"]],pn:"Within Snug Harbor Botanical Garden",w:"https://sichildrensmuseum.org"},
+{id:129,n:"South Street Seaport Museum",a:"12 Fulton St",lt:40.7063,ln:-74.0026,cat:"Maritime Museum",ic:"\u26f5",t:30,io:"b",tp:"p",af:1,$:5,d:"Indoor maritime galleries + outdoor historic tall ships at Pier 16. Free family craft activities monthly.",days:[null,null,"11-5","11-5","11-5","11-5","11-5"],pr:[["Child","$5"],["Adult","$18"]],pn:"Monthly free family crafts",w:"https://southstreetseaportmuseum.org"},
+{id:130,n:"Meadowlands Environment Center",a:"2 DeKorte Park Plaza, Lyndhurst, NJ",lt:40.7700,ln:-74.0975,cat:"Nature Center",ic:"\ud83e\udda2",t:30,io:"b",tp:"p",af:1,$:0,d:"Indoor 1,000-gal marsh aquarium with live crabs & turtles. Outdoor boardwalk trail into the Meadowlands.",days:["8-4","8-4","8-4","8-4","8-4","10-3","10-3"],pr:[["Everything","Free"]],pn:"Trails open daily 8am to dusk",w:"https://www.njsea.com/meadowlands-environment-center/"},
+{id:131,n:"Dana Discovery Center",a:"110th St & Lenox Ave, Central Park",lt:40.7964,ln:-73.9528,cat:"Nature Center",ic:"\ud83c\udf3f",t:20,io:"b",tp:"p",af:1,$:0,d:"Free nature education center on Harlem Meer. Indoor workshops + outdoor catch-and-release fishing.",days:[null,null,"10-5","10-5","10-5","10-5","10-5"],pr:[["Everything","Free"]],pn:"Free fishing gear to borrow",w:"https://www.centralparknyc.org/locations/charles-a-dana-discovery-center"},
+{id:132,n:"Inwood Hill Nature Center",a:"218th St & Indian Rd",lt:40.8722,ln:-73.9250,cat:"Nature Center",ic:"\ud83c\udf3f",t:30,io:"b",tp:"p",af:1,$:0,d:"Renovated center with interactive exhibits on Manhattan's last salt marsh. Park trails & old-growth forest.",days:[null,null,null,null,null,"10-3","10-3"],pr:[["Everything","Free"]],pn:"Weekends only; trails open daily",w:"https://www.nycgovparks.org/parks/inwood-hill-park/facilities/naturecenters"},
+{id:133,n:"Van Cortlandt Nature Center",a:"W 246th St & Broadway, Bronx",lt:40.8978,ln:-73.8886,cat:"Nature Center",ic:"\ud83c\udf3f",t:35,io:"b",tp:"p",af:1,$:0,d:"Indoor wildlife exhibits, live animals, park maps. Surrounded by 1,146-acre Van Cortlandt Park.",days:[null,null,null,null,null,"10-3","10-3"],pr:[["Everything","Free"]],pn:"Weekends only; Urban Park Rangers",w:"https://www.nycgovparks.org/parks/VanCortlandtPark/facilities/naturecenters"},
+{id:134,n:"Prospect Park Audubon Center",a:"Lincoln Rd entrance, Prospect Park, Brooklyn",lt:40.6608,ln:-73.9652,cat:"Nature Center",ic:"\ud83d\udc26",t:35,io:"b",tp:"p",af:1,$:0,d:"Free nature programming in historic boathouse. Indoor animal encounters + outdoor bird walks around the lake.",days:[null,null,null,null,null,"10-5","10-5"],pr:[["Everything","Free"]],pn:"Open weekends & school holidays",w:"https://www.prospectpark.org/visit-the-park/places-to-go/audubon-center/"},
+{id:135,n:"Weinberg Nature Center",a:"455 Mamaroneck Rd, Scarsdale, NY",lt:40.9756,ln:-73.7542,cat:"Nature Center",ic:"\ud83d\udc0d",t:40,io:"b",tp:"b",af:1,$:0,d:"Indoor animal room with 25 species + greenhouse. 10-acre sanctuary with short trails. Little Ferns toddler classes.",days:[null,null,"9-5","9-5","9-5","9-5","9-5"],pr:[["Walk-in","Free"],["Programs","Fee varies"]],pn:"Register through Village of Scarsdale",w:"https://www.weinbergnaturecenter.org"},
+{id:136,n:"Rye Nature Center",a:"873 Boston Post Rd, Rye, NY",lt:40.9756,ln:-73.6871,cat:"Nature Center",ic:"\ud83c\udf32",t:45,io:"b",tp:"b",af:1,$:0,d:"Indoor visitor center with animal displays. 47 acres of forest with easy half-mile trails for toddlers.",days:["9-4:40","9-4:40","9-4:40","9-4:40","9-4:40","9-4:40",null],pr:[["Grounds","Free"],["Programs","Membership req."]],pn:"Grounds open dawn to dusk free",w:"https://www.ryenaturecenter.org"},
+{id:137,n:"Alley Pond Environmental Center",a:"229-10 Northern Blvd, Queens",lt:40.7532,ln:-73.7471,cat:"Nature Center",ic:"\ud83d\udc22",t:40,io:"b",tp:"p",af:1,$:0,d:"Free indoor animal room with turtles, snakes, frogs. Wetland trails through 635-acre Alley Pond Park.",days:["9-4:30","9-4:30","9-4:30","9-4:30","9-4:30","11-1","11-1"],pr:[["Everything","Free"]],pn:"Free animal room tours; drop-in OK",w:"https://www.alleypond.org"},
+{id:138,n:"Abma's Farm",a:"700 Lawlins Rd, Wyckoff, NJ",lt:40.9536,ln:-74.1605,cat:"Farm",ic:"\ud83d\udc14",t:40,io:"b",tp:"p",af:1,$:6,d:"Outdoor barnyard petting zoo + warm greenhouses with plants year-round. Farm market with scratch bakery.",days:["8-6","8-6","8-6","8-6","8-6","8-5:30",null],pr:[["Under 24 mo","Free"],["Age 2+ online","$5.50"],["At door","$7 cash"]],pn:"Petting zoo tickets online save $1.50",w:"https://www.abmasfarm.com"},
+{id:139,n:"Cora Hartshorn Arboretum",a:"324 Forest Dr S, Short Hills, NJ",lt:40.7362,ln:-74.3340,cat:"Nature Center",ic:"\ud83c\udf33",t:45,io:"b",tp:"p",af:1,$:0,d:"Indoor animal exhibits (mammals, reptiles, amphibians) + 16 acres of woodland trails and bird sanctuary.",days:["9-4","9-4","9-4","9-4","9-4","9-4","9-4"],pr:[["Everything","Free"]],pn:"Trails open dawn to dusk free",w:"https://hartshornarboretum.org"},
+{id:140,n:"Teatown Lake Reservation",a:"1600 Spring Valley Rd, Ossining, NY",lt:41.2126,ln:-73.8354,cat:"Nature Center",ic:"\ud83e\udd85",t:55,io:"b",tp:"b",$:0,af:0,d:"Indoor nature center with live raptors, reptiles, mammals. 15 miles of trails through 1,000-acre preserve.",days:["9-5","9-5","9-5","9-5","9-5","9-5","9-5"],pr:[["Non-member","$5 suggested"],["Member","Free"]],pn:"Visitor center open 7 days",w:"https://www.teatown.org"},
+// ── NEW VENUES 141-200: Museums, Cultural, Play Spaces, Classes ──
+{id:141,n:"New-York Historical Society DiMenna",a:"170 Central Park West",lt:40.7794,ln:-73.9735,cat:"Children's Museum",ic:"\ud83c\udfe0",t:5,io:"i",tp:"p",$:0,af:1,d:"DiMenna Children's History Museum inside. Interactive NYC history exhibits. Under 5 free.",days:[null,"11-6","11-6","11-6","11-8","11-6","11-6"],pr:[["Under 5","Free"],["Adult","$24"]],pn:"Fri 5-8pm pay what you wish",w:"https://www.nyhistory.org"},
+{id:142,n:"Whitney Museum",a:"99 Gansevoort St",lt:40.7396,ln:-74.0089,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:25,io:"i",tp:"p",$:0,af:1,d:"Under 25 free. Outdoor terraces with Hudson views. Fri 5-10pm free for all. CMOM collab Sat for ages 0-6.",days:["10:30-6",null,"10:30-6","10:30-6","10:30-10","10:30-6","10:30-6"],pr:[["Under 25","Free"],["Fri eve","Free"]],pn:"Sat CMOM Open Studio for ages 0-6",w:"https://whitney.org"},
+{id:143,n:"El Museo del Barrio",a:"1230 5th Ave",lt:40.7934,ln:-73.9515,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:20,io:"i",tp:"p",$:0,af:1,d:"Latin American & Caribbean art. Under 12 free. 3rd Saturday Super Sabado free for all.",days:[null,null,null,"11-5","11-5","11-5","11-5"],pr:[["Under 12","Free"],["Adult","Pay what you can"]],pn:"3rd Saturday free",w:"https://www.elmuseo.org"},
+{id:144,n:"Museum of Arts and Design",a:"2 Columbus Circle",lt:40.7673,ln:-73.9819,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:10,io:"i",tp:"p",$:0,af:1,d:"Under 18 free. Tactile craft & design exhibits. Hands-on workshops. Right at Columbus Circle.",days:[null,"10-6","10-6","10-6","10-6","10-6","10-6"],pr:[["Under 18","Free"],["Adult","$20"]],pn:"Under 18 always free",w:"https://madmuseum.org"},
+{id:145,n:"Asia Society",a:"725 Park Ave",lt:40.7697,ln:-73.9645,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:15,io:"i",tp:"b",$:0,af:1,d:"Under 16 free. Family Days with crafts, lion dances, cultural performances. Beautiful gallery.",days:[null,"11-6","11-6","11-6","11-6","11-6","11-6"],pr:[["Under 16","Free"],["Adult","$15"]],pn:"Free Fri 6-9pm",w:"https://asiasociety.org"},
+{id:146,n:"Japan Society",a:"333 E 47th St",lt:40.7534,ln:-73.9688,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:20,io:"i",tp:"b",$:0,af:1,d:"Under 16 free. Gallery + Japanese cultural events, festivals, family workshops.",days:[null,"12-7","12-7","12-7","12-7","12-5","12-5"],pr:[["Under 16","Free"],["Adult","$15"]],pn:"Family membership $125",w:"https://www.japansociety.org"},
+{id:147,n:"New Victory Theater",a:"209 W 42nd St",lt:40.7568,ln:-73.9885,cat:"Theater",ic:"\ud83c\udfad",t:20,io:"i",tp:"p",$:25,af:1,d:"NYC's premier family theater. Lap seats for under 3. Shows designed for ages 3+ but toddlers welcome.",days:["v","v","v","v","v","v","v"],pr:[["Tickets","$25-72"],["Lap seats","Free (under 3)"]],pn:"Check schedule; matinees best for toddlers",w:"https://newvictory.org"},
+{id:148,n:"Vital Theatre / Pinkalicious",a:"2162 Broadway",lt:40.7838,ln:-73.9805,cat:"Theater",ic:"\ud83c\udfad",t:5,io:"i",tp:"p",$:40,af:0,d:"Long-running Pinkalicious musical for ages 2-8. 60 min, no intermission. Right on the UWS.",days:[null,null,null,null,null,"11-3","11-3"],pr:[["Ticket","$40-60"]],pn:"Weekend shows; 60 min perfect for toddlers",w:"https://www.vitaltheatre.com"},
+{id:149,n:"TADA! Youth Theater",a:"15 W 28th St",lt:40.7456,ln:-73.9901,cat:"Theater",ic:"\ud83c\udfad",t:22,io:"i",tp:"p",$:15,af:0,d:"Original musicals performed by kids ages 8-18. Shows suitable for ages 3+. Affordable tickets.",days:["v","v","v","v","v","v","v"],pr:[["Child","$15"],["Adult","$25"]],pn:"Check schedule for showtimes",w:"https://www.tadatheater.com"},
+{id:150,n:"Long Island Children's Museum",a:"11 Davis Ave, Garden City, NY",lt:40.7268,ln:-73.6132,cat:"Children's Museum",ic:"\ud83c\udfe0",t:45,io:"i",tp:"p",$:14,af:0,d:"Tot Spot for birth-to-3: sensory play, water tables. 14 galleries of hands-on exhibits.",days:[null,"10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["General","$14"],["Under 1","Free"]],pn:"LIRR from Penn Station + taxi",w:"https://www.licm.org"},
+{id:151,n:"Sloomoo Institute",a:"475 Broadway, SoHo",lt:40.7218,ln:-73.9990,cat:"Immersive",ic:"\ud83e\udeb4",t:25,io:"i",tp:"p",$:39,af:0,d:"Immersive slime play. DIY slime bar included with ticket. Ages 2+ need tickets. Sensory overload (in a good way).",days:["10-5:30","10-5:30","10-5:30","10-5:30","10-7:30","9-7:30","9-6:30"],pr:[["General","$39-50"],["Under 2","Free"]],pn:"Messy! Wear old clothes",w:"https://www.sloomoo.com"},
+{id:152,n:"INTER_ NYC",a:"15 Hudson Yards",lt:40.7538,ln:-74.0018,cat:"Immersive",ic:"\ud83d\ude80",t:20,io:"i",tp:"p",$:0,af:1,d:"Motion-sensitive space adventure with immersive projections. Under 4 free. Stunning visuals.",days:["10-8","10-8","10-8","10-8","10-9","10-9","10-8"],pr:[["Under 4","Free"],["Adult","$35"]],pn:"Under 4 free; timed entry",w:"https://www.inter.nyc"},
+{id:153,n:"Arte Museum NYC",a:"29 Broadway",lt:40.7065,ln:-74.0123,cat:"Immersive Art",ic:"\ud83c\udfa8",t:30,io:"i",tp:"p",$:0,af:1,d:"Immersive nature projections: waterfalls, forests, oceans. Under 3 free. Some dark/mirrored rooms.",days:["10-9","10-9","10-9","10-9","10-9","10-9","10-9"],pr:[["Under 3","Free"],["Child 3-12","$35"],["Adult","$55"]],pn:"Under 3 free; carry toddlers in dark rooms",w:"https://www.artemuseum.com"},
+{id:154,n:"Imagine Swimming UWS",a:"752 West End Ave",lt:40.7928,ln:-73.9745,cat:"Swim",ic:"\ud83c\udfca",t:8,io:"i",tp:"c",$:48,af:0,d:"Parent & Me swim classes ages 4mo-3yr. Warm pool, gentle progression. UWS location.",days:["v","v","v","v","v","v","v"],pr:[["Per class","$48"]],pn:"Multiple schedule options",w:"https://www.imagineswimming.com/locations/upper-west-side"},
+{id:155,n:"Goldfish Swim School UES",a:"1534 2nd Ave",lt:40.7785,ln:-73.9505,cat:"Swim",ic:"\ud83c\udfca",t:20,io:"i",tp:"c",$:50,af:0,d:"Ages 4mo+. Warm 90-degree pool. Shatter-proof underwater viewing. Family-friendly tropical decor.",days:["v","v","v","v","v","v","v"],pr:[["Annual membership","$50"],["Per class","~$35-40"]],pn:"90-degree pool; family changing rooms",w:"https://goldfishswimschool.com/ues-e-80th-street/"},
+{id:156,n:"NYC Elite Gymnastics",a:"200 Riverside Blvd",lt:40.7754,ln:-73.9891,cat:"Gym",ic:"\ud83e\udd38",t:10,io:"i",tp:"c",$:45,af:0,d:"Parent-child obstacle courses from 3 months. 50-min classes. UWS riverside location.",days:["v","v","v","v","v","v",null],pr:[["Per class","~$45"]],pn:"Free trial available",w:"https://nycelite.com/upper-west-side/"},
+{id:157,n:"Children's Tumbling",a:"9 Murray St, Tribeca",lt:40.7130,ln:-74.0076,cat:"Gym",ic:"\ud83e\udd38",t:35,io:"i",tp:"c",$:65,af:0,d:"Since 1978. NYC's oldest tumbling program. Classes from 16 months. Professional gymnastic equipment.",days:["v","v","v","v","v","v",null],pr:[["Per class","$65-90"]],pn:"NYC institution since 1978",w:"https://childrentumbling.com"},
+{id:158,n:"Super Soccer Stars UWS",a:"131 W 86th St",lt:40.7877,ln:-73.9727,cat:"Sports",ic:"\u26bd",t:5,io:"i",tp:"c",$:35,af:0,d:"Adult & Me soccer for 12-26mo, Soccer for 2-3s. Fun intro to team sports.",days:["v","v","v","v","v","v","v"],pr:[["Per class","~$35-48"]],pn:"Multiple UWS locations",w:"https://www.soccerstars.com/ny/nyc/"},
+{id:159,n:"Color Me Mine UWS",a:"177 Amsterdam Ave",lt:40.7795,ln:-73.9804,cat:"Art Studio",ic:"\ud83c\udfa8",t:5,io:"i",tp:"p",$:5,af:1,d:"Drop-in pottery painting. Mini Mondays: $5 for under-5s. Pick a piece, paint it, they fire it.",days:["11-7","11-7","11-7","11-7","11-8","10-8","11-7"],pr:[["Mini Mon (under 5)","$5 + piece"],["Regular","$10 + piece"]],pn:"Best deal: Mini Mondays for toddlers",w:"https://upperwestside.colormemine.com"},
+{id:160,n:"NY Kids Club",a:"168 Amsterdam Ave",lt:40.7738,ln:-73.9823,cat:"Classes",ic:"\ud83e\udd38",t:10,io:"i",tp:"b",$:45,af:0,d:"Music, gym, art, dance, cooking, STEM, yoga for ages 2mo-12yr. Drop-in and membership options.",days:["8-6","8-6","8-6","8-6","8-6","8-4","9-2"],pr:[["Drop-in","~$45"],["Membership","$300/mo"]],pn:"Multi-activity center",w:"https://nypreschoolandkidsclub.com"},
+{id:161,n:"Crossbar UWS",a:"250 W 86th St",lt:40.7880,ln:-73.9730,cat:"Sports",ic:"\u26bd",t:5,io:"i",tp:"b",$:20,af:0,d:"Indoor mini soccer field. Daily toddler open play 9am-noon plus hosted soccer classes.",days:["9-9","9-9","9-9","9-9","9-9","9-6","9-6"],pr:[["Open play","$20/hr"],["Class","$35"]],pn:"Toddler open play every morning",w:"https://www.crossbar.nyc"},
+{id:162,n:"Little Maestros",a:"344 E 69th St",lt:40.7645,ln:-73.9594,cat:"Music",ic:"\ud83c\udfb5",t:20,io:"i",tp:"c",$:35,af:0,d:"Award-winning 45-min toddler music with storytime, puppets, dance parties. Ages 0-5.",days:["v","v","v","v","v","v",null],pr:[["Per class","~$35"]],pn:"Award-winning music program",w:"https://www.littlemaestros.com"},
+{id:163,n:"Church Street School",a:"41 White St, Tribeca",lt:40.7180,ln:-74.0024,cat:"Music",ic:"\ud83c\udfb5",t:30,io:"i",tp:"c",$:35,af:0,d:"Non-profit music & art from 16mo. Dalcroze eurythmics, creative movement, art exploration.",days:["v","v","v","v","v","v",null],pr:[["Per class","~$35"]],pn:"Dalcroze method; non-profit",w:"https://www.churchstreetschool.org"},
+{id:164,n:"Yogi Beans UES",a:"1018 Lexington Ave",lt:40.7720,ln:-73.9612,cat:"Yoga",ic:"\ud83e\uddd8",t:20,io:"i",tp:"c",$:35,af:0,d:"Kids-only yoga studio. Mini Sun Salutation for ages 2+. Calm, focused environment.",days:["v","v","v","v","v","v","v"],pr:[["Per class","~$35"]],pn:"Kids-only yoga; ages 2+",w:"https://yogibeans.com"},
+{id:165,n:"Bilingual Birdies",a:"Various UWS/Manhattan",lt:40.7860,ln:-73.9770,cat:"Music",ic:"\ud83c\udfb5",t:5,io:"i",tp:"c",$:30,af:0,d:"Spanish, French, Mandarin through music, puppetry, dance for ages 0-6. Multiple UWS locations.",days:["v","v","v","v","v","v",null],pr:[["Per class","~$30"]],pn:"Language + music combo",w:"https://bilingualbirdies.com/nyc/"},
+{id:166,n:"14th Street Y",a:"344 E 14th St",lt:40.7322,ln:-73.9818,cat:"Classes",ic:"\ud83c\udfe2",t:25,io:"i",tp:"c",$:17,af:0,d:"Yoga, dance, art, music, movement classes for toddlers. $17 trial class. Affordable packages.",days:["v","v","v","v","v","v","v"],pr:[["Trial class","$17"],["5-pack","$65"]],pn:"Most affordable class venue",w:"https://www.14streety.org"},
+{id:167,n:"Apple Seeds",a:"6 Stuyvesant Oval",lt:40.7319,ln:-73.9769,cat:"Play Space",ic:"\ud83c\udf4e",t:25,io:"i",tp:"b",$:25,af:0,d:"Indoor play space + classes in Stuy Town. Membership-based but trial visits available.",days:["9-5","9-5","9-5","9-5","9-5","9-3","9-3"],pr:[["Trial visit","$25"],["Membership","$75/mo"]],pn:"Trial visit available",w:"https://appleseedsovalkids.com"},
+{id:168,n:"Chelsea Forest Play",a:"241 W 20th St",lt:40.7420,ln:-73.9977,cat:"Play Space",ic:"\ud83c\udf32",t:25,io:"i",tp:"p",$:35,af:0,d:"Nature-themed treehouse indoor playground. Reservation required. Beautiful design.",days:["9-5","9-5","9-5","9-5","9-5","9-4","9-4"],pr:[["50-min session","$35"]],pn:"Reservation required",w:"https://www.chelseaforestplay.com"},
+{id:169,n:"Twinkle Playspace",a:"144 Frost St, Williamsburg",lt:40.7168,ln:-73.9459,cat:"Play Space",ic:"\ud83e\uddf8",t:40,io:"i",tp:"p",$:20,af:0,d:"Toddler-focused space, ages 0-6. Soft play, imaginative stations. Intimate and calm.",days:["9-5","9-5","9-5","9-5","9-5","9-5",null],pr:[["Child","$20"],["Adult","$15"]],pn:"Ages 0-6 only",w:"https://www.twinkleplayspace.com"},
+{id:170,n:"Fairytale Island",a:"7110 3rd Ave, Bay Ridge",lt:40.6325,ln:-74.0246,cat:"Play Space",ic:"\ud83e\uddf8",t:45,io:"i",tp:"p",$:20,af:0,d:"Ball pit, train ride, swings, slides. Fun Bay Ridge toddler destination.",days:["10-7","10-7","10-7","10-7","10-7","10-7","10-7"],pr:[["Child","$20"]],pn:"All ages welcome",w:"https://www.fairytaleislandnyc.com"},
+{id:171,n:"The Kids Town",a:"278A 6th St, Park Slope",lt:40.6700,ln:-73.9832,cat:"Play Space",ic:"\ud83e\uddf8",t:35,io:"i",tp:"p",$:25,af:0,d:"Family-owned, intimate play space. 90-min sessions in a cozy Park Slope setting.",days:["9:30-5","9:30-5","9:30-5","9:30-5","9:30-5","9:30-5","9:30-5"],pr:[["90 min","$25"]],pn:"Intimate family-run space",w:"https://www.thekidstown.com"},
+{id:172,n:"KidsZone Indoor Playground",a:"5904 99th St, Corona, Queens",lt:40.7365,ln:-73.8620,cat:"Play Space",ic:"\ud83e\uddf8",t:40,io:"i",tp:"p",$:15,af:0,d:"Trumpet slide, obstacle course, toddler area. Budget Queens option.",days:["10-7","10-7","10-7","10-7","10-7","10-7","10-7"],pr:[["Per hour","$15"]],pn:"Budget-friendly",w:"https://www.kidszonenyc.com"},
+{id:173,n:"Rainbow Castle",a:"131-48 Avery Ave, Flushing",lt:40.7633,ln:-73.8176,cat:"Play Space",ic:"\ud83e\uddf8",t:45,io:"i",tp:"p",$:20,af:0,d:"Sensory walls, STEM zones, toddler area. Popular Flushing destination.",days:["10-7","10-7","10-7","10-7","10-7","10-7","10-7"],pr:[["Child","$20"]],pn:"Separate toddler section",w:"https://www.rainbowcastlenyc.com"},
+{id:174,n:"Kids Fun House",a:"62-73 Fresh Pond Rd, Ridgewood",lt:40.7089,ln:-73.8989,cat:"Play Space",ic:"\ud83e\uddf8",t:40,io:"i",tp:"p",$:15,af:0,d:"3-story playground with separate toddler section. $12-20 depending on day.",days:[null,"10-7","10-7","10-7","10-7","10-7","10-7"],pr:[["Weekday","$12-15"],["Weekend","$18-20"]],pn:"Closed Mondays",w:"https://www.kidsfunhousenyc.com"},
+{id:175,n:"Kidz Fun Palace",a:"35-38 Junction Blvd, Corona",lt:40.7486,ln:-73.8694,cat:"Play Space",ic:"\ud83e\uddf8",t:40,io:"i",tp:"p",$:15,af:0,d:"20,000-ball ball pit, merry-go-round, toddler area. Huge Queens playground.",days:["10-7","10-7","10-7","10-7","10-8","10-8","10-7"],pr:[["2 hours","$15"]],pn:"Massive ball pit",w:"https://www.kidzfunpalace.com"},
+{id:176,n:"Playgarden Prep Tribeca",a:"95 Franklin St",lt:40.7184,ln:-74.0035,cat:"Play Space",ic:"\ud83e\uddf8",t:30,io:"i",tp:"b",$:50,af:0,d:"NYC's largest under-5 indoor playground. Membership-based with trial days available.",days:["7-6","7-6","7-6","7-6","7-6","9-1",null],pr:[["Trial day","$50"],["Membership","Monthly"]],pn:"Membership-based; trial available",w:"https://playgardennyc.com"},
+{id:177,n:"Gymboree UES",a:"1622 First Ave",lt:40.7760,ln:-73.9500,cat:"Music",ic:"\ud83c\udfb5",t:18,io:"i",tp:"b",$:59,af:0,d:"Open gym + structured music, art, sensory classes. Ages 0-5. Drop-in welcome.",days:["v","v","v","v","v","9:30-11",null],pr:[["Open Gym","$59"]],pn:"Sat open gym; weekday classes",w:"https://www.gymboreeclasses.com"},
+{id:178,n:"My Gym UES",a:"1608 First Ave",lt:40.7763,ln:-73.9498,cat:"Gym",ic:"\ud83e\udd38",t:20,io:"i",tp:"b",$:45,af:0,d:"Mommy & Me gymnastics, open gym. Structured tumbling for babies through age 6.",days:["9-6","9-6","9-6","9-6","9-6","9-3",null],pr:[["Drop-in","~$45"],["Membership","Monthly"]],pn:"Free trial class",w:"https://www.mygym.com"},
+{id:179,n:"MoMA",a:"11 W 53rd St",lt:40.7614,ln:-73.9776,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:15,io:"i",tp:"p",$:0,af:1,d:"Under 16 always free. World-class modern art. Stroller-friendly. Fri 5:30-8:30pm free for NYS residents.",days:["10:30-5:30","10:30-5:30","10:30-5:30","10:30-5:30","10:30-8:30","10:30-5:30","10:30-5:30"],pr:[["Under 16","Free"],["Adult","$30"]],pn:"Fri evenings free for NY residents",w:"https://www.moma.org"},
+{id:180,n:"Noguchi Museum",a:"9-01 33rd Rd, LIC",lt:40.7676,ln:-73.9374,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:30,io:"b",tp:"p",$:0,af:1,d:"Under 12 free. Tranquil sculpture garden & galleries. 1st Friday free for all. A hidden gem.",days:[null,null,"10-5","10-5","10-5","11-6","11-6"],pr:[["Under 12","Free"],["1st Fri","Free"]],pn:"1st Friday free; serene space",w:"https://www.noguchi.org"},
+{id:181,n:"Bronx Museum",a:"1040 Grand Concourse",lt:40.8312,ln:-73.9198,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:35,io:"i",tp:"p",$:0,af:1,d:"Always free for everyone. Contemporary art in the Bronx.",days:[null,null,"11-6","11-6","11-6","11-6","11-6"],pr:[["Everyone","Free"]],pn:"Always free",w:"https://bronxmuseum.org"},
+{id:182,n:"Jane's Carousel",a:"Old Dock St, DUMBO, Brooklyn",lt:40.7042,ln:-73.9936,cat:"Carousel",ic:"\ud83c\udfa0",t:35,io:"i",tp:"p",$:2,af:1,d:"Beautifully restored 1922 carousel in a Jean Nouvel glass pavilion. Toddlers love the painted horses.",days:[null,null,"11-7","11-7","11-7","11-7","11-7"],pr:[["Per ride","$2"]],pn:"Cash only; $2 per ride",w:"https://janescarousel.com"},
+{id:183,n:"Le Carrousel Bryant Park",a:"Bryant Park, 6th Ave & 42nd St",lt:40.7536,ln:-73.9832,cat:"Carousel",ic:"\ud83c\udfa0",t:15,io:"i",tp:"p",$:4,af:1,d:"Whimsical French-style carousel with hand-painted animals. Covered, so great for light rain.",days:["11-8","11-8","11-8","11-8","11-8","11-9","11-8"],pr:[["Per ride","$4"]],pn:"Open year-round; heated in winter",w:"https://bryantpark.org/things-to-do/le-carrousel"},
+{id:184,n:"Totally Kid Carousel",a:"Riverbank State Park, 679 Riverside Dr",lt:40.8253,ln:-73.9486,cat:"Carousel",ic:"\ud83c\udfa0",t:20,io:"i",tp:"p",$:1,af:1,d:"One-of-a-kind carousel with animals designed by NYC kids. Only $1 per ride. Inside Riverbank State Park.",days:[null,null,null,null,null,"11-5","11-5"],pr:[["Per ride","$1"]],pn:"Weekends only; $1 per ride",w:"https://parks.ny.gov/parks/riverbank"},
+{id:185,n:"SocRoc NYC",a:"Various UWS/Manhattan",lt:40.7860,ln:-73.9770,cat:"Sports",ic:"\u26bd",t:10,io:"i",tp:"c",$:35,af:0,d:"Grown-Up & Me soccer for 18mo-3yr. Fun non-competitive intro to kicking and teamwork.",days:["v","v","v","v","v","v","v"],pr:[["Per class","$35-48"]],pn:"Multiple UWS locations",w:"https://socrocnyc.com"},
+{id:186,n:"Kids at Art UES",a:"1412 2nd Ave",lt:40.7690,ln:-73.9560,cat:"Art Studio",ic:"\ud83c\udfa8",t:20,io:"i",tp:"c",$:30,af:0,d:"Creative art classes for ages 2-12. 25+ years on the UES. Small class sizes.",days:["9-5","9-5","9-5","9-5","9-5","9-3",null],pr:[["Per class","~$30"]],pn:"25+ years experience",w:"https://www.kidsatartnyc.com"},
+{id:187,n:"Gymboree Play & Music Brooklyn",a:"157 Montague St, Brooklyn Heights",lt:40.6935,ln:-73.9929,cat:"Music",ic:"\ud83c\udfb5",t:30,io:"i",tp:"b",$:59,af:0,d:"Open gym + structured music, sensory classes for ages 0-5. Brooklyn Heights location.",days:["v","v","v","v","v","9:30-11",null],pr:[["Open Gym","$59"]],pn:"Sat open gym; weekday classes",w:"https://www.gymboreeclasses.com"},
+{id:188,n:"Kidville Brooklyn Heights",a:"155 Montague St, Brooklyn",lt:40.6936,ln:-73.9925,cat:"Gym",ic:"\ud83e\udd38",t:30,io:"i",tp:"b",$:29,af:0,d:"Indoor gym, music, art classes for babies and toddlers. Brooklyn Heights location.",days:["9-5","9-5","9-5","9-5","9-5",null,null],pr:[["Drop-in","$29"]],pn:"Same programs as UWS location",w:"https://kidville.com"},
+{id:189,n:"Discovery Programs Playpark",a:"251 W 100th St",lt:40.7963,ln:-73.9694,cat:"Play Space",ic:"\ud83e\uddf8",t:10,io:"i",tp:"p",$:25,af:0,d:"Drop-in playpark for ages 6-48 months. Tuesdays & Fridays only, limited hours.",days:[null,"10-12",null,null,"10-12",null,null],pr:[["Drop-in","$25"]],pn:"Tue & Fri mornings only",w:"https://discoveryprograms.com"},
+{id:190,n:"Imagine That! Museum",a:"4 Vreeland Rd, Florham Park, NJ",lt:40.7876,ln:-74.3880,cat:"Children's Museum",ic:"\ud83c\udfe0",t:45,io:"i",tp:"p",$:15,af:0,d:"18 themed play zones: mini town, fire truck, construction, art room. All-day admission.",days:[null,"10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Child","$21.99"],["Adult","$6.99"]],pn:"All-day play; NJ Transit accessible",w:"https://www.imaginethatmuseum.com"},
+{id:191,n:"Stepping Stones Museum",a:"303 West Ave, Norwalk, CT",lt:41.0953,ln:-73.4322,cat:"Children's Museum",ic:"\ud83c\udfe0",t:55,io:"i",tp:"p",$:20,af:0,d:"Hands-on exhibits for ages 0-10. Dedicated toddler area. Award-winning Connecticut museum.",days:[null,"10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["General","$20"]],pn:"Metro-North to Norwalk",w:"https://www.steppingstonesmuseum.org"},
+{id:192,n:"Kidville Park Slope",a:"434 7th Ave, Brooklyn",lt:40.6647,ln:-73.9813,cat:"Gym",ic:"\ud83e\udd38",t:35,io:"i",tp:"b",$:29,af:0,d:"Indoor gym, music, art classes for babies and toddlers. Park Slope location.",days:["9-5","9-5","9-5","9-5","9-5",null,null],pr:[["Drop-in","$29"]],pn:"Same programs as UWS",w:"https://kidville.com"},
+{id:193,n:"New Museum",a:"235 Bowery",lt:40.7223,ln:-73.9929,cat:"Museum",ic:"\ud83c\udfdb\ufe0f",t:25,io:"i",tp:"p",$:0,af:1,d:"Under 18 free. Contemporary art in a striking building. New OMA expansion opened March 2026.",days:[null,null,"11-6","11-6","11-6","11-6","11-6"],pr:[["Under 18","Free"],["Adult","$22"]],pn:"Free Thu 7-9pm; under 18 free",w:"https://www.newmuseum.org"},
+{id:194,n:"Fotografiska NYC",a:"281 Park Ave South",lt:40.7398,ln:-73.9852,cat:"Museum",ic:"\ud83d\udcf7",t:20,io:"i",tp:"p",$:0,af:1,d:"Photography museum. Under 7 free. Beautiful building with restaurant. Stroller-friendly.",days:["10-11","10-11","10-11","10-11","10-11","10-11","10-9"],pr:[["Under 7","Free"],["Adult","$31"]],pn:"Under 7 free; open late",w:"https://www.fotografiska.com/nyc/"},
+{id:195,n:"Bronx Zoo",a:"2300 Southern Blvd, Bronx",lt:40.8506,ln:-73.8769,cat:"Zoo",ic:"\ud83e\udd81",t:45,io:"b",tp:"p",$:0,af:1,d:"JungleWorld, Bug Carousel, World of Reptiles indoors. Under 3 free. Free Wednesdays.",days:["10-5","10-5","10-5","10-5","10-5","10-5:30","10-5:30"],pr:[["Under 3","Free"],["Adult","$28.95"]],pn:"Free Wednesdays; heated indoor exhibits",w:"https://bronxzoo.com"},
+{id:196,n:"NY Botanical Garden",a:"2900 Southern Blvd, Bronx",lt:40.8631,ln:-73.8794,cat:"Garden",ic:"\ud83c\udf3f",t:45,io:"b",tp:"b",$:0,af:1,d:"Everett Children's Adventure Garden + warm tropical conservatory. Under 2 free. Free Wed for NYC residents.",days:[null,"10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30"],pr:[["Under 2","Free"],["Child 2-12","$4"],["Adult","$15"]],pn:"Free Wed for NYC; conservatory warm year-round",w:"https://www.nybg.org"},
+{id:197,n:"South Street Seaport Museum",a:"12 Fulton St",lt:40.7063,ln:-74.0026,cat:"Museum",ic:"\u26f5",t:30,io:"b",tp:"p",$:5,af:1,d:"Maritime galleries + outdoor historic tall ships at Pier 16. Monthly free family craft activities.",days:[null,null,"11-5","11-5","11-5","11-5","11-5"],pr:[["Child","$5"],["Adult","$18"]],pn:"Monthly free family crafts",w:"https://southstreetseaportmuseum.org"},
+{id:198,n:"Gulliver's Gate (reopened)",a:"216 W 44th St",lt:40.7574,ln:-73.9871,cat:"Immersive",ic:"\ud83c\udf0d",t:18,io:"i",tp:"p",$:0,af:1,d:"Miniature world with interactive elements. Under 3 free. Tiny cities, trains, airports mesmerize toddlers.",days:["10-8","10-8","10-8","10-8","10-9","10-9","10-8"],pr:[["Under 3","Free"],["Child 3-12","$29"],["Adult","$39"]],pn:"Interactive keys activate scenes",w:"https://gulliversgate.com"},
+{id:199,n:"Hudson Yards Vessel/Edge",a:"20 Hudson Yards",lt:40.7538,ln:-74.0018,cat:"Landmark",ic:"\ud83c\udfdb\ufe0f",t:20,io:"b",tp:"p",$:0,af:1,d:"Free to walk around the Shops & outdoor areas. Edge observation deck (toddlers may find it thrilling or scary).",days:["10-9","10-9","10-9","10-9","10-9","10-9","10-9"],pr:[["Shops/plaza","Free"],["Edge","$41 (under 6 free)"]],pn:"Shops are free; Edge under 6 free",w:"https://www.hudsonyardsnewyork.com"},
+{id:200,n:"Roosevelt Island Tramway + Playground",a:"E 60th St & 2nd Ave",lt:40.7614,ln:-73.9596,cat:"Adventure",ic:"\ud83d\udea1",t:15,io:"b",tp:"p",$:0,af:1,d:"Aerial tram ride over East River (uses MetroCard). Indoor playground on the island. Toddlers love the ride itself.",days:["6-2am","6-2am","6-2am","6-2am","6-3:30am","6-3:30am","6-2am"],pr:[["Tram","$2.90 MetroCard"],["Playground","Free"]],pn:"Regular MetroCard fare; the ride IS the activity",w:"https://rioc.ny.gov/302/Tram"}
+];
+
+// Category groups — colored like subway lines
+const GC={play:"#FF6319",museum:"#0039A6",nature:"#00933C",books:"#B933AD",classes:"#FCCC0A",shows:"#6CBE45"};
+function grp(v){
+  const c=v.cat;
+  if(/Museum|Landmark|Immersive/.test(c))return"museum";
+  if(/Zoo|Aquarium|Nature|Garden|Farm|Animals/.test(c))return"nature";
+  if(/Library|Bookstore/.test(c))return"books";
+  if(/Gym|Classes|Swim|Yoga|Sports|Workshop|Cooking|Community/.test(c))return"classes";
+  if(/Music|Theater|Dance/.test(c))return"shows";
+  return"play";
+}
+function bullet(v,extra){const g=grp(v);const fg=g==="classes"?"#1A1A1A":"#fff";return`<div class="bullet ${extra||''}" style="background:${GC[g]};color:${fg}">${v.id}</div>`;}
+
+function isOpenDay(v,di){if(di==="any")return true;const h=v.days[parseInt(di)];return h!==null&&h!=="v";}
+function matchF(v){
+  if(filters.g!=="any"&&grp(v)!==filters.g)return false;
+  if(filters.day!=="any"&&!isOpenDay(v,filters.day))return false;
+  if(filters.t<99&&v.t>filters.t)return false;
+  if(filters.io==="indoor"&&v.io==="o")return false;
+  if(filters.io==="outdoor"&&v.io==="i")return false;
+  if(filters.tp==="play"&&v.tp==="c")return false;
+  if(filters.tp==="class"&&v.tp==="p")return false;
+  if(filters.pr<100&&v.$>filters.pr)return false;
+  if(filters.af==="1"&&!v.af)return false;
+  return true;
+}
+function openSt(v){const h=v.days[todayIdx];if(!h)return{o:false,t:"Closed today"};if(h==="v")return{o:true,t:"Check schedule"};return{o:true,t:"Open "+h+" today"};}
+function fmtP(v){return v.$===0?"Free":"$"+v.$;}
+
+const map=L.map('map',{zoomControl:false}).setView([40.7831,-73.9812],12);
+L.control.zoom({position:'topright'}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OSM &copy; CARTO',maxZoom:19}).addTo(map);
+L.marker([40.7831,-73.9812],{icon:L.divIcon({className:'',html:'<div class="cm home">🍓</div>',iconSize:[40,40],iconAnchor:[20,20],popupAnchor:[0,-20]}),zIndexOffset:1000}).addTo(map).bindPopup('<div style="padding:12px 16px;text-align:center;font-size:13px"><b>79 St &amp; Broadway</b><br><span style="color:#6F6857;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Home base</span></div>');
+
+const MK={};
+D.forEach(v=>{
+  const g=grp(v);const fg=g==="classes"?"#1A1A1A":"#fff";
+  const mk=L.marker([v.lt,v.ln],{icon:L.divIcon({className:'',html:`<div class="cm" style="background:${GC[g]};color:${fg}">${v.id}</div>`,iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-15]})}).addTo(map);
+  const hH=v.days.map((h,i)=>`<div class="hr-row${i===todayIdx?' tdy':''}"><span class="d">${DAYS[i]}</span>${h===null?'<span class="closed">Closed</span>':h==="v"?"Varies":h}</div>`).join('');
+  const pH=v.pr.map(([l,val])=>`<div class="pr-row"><span>${l}</span><span class="v">${val}</span></div>`).join('');
+  const ioL=v.io==="i"?"Indoor":v.io==="o"?"Outdoor":"Indoor + Outdoor";
+  const tpL=v.tp==="p"?"Open Play":v.tp==="c"?"Classes":"Play + Classes";
+  mk.bindPopup(`<div class="pop-h">${bullet(v)}<div><h3>${v.n}</h3><div class="cat">${v.cat} &middot; ${ioL} &middot; ${tpL}</div></div></div><div class="pop-b"><div class="desc">${v.d}</div><div class="hrs"><h4>Hours</h4>${hH}</div><div><h4>Pricing</h4>${pH}${v.pn?`<div class="note">${v.pn}</div>`:''}</div></div><div class="pop-f"><a href="${v.w}" target="_blank" rel="noopener">Website &rarr;</a><span class="tbadge">${v.t} min from home</span></div>`,{maxWidth:310,minWidth:280});
+  MK[v.id]=mk;
+});
+
+let searchQ='';
+
+function render(){
+  const g=document.getElementById('grid');g.innerHTML='';
+  const f=D.filter(v=>{
+    if(searchQ&&!v.n.toLowerCase().includes(searchQ)&&!v.d.toLowerCase().includes(searchQ)&&!v.cat.toLowerCase().includes(searchQ)&&!v.a.toLowerCase().includes(searchQ))return false;
+    return matchF(v);
+  });
+  document.getElementById('count').textContent=f.length;
+  D.forEach(v=>{const m=MK[v.id];const show=f.includes(v);if(show){if(!map.hasLayer(m))m.addTo(map);}else{if(map.hasLayer(m))map.removeLayer(m);}});
+  if(!f.length){g.innerHTML='<div class="empty-msg" style="grid-column:1/-1"><span>!</span>No stops match your filters.<br>Try widening the search.</div>';return;}
+  if(sortBy==="near")f.sort((a,b)=>a.t-b.t||a.id-b.id);
+  else if(sortBy==="price")f.sort((a,b)=>a.$-b.$||a.t-b.t);
+  else f.sort((a,b)=>a.n.localeCompare(b.n));
+  f.forEach(v=>{
+    const s=openSt(v);
+    const io=v.io==='b'?'In + Out':v.io==='i'?'Indoor':'Outdoor';
+    const tp=v.tp==='b'?'Play & Classes':v.tp==='p'?'Open Play':'Classes';
+    const c=document.createElement('div');c.className='vc';c.dataset.id=v.id;c.style.setProperty('--gc',GC[grp(v)]);
+    c.innerHTML=`
+      <div class="vc-top">
+        ${bullet(v)}
+        <div class="vc-title"><div class="nm">${v.n}</div><div class="cat-line">${v.cat} &middot; ${v.a}</div></div>
+        <div class="vc-price ${v.$===0?'free':''}">${fmtP(v)}</div>
+      </div>
+      <div class="desc-line">${v.d}</div>
+      <div class="meta">
+        <span class="${s.o?'ok':'no'}">${s.t}</span>
+        <span>${v.t} min</span>
+        <span>${io}</span>
+        <span>${tp}</span>
+        ${v.af?'<span>Adults too</span>':''}
+      </div>`;
+    c.onclick=()=>{document.querySelectorAll('.vc').forEach(x=>x.classList.remove('on'));c.classList.add('on');map.flyTo([v.lt,v.ln],15,{duration:.5});MK[v.id].openPopup();};
+    g.appendChild(c);
+  });
+  const fn=document.createElement('div');fn.className='foot-note';fn.textContent='Hours and prices drift — check the website before heading out';g.appendChild(fn);
+}
+
+// Filter pills
+document.querySelectorAll('.pill').forEach(b=>{b.onclick=()=>{const gr=b.dataset.g;
+  if(gr==='af'){// toggle
+    b.classList.toggle('on');filters.af=b.classList.contains('on')?"1":"any";
+  }else{
+    document.querySelectorAll(`.pill[data-g="${gr}"]`).forEach(x=>x.classList.remove('on'));b.classList.add('on');
+    filters[gr]=gr==='t'?parseInt(b.dataset.v):b.dataset.v;
+  }
+  render();
+};});
+
+// Mark today's day pill
+const tdPill=document.querySelector(`.pill[data-g="day"][data-v="${todayIdx}"]`);
+if(tdPill)tdPill.classList.add('today');
+
+// Price slider
+const ps=document.getElementById('price-slider');
+const pl=document.getElementById('price-lbl');
+ps.addEventListener('input',()=>{
+  filters.pr=parseInt(ps.value);
+  pl.textContent=filters.pr>=100?'Any price':filters.pr===0?'Free only':'Up to $'+filters.pr;
+  render();
+});
+
+// Sort
+document.getElementById('sort').addEventListener('change',e=>{sortBy=e.target.value;render();});
+
+// Search
+document.getElementById('q').addEventListener('input',e=>{searchQ=e.target.value.toLowerCase().trim();render();});
+
+// Popup <-> card sync
+map.on('popupopen',e=>{const ll=e.popup._latlng;const v=D.find(x=>Math.abs(x.lt-ll.lat)<.0002&&Math.abs(x.ln-ll.lng)<.0002);if(v){document.querySelectorAll('.vc').forEach(x=>x.classList.remove('on'));const c=document.querySelector(`.vc[data-id="${v.id}"]`);if(c){c.classList.add('on');c.scrollIntoView({behavior:'smooth',block:'nearest'});}}});
+
+render();
+</script>
+</body>
+</html>

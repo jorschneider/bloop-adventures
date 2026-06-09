@@ -1,0 +1,562 @@
+[
+  {
+    "id": 1,
+    "name": "Children's Museum of Manhattan (CMOM)",
+    "address": "212 West 83rd Street, New York, NY 10024",
+    "lat": 40.7853,
+    "lng": -73.9737,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "10:00 AM - 5:00 PM",
+      "wednesday": "10:00 AM - 5:00 PM",
+      "thursday": "10:00 AM - 5:00 PM",
+      "friday": "10:00 AM - 5:00 PM",
+      "saturday": "10:00 AM - 5:00 PM",
+      "sunday": "10:00 AM - 5:00 PM",
+      "closed_days": ["Monday"],
+      "notes": "Also open on holiday Mondays"
+    },
+    "pricing": {
+      "base_price": 17,
+      "details": "$17 online / $18 at door. Seniors $14 online / $15 at door. Under 1 free. Members free."
+    },
+    "setting": "indoor",
+    "play_type": "open play",
+    "category": "Children's Museum",
+    "description": "Five floors of hands-on exhibits designed for ages 0-6, including the PlayWorks toddler area with soft play and a mini NYC neighborhood.",
+    "website": "https://cmom.org",
+    "travel_minutes_from_79th_broadway": 7
+  },
+  {
+    "id": 2,
+    "name": "Chelsea Forest Play",
+    "address": "241 West 20th Street, New York, NY 10011",
+    "lat": 40.7410,
+    "lng": -73.9970,
+    "hours": {
+      "monday": "Open (by reservation)",
+      "tuesday": "Open (by reservation)",
+      "wednesday": "Open (by reservation)",
+      "thursday": "Open (by reservation)",
+      "friday": "Open (by reservation)",
+      "saturday": "Open (by reservation)",
+      "sunday": "Open (by reservation)",
+      "closed_days": [],
+      "notes": "Open play sessions are 50 minutes, reservation required. Schedule varies; check website for available time slots."
+    },
+    "pricing": {
+      "base_price": 35,
+      "details": "$35 per child for a 50-minute open play session. Sibling discounts available."
+    },
+    "setting": "indoor",
+    "play_type": "both",
+    "category": "Indoor Playground",
+    "description": "Nature-inspired indoor forest playground with a two-level treehouse, slides, play kitchen, dress-up wardrobe, sensory room, and cozy reading corner for toddlers.",
+    "website": "https://www.chelseaforestplay.com",
+    "travel_minutes_from_79th_broadway": 25
+  },
+  {
+    "id": 3,
+    "name": "The Art Farm in the City",
+    "address": "431 East 91st Street, Floor 2, New York, NY 10128",
+    "lat": 40.7808,
+    "lng": -73.9479,
+    "hours": {
+      "monday": "9:00 AM - 5:00 PM (open play 12:30-3:30 PM)",
+      "tuesday": "9:00 AM - 5:00 PM (open play 12:30-3:30 PM)",
+      "wednesday": "9:00 AM - 5:00 PM (open play 12:30-3:30 PM)",
+      "thursday": "9:00 AM - 5:00 PM (open play 12:30-3:30 PM)",
+      "friday": "9:00 AM - 5:00 PM",
+      "saturday": "8:00 AM - 10:00 AM (animal visits only)",
+      "sunday": "8:00 AM - 10:00 AM (animal visits only)",
+      "closed_days": [],
+      "notes": "Open play Mon-Thu 12:30-3:30 PM only. Weekend mornings are animal visit drop-ins ($15). No open play Fri-Sun."
+    },
+    "pricing": {
+      "base_price": 20,
+      "details": "$20 per child for open play (Mon-Thu). Weekend animal visits $15. Drop-in classes $45."
+    },
+    "setting": "indoor",
+    "play_type": "both",
+    "category": "Play & Petting Zoo",
+    "description": "Unique indoor play space with NYC's only indoor petting zoo, plus faux-grass floors, art and music classes, and a coffee bar for parents.",
+    "website": "https://www.theartfarms.com",
+    "travel_minutes_from_79th_broadway": 20
+  },
+  {
+    "id": 4,
+    "name": "Twinkle Playspace",
+    "address": "144 Frost Street, Brooklyn, NY 11211",
+    "lat": 40.7170,
+    "lng": -73.9445,
+    "hours": {
+      "monday": "10:00 AM - 12:00 PM, 12:30 PM - 2:30 PM, 3:00 PM - 5:00 PM",
+      "tuesday": "10:00 AM - 12:00 PM, 12:30 PM - 2:30 PM, 3:00 PM - 5:00 PM",
+      "wednesday": "10:00 AM - 12:00 PM, 12:30 PM - 2:30 PM, 3:00 PM - 5:00 PM",
+      "thursday": "10:00 AM - 12:00 PM, 12:30 PM - 2:30 PM, 3:00 PM - 5:00 PM",
+      "friday": "10:00 AM - 12:00 PM, 12:30 PM - 2:30 PM, 3:00 PM - 5:00 PM",
+      "saturday": "8:30 AM - 10:30 AM",
+      "sunday": "8:30 AM - 10:30 AM",
+      "closed_days": [],
+      "notes": "Socks required for all. 2-hour sessions. $5 surcharge if purchased at door."
+    },
+    "pricing": {
+      "base_price": 20,
+      "details": "$20 per child + $15 per adult for a 2-hour session (online). $5 surcharge at the door."
+    },
+    "setting": "indoor",
+    "play_type": "open play",
+    "category": "Indoor Playground",
+    "description": "4,500-square-foot toddler-focused playspace with a climbable tree, firehouse, Brooklyn Bridge construction zone, water table, and mythical dragon features for ages 0-6.",
+    "website": "https://twinkleplayspace.com",
+    "travel_minutes_from_79th_broadway": 40
+  },
+  {
+    "id": 5,
+    "name": "Fairytale Island",
+    "address": "7110 3rd Avenue, Brooklyn, NY 11209",
+    "lat": 40.6345,
+    "lng": -74.0254,
+    "hours": {
+      "monday": "10:00 AM - 7:00 PM",
+      "tuesday": "10:00 AM - 7:00 PM",
+      "wednesday": "10:00 AM - 7:00 PM",
+      "thursday": "10:00 AM - 7:00 PM",
+      "friday": "10:00 AM - 8:00 PM",
+      "saturday": "10:00 AM - 8:00 PM",
+      "sunday": "10:00 AM - 7:00 PM",
+      "closed_days": [],
+      "notes": "Socks required. On-site cafe with snacks and beverages."
+    },
+    "pricing": {
+      "base_price": 20,
+      "details": "$20 per child. Group discount: $17 each for 3+ children."
+    },
+    "setting": "indoor",
+    "play_type": "open play",
+    "category": "Indoor Playground",
+    "description": "Imaginative indoor playground with a faux sandbox, giant ball pit, train ride, swings, slides, trampoline, climbing wall, and kids shopping center.",
+    "website": "https://www.fairytaleisland.info",
+    "travel_minutes_from_79th_broadway": 45
+  },
+  {
+    "id": 6,
+    "name": "Wonderland Playhouse",
+    "address": "3839 Nostrand Avenue, Brooklyn, NY 11235",
+    "lat": 40.5920,
+    "lng": -73.9373,
+    "hours": {
+      "monday": "10:00 AM - 7:00 PM",
+      "tuesday": "10:00 AM - 7:00 PM",
+      "wednesday": "10:00 AM - 7:00 PM",
+      "thursday": "10:00 AM - 7:00 PM",
+      "friday": "10:00 AM - 7:00 PM",
+      "saturday": "10:00 AM - 7:00 PM",
+      "sunday": "10:00 AM - 7:00 PM",
+      "closed_days": [],
+      "notes": "Open daily. Additional time can be purchased at the front desk."
+    },
+    "pricing": {
+      "base_price": 25,
+      "details": "$25 per child for 2 hours of open play. Monthly unlimited passes available."
+    },
+    "setting": "indoor",
+    "play_type": "both",
+    "category": "Indoor Playground",
+    "description": "Nearly 4,000-square-foot sensory-rich play space with ball pit, zipline, dress-up station, Lego and Magna-Tile tables, mini carousel, and claw machines for ages 0-10.",
+    "website": "https://www.wonderlandplayhouse.com",
+    "travel_minutes_from_79th_broadway": 55
+  },
+  {
+    "id": 7,
+    "name": "Brooklyn Children's Museum",
+    "address": "145 Brooklyn Avenue, Brooklyn, NY 11213",
+    "lat": 40.6747,
+    "lng": -73.9444,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "Closed",
+      "wednesday": "10:00 AM - 5:00 PM",
+      "thursday": "10:00 AM - 5:00 PM (free 2-5 PM)",
+      "friday": "10:00 AM - 5:00 PM",
+      "saturday": "10:00 AM - 5:00 PM",
+      "sunday": "10:00 AM - 5:00 PM",
+      "closed_days": ["Monday", "Tuesday"],
+      "notes": "Free admission Thursdays 2-5 PM courtesy of Amazon. EBT/SNAP discounts available."
+    },
+    "pricing": {
+      "base_price": 15,
+      "details": "$15 per person general admission. Free Thursdays 2-5 PM. Member and community partner discounts available."
+    },
+    "setting": "indoor",
+    "play_type": "open play",
+    "category": "Children's Museum",
+    "description": "World's first children's museum with the beloved Totally Tots exhibit, a dedicated toddler area with water play, building blocks, and imaginative play stations.",
+    "website": "https://www.brooklynkids.org",
+    "travel_minutes_from_79th_broadway": 40
+  },
+  {
+    "id": 8,
+    "name": "Bronx Children's Museum",
+    "address": "725 Exterior Street, 2nd Floor, Bronx, NY 10451",
+    "lat": 40.8268,
+    "lng": -73.9275,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "10:00 AM - 1:00 PM",
+      "wednesday": "10:00 AM - 1:00 PM",
+      "thursday": "10:00 AM - 1:00 PM",
+      "friday": "10:00 AM - 1:00 PM",
+      "saturday": "10:00 AM - 1:00 PM, 2:00 PM - 5:00 PM",
+      "sunday": "Closed",
+      "closed_days": ["Monday", "Sunday"],
+      "notes": "Walk-ups are first-come, first-served. Reservations recommended. EBT holders $3."
+    },
+    "pricing": {
+      "base_price": 8,
+      "details": "Children $8, Adults $14, Seniors $10. Under 1 free. EBT holders $3."
+    },
+    "setting": "indoor",
+    "play_type": "open play",
+    "category": "Children's Museum",
+    "description": "13,000-square-foot museum with a water table, 'The Block' mini-neighborhood for pretend play, and 'The Nest' soft play area designed for crawlers and toddlers.",
+    "website": "https://www.bxcm.org",
+    "travel_minutes_from_79th_broadway": 30
+  },
+  {
+    "id": 9,
+    "name": "KidsZone Indoor Playground",
+    "address": "5904 99th Street, Corona, NY 11368",
+    "lat": 40.7370,
+    "lng": -73.8620,
+    "hours": {
+      "monday": "11:00 AM - 8:00 PM",
+      "tuesday": "11:00 AM - 8:00 PM",
+      "wednesday": "11:00 AM - 8:00 PM",
+      "thursday": "11:00 AM - 8:00 PM",
+      "friday": "10:00 AM - 8:00 PM",
+      "saturday": "10:00 AM - 8:00 PM",
+      "sunday": "10:00 AM - 8:00 PM",
+      "closed_days": [],
+      "notes": "Socks required; available for purchase at $3. Open daily."
+    },
+    "pricing": {
+      "base_price": 15,
+      "details": "$15/child for 1 hour, $22/child for 2 hours, $30/child for 4 hours."
+    },
+    "setting": "indoor",
+    "play_type": "open play",
+    "category": "Indoor Playground",
+    "description": "Colorful indoor playground with a trumpet slide, obstacle course, ball pit, and soft play areas suitable for toddlers in the heart of Corona, Queens.",
+    "website": "https://www.kidszoneindoorplayground.com",
+    "travel_minutes_from_79th_broadway": 40
+  },
+  {
+    "id": 10,
+    "name": "Rainbow Castle Indoor Playground",
+    "address": "131-48 Avery Avenue, Flushing, NY 11355",
+    "lat": 40.7598,
+    "lng": -73.8230,
+    "hours": {
+      "monday": "9:30 AM - 7:30 PM",
+      "tuesday": "9:30 AM - 7:30 PM",
+      "wednesday": "9:30 AM - 7:30 PM",
+      "thursday": "9:30 AM - 7:30 PM",
+      "friday": "9:30 AM - 8:00 PM",
+      "saturday": "9:30 AM - 8:00 PM",
+      "sunday": "9:30 AM - 8:00 PM",
+      "closed_days": [],
+      "notes": "Additional adults $10 each. Snack bar on site."
+    },
+    "pricing": {
+      "base_price": 20,
+      "details": "$20 per child with 1 free adult. Additional adults $10 each."
+    },
+    "setting": "indoor",
+    "play_type": "open play",
+    "category": "Indoor Playground",
+    "description": "Themed indoor playground with a dedicated toddler area, interactive sensory walls, massive ball pit, slides, trampolines, and STEM activity zones.",
+    "website": "https://www.rainbowcastleplayground.com",
+    "travel_minutes_from_79th_broadway": 45
+  },
+  {
+    "id": 11,
+    "name": "Kids Fun House",
+    "address": "62-73 Fresh Pond Road, Ridgewood, NY 11385",
+    "lat": 40.7045,
+    "lng": -73.8965,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "10:00 AM - 8:00 PM",
+      "wednesday": "10:00 AM - 8:00 PM",
+      "thursday": "10:00 AM - 8:00 PM",
+      "friday": "10:00 AM - 8:00 PM",
+      "saturday": "10:00 AM - 8:00 PM",
+      "sunday": "10:00 AM - 8:00 PM",
+      "closed_days": ["Monday"],
+      "notes": "Walk-ins welcome. Hours may change due to private events. Includes 40 arcade game credits."
+    },
+    "pricing": {
+      "base_price": 16,
+      "details": "$16/child Tue/Thu/Fri, $12/child Wed, $20/child Sat-Sun. Includes 2 free adults + 40 arcade credits."
+    },
+    "setting": "indoor",
+    "play_type": "open play",
+    "category": "Indoor Playground",
+    "description": "Three-story indoor playground with a separate socks-only toddler area featuring a small tree to climb, a playhouse, mini slide, plus arcade games for older kids.",
+    "website": "https://www.kidsfunhouse.com",
+    "travel_minutes_from_79th_broadway": 45
+  },
+  {
+    "id": 12,
+    "name": "Kidz Fun Palace",
+    "address": "35-38 Junction Boulevard, Corona, NY 11368",
+    "lat": 40.7494,
+    "lng": -73.8690,
+    "hours": {
+      "monday": "11:00 AM - 9:00 PM",
+      "tuesday": "11:00 AM - 9:00 PM",
+      "wednesday": "11:00 AM - 9:00 PM",
+      "thursday": "11:00 AM - 9:00 PM",
+      "friday": "11:00 AM - 10:00 PM",
+      "saturday": "10:00 AM - 10:00 PM",
+      "sunday": "10:00 AM - 10:00 PM",
+      "closed_days": [],
+      "notes": "Open daily. Walk-ins welcome."
+    },
+    "pricing": {
+      "base_price": 15,
+      "details": "$15 per child including 1 adult for a 2-hour session."
+    },
+    "setting": "indoor",
+    "play_type": "open play",
+    "category": "Indoor Playground",
+    "description": "4,000+ square feet of play with 20,000-ball ball pit, merry-go-round, enclosed trampoline, obstacle course, arcade, and a proportionally-sized toddler section.",
+    "website": "https://kidzfunpalace.com",
+    "travel_minutes_from_79th_broadway": 40
+  },
+  {
+    "id": 13,
+    "name": "Jungle Adventure NYC",
+    "address": "149-13 14th Avenue, Whitestone, NY 11357",
+    "lat": 40.7870,
+    "lng": -73.8140,
+    "hours": {
+      "monday": "10:30 AM - 6:15 PM",
+      "tuesday": "10:30 AM - 6:15 PM",
+      "wednesday": "10:30 AM - 6:15 PM",
+      "thursday": "10:30 AM - 6:15 PM",
+      "friday": "10:00 AM - 7:00 PM",
+      "saturday": "10:00 AM - 7:00 PM",
+      "sunday": "10:00 AM - 7:00 PM",
+      "closed_days": [],
+      "notes": "Walk-ins accepted but spots limited. Socks required. Call 917-622-1279 for availability."
+    },
+    "pricing": {
+      "base_price": 25,
+      "details": "Approximately $25 per child for a 1.5-hour session including 1 adult. Pricing varies by day and duration; check website."
+    },
+    "setting": "indoor",
+    "play_type": "open play",
+    "category": "Indoor Playground",
+    "description": "Jungle-themed indoor playground for ages 2-12 with rainbow slides, ball pit, trampoline, ninja courses, ball blasters, and block building area.",
+    "website": "https://www.jungleadventurenyc.com",
+    "travel_minutes_from_79th_broadway": 45
+  },
+  {
+    "id": 14,
+    "name": "Hooray Indoor Playground",
+    "address": "20-07 127th Street, College Point, NY 11356",
+    "lat": 40.7843,
+    "lng": -73.8452,
+    "hours": {
+      "monday": "10:00 AM - 7:00 PM",
+      "tuesday": "10:00 AM - 7:00 PM",
+      "wednesday": "10:00 AM - 7:00 PM",
+      "thursday": "10:00 AM - 7:00 PM",
+      "friday": "10:00 AM - 8:00 PM",
+      "saturday": "10:00 AM - 8:00 PM",
+      "sunday": "10:00 AM - 8:00 PM",
+      "closed_days": [],
+      "notes": "8,000 square feet. Described as clean with reasonable prices."
+    },
+    "pricing": {
+      "base_price": 20,
+      "details": "Approximately $20 per child. Contact venue at (718) area code for exact current pricing."
+    },
+    "setting": "indoor",
+    "play_type": "open play",
+    "category": "Indoor Playground",
+    "description": "8,000-square-foot play space with trampoline, dress-up station, merry-go-round, ball pit, slide structures, soft toddler area, and arcade games.",
+    "website": "http://www.hoorayindoorplayground.com",
+    "travel_minutes_from_79th_broadway": 45
+  },
+  {
+    "id": 15,
+    "name": "The Kids Town",
+    "address": "278A 6th Street, Brooklyn, NY 11215",
+    "lat": 40.6710,
+    "lng": -73.9820,
+    "hours": {
+      "monday": "10:00 AM - 5:00 PM",
+      "tuesday": "10:00 AM - 5:00 PM",
+      "wednesday": "10:00 AM - 5:00 PM",
+      "thursday": "10:00 AM - 5:00 PM",
+      "friday": "10:00 AM - 5:00 PM",
+      "saturday": "10:00 AM - 5:00 PM",
+      "sunday": "10:00 AM - 5:00 PM",
+      "closed_days": [],
+      "notes": "Open daily. 90-minute sessions."
+    },
+    "pricing": {
+      "base_price": 25,
+      "details": "$25 per child for a 90-minute open play session."
+    },
+    "setting": "indoor",
+    "play_type": "both",
+    "category": "Indoor Playground",
+    "description": "Family-owned Park Slope play space for newborn to age 7, with climbing structures, pretend play areas, and art classes in an intimate neighborhood setting.",
+    "website": "https://thekidstown.com",
+    "travel_minutes_from_79th_broadway": 35
+  },
+  {
+    "id": 16,
+    "name": "NY Preschool & Kids Club (W 68th Street)",
+    "address": "168 Amsterdam Avenue, New York, NY 10023",
+    "lat": 40.7753,
+    "lng": -73.9812,
+    "hours": {
+      "monday": "9:00 AM - 6:00 PM",
+      "tuesday": "9:00 AM - 6:00 PM",
+      "wednesday": "9:00 AM - 6:00 PM",
+      "thursday": "9:00 AM - 6:00 PM",
+      "friday": "9:00 AM - 6:00 PM",
+      "saturday": "9:00 AM - 6:00 PM",
+      "sunday": "10:00 AM - 6:00 PM",
+      "closed_days": [],
+      "notes": "Open play requires membership. Large gym with 20-foot trampoline."
+    },
+    "pricing": {
+      "base_price": 300,
+      "details": "Monthly open play membership: $300/child, $150 each additional child. Annual: $3,300/child. Includes unlimited open play + gym access."
+    },
+    "setting": "indoor",
+    "play_type": "both",
+    "category": "Kids Gym & Enrichment",
+    "description": "State-of-the-art gym with a 20-foot trampoline, balance beams, sprung floor, and four classrooms offering open play and enrichment classes for ages 2 months to 12 years.",
+    "website": "https://nypreschoolandkidsclub.com/location/68th-street/",
+    "travel_minutes_from_79th_broadway": 10
+  },
+  {
+    "id": 17,
+    "name": "My Gym Upper East Side (83rd Street)",
+    "address": "1608 First Avenue, New York, NY 10028",
+    "lat": 40.7749,
+    "lng": -73.9500,
+    "hours": {
+      "monday": "9:00 AM - 3:00 PM",
+      "tuesday": "9:00 AM - 6:30 PM",
+      "wednesday": "9:00 AM - 6:30 PM",
+      "thursday": "9:00 AM - 6:30 PM",
+      "friday": "9:00 AM - 4:00 PM",
+      "saturday": "9:00 AM - 1:00 PM",
+      "sunday": "Closed",
+      "closed_days": ["Sunday"],
+      "notes": "$75 lifetime membership fee. Open gym available between classes. 25% sibling discount."
+    },
+    "pricing": {
+      "base_price": 75,
+      "details": "$75 one-time lifetime membership fee, plus per-class pricing (varies by program). Open gym between classes included. 25% sibling/twin discount."
+    },
+    "setting": "indoor",
+    "play_type": "classes",
+    "category": "Kids Gym",
+    "description": "Structured Mommy & Me classes and gymnastics programs for ages 6 weeks to 10 years, with open gym time between classes for free play on age-appropriate equipment.",
+    "website": "https://www.mygym.com/uppereast83",
+    "travel_minutes_from_79th_broadway": 20
+  },
+  {
+    "id": 18,
+    "name": "Gymboree Play & Music (Upper East Side)",
+    "address": "1622 First Avenue, New York, NY 10028",
+    "lat": 40.7774,
+    "lng": -73.9490,
+    "hours": {
+      "monday": "Open (open gym 12:30-1:30 PM, 2:00-4:00 PM)",
+      "tuesday": "Open (open gym 11:30 AM-1:30 PM)",
+      "wednesday": "Open (open gym 3:00-4:30 PM)",
+      "thursday": "Open (open gym 1:15-2:15 PM, 3:00-5:00 PM)",
+      "friday": "Open (open gym 12:30-2:30 PM)",
+      "saturday": "Open (open gym 11:30 AM-12:15 PM)",
+      "sunday": "Closed",
+      "closed_days": ["Sunday"],
+      "notes": "Classes are 45 minutes. Open gym hours listed are drop-in times between scheduled classes."
+    },
+    "pricing": {
+      "base_price": 59,
+      "details": "$59 per class/open gym visit. Semester packages available at lower per-class rates."
+    },
+    "setting": "indoor",
+    "play_type": "both",
+    "category": "Kids Gym & Music",
+    "description": "Play-based classes in art, music, and sensory exploration for ages 0-5, plus drop-in open gym sessions with climbing structures and age-appropriate equipment.",
+    "website": "https://www.gymboreeclasses.com/en/locations/NY/Upper-East-Side/",
+    "travel_minutes_from_79th_broadway": 18
+  },
+  {
+    "id": 19,
+    "name": "Discovery Programs Playpark",
+    "address": "251 West 100th Street at West End Avenue, New York, NY 10025",
+    "lat": 40.7960,
+    "lng": -73.9710,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "12:30 PM - 1:15 PM",
+      "wednesday": "Closed",
+      "thursday": "Closed",
+      "friday": "11:15 AM - 12:00 PM",
+      "saturday": "Closed",
+      "sunday": "Closed",
+      "closed_days": ["Monday", "Wednesday", "Thursday", "Saturday", "Sunday"],
+      "notes": "Limited schedule: Tuesdays and Fridays only, 45-minute sessions. Cash only. Closed on holiday weeks."
+    },
+    "pricing": {
+      "base_price": 25,
+      "details": "$25 drop-in for non-students, $10 for Discovery Programs students. Cash only."
+    },
+    "setting": "indoor",
+    "play_type": "open play",
+    "category": "Indoor Playspace",
+    "description": "Intimate indoor playspace for ages 6-48 months with parent/caregiver supervision, offering gentle open play in a nurturing UWS community setting.",
+    "website": "https://www.discoveryprograms.com/classes/playpark-indoor-playspace-for-kids/",
+    "travel_minutes_from_79th_broadway": 10
+  },
+  {
+    "id": 20,
+    "name": "Playgarden Prep (Tribeca)",
+    "address": "95 Franklin Street, New York, NY 10013",
+    "lat": 40.7177,
+    "lng": -74.0032,
+    "hours": {
+      "monday": "9:00 AM - 5:00 PM",
+      "tuesday": "9:00 AM - 5:00 PM",
+      "wednesday": "9:00 AM - 5:00 PM",
+      "thursday": "9:00 AM - 5:00 PM",
+      "friday": "9:00 AM - 5:00 PM",
+      "saturday": "9:30 AM - 5:00 PM",
+      "sunday": "9:30 AM - 5:00 PM",
+      "closed_days": [],
+      "notes": "Playground open 7 days. Access requires semester-based membership or $50 trial day pass (includes 1 class + 1 hr playground)."
+    },
+    "pricing": {
+      "base_price": 50,
+      "details": "$50 trial day pass (1 class + 1 hour playground). Semester memberships: ~$450-750/season for playground access, plus class enrollment starting at $750. Contact for current rates."
+    },
+    "setting": "indoor",
+    "play_type": "both",
+    "category": "Enrichment & Playground",
+    "description": "NYC's largest indoor playground for under-5s at 3,000 sq ft, with custom climbing structures, slides, and rotating equipment, paired with enrichment classes.",
+    "website": "https://playgardennyc.com",
+    "travel_minutes_from_79th_broadway": 30
+  }
+]

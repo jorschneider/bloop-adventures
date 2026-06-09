@@ -1,0 +1,522 @@
+[
+  {
+    "id": 1,
+    "name": "New-York Historical Society (DiMenna Children's History Museum)",
+    "address": "170 Central Park West, New York, NY 10024",
+    "lat": 40.7794,
+    "lng": -73.9739,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "11:00 AM - 5:00 PM",
+      "wednesday": "11:00 AM - 5:00 PM",
+      "thursday": "11:00 AM - 5:00 PM",
+      "friday": "11:00 AM - 8:00 PM",
+      "saturday": "11:00 AM - 5:00 PM",
+      "sunday": "11:00 AM - 5:00 PM",
+      "closed_days": ["Monday"],
+      "notes": "Pay-as-you-wish Fridays 5-8 PM. DiMenna Children's History Museum on the lower level."
+    },
+    "pricing": {
+      "base_price": 24,
+      "details": "Adults $24, Seniors $19, Students $13, Children 5-13 $6, Under 5 free. Pay-as-you-wish Fri 5-8 PM."
+    },
+    "category": "History Museum / Children's Museum",
+    "description": "Steps from 79th & Broadway, this museum includes the DiMenna Children's History Museum on its lower level with interactive exhibits about NYC and American history. The children's museum is designed for ages 8-13, but toddlers enjoy the sensory exploration, dioramas, and play-based gallery games. Strollers permitted throughout.",
+    "website": "https://www.nyhistory.org/childrens-museum",
+    "travel_minutes_from_79th_broadway": 3
+  },
+  {
+    "id": 2,
+    "name": "Whitney Museum of American Art",
+    "address": "99 Gansevoort Street, New York, NY 10014",
+    "lat": 40.7396,
+    "lng": -74.0089,
+    "hours": {
+      "monday": "10:30 AM - 6:00 PM",
+      "tuesday": "Closed",
+      "wednesday": "10:30 AM - 6:00 PM",
+      "thursday": "10:30 AM - 6:00 PM",
+      "friday": "10:30 AM - 10:00 PM",
+      "saturday": "10:30 AM - 6:00 PM",
+      "sunday": "10:30 AM - 6:00 PM",
+      "closed_days": ["Tuesday"],
+      "notes": "Free Fri 5-10 PM. Free 2nd Sunday of every month. Under 25 always free."
+    },
+    "pricing": {
+      "base_price": 30,
+      "details": "Adults $30, Under 25 always free. Free Fri 5-10 PM and 2nd Sundays. Floor 1 gallery always free."
+    },
+    "category": "Art Museum",
+    "description": "American art museum in the Meatpacking District with a joint program with CMOM offering hands-on artmaking for ages 0-6 on Saturday mornings (11 AM-3 PM) including sand play, lightboards, building projects, movement activities, bubbles, and music circles. Outdoor terraces with Hudson River views are great for toddler breaks. Strollers permitted throughout.",
+    "website": "https://whitney.org/education/families",
+    "travel_minutes_from_79th_broadway": 25
+  },
+  {
+    "id": 3,
+    "name": "El Museo del Barrio",
+    "address": "1230 Fifth Avenue, New York, NY 10029",
+    "lat": 40.7934,
+    "lng": -73.9513,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "Closed",
+      "wednesday": "Closed",
+      "thursday": "11:00 AM - 5:00 PM",
+      "friday": "11:00 AM - 5:00 PM",
+      "saturday": "11:00 AM - 5:00 PM",
+      "sunday": "11:00 AM - 5:00 PM",
+      "closed_days": ["Monday", "Tuesday", "Wednesday"],
+      "notes": "Open Thu-Sun only. Located on Museum Mile at 104th St."
+    },
+    "pricing": {
+      "base_price": 0,
+      "details": "Pay what you wish. Suggested: $9 adults, $5 students/seniors, children free."
+    },
+    "category": "Art / Cultural Museum",
+    "description": "Latin American and Caribbean art museum on Museum Mile specializing in Puerto Rican and Latinx culture. Offers bilingual family workshops, hands-on craft activities, live music and dance performances, and seasonal carnivals. The colorful galleries and interactive programming make it engaging for toddlers, and the pay-what-you-wish policy makes it very accessible.",
+    "website": "https://elmuseo.org",
+    "travel_minutes_from_79th_broadway": 20
+  },
+  {
+    "id": 4,
+    "name": "Asia Society and Museum",
+    "address": "725 Park Avenue, New York, NY 10021",
+    "lat": 40.7685,
+    "lng": -73.9649,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "Closed",
+      "wednesday": "11:00 AM - 5:00 PM",
+      "thursday": "11:00 AM - 5:00 PM",
+      "friday": "11:00 AM - 5:00 PM",
+      "saturday": "11:00 AM - 5:00 PM",
+      "sunday": "11:00 AM - 5:00 PM",
+      "closed_days": ["Monday", "Tuesday"],
+      "notes": "Free admission on Fridays."
+    },
+    "pricing": {
+      "base_price": 15,
+      "details": "Adults $15, Students/Seniors $10, Under 16 free. Free on Fridays. Family Day events: $20 non-members, $15 members, children over 2 $10."
+    },
+    "category": "Cultural Center / Art Museum",
+    "description": "Cultural center at 70th & Park hosting Family Day events with lion dances, martial arts demos, shadow puppet-making, music, crafts, and storytelling celebrating Asian cultures. Regular family programs include hands-on art workshops and interactive cultural activities. The intimate scale and sensory-rich Family Day events work well for toddlers.",
+    "website": "https://asiasociety.org/new-york/family-programs",
+    "travel_minutes_from_79th_broadway": 15
+  },
+  {
+    "id": 5,
+    "name": "Japan Society",
+    "address": "333 East 47th Street, New York, NY 10017",
+    "lat": 40.7533,
+    "lng": -73.9680,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "11:00 AM - 5:00 PM",
+      "wednesday": "11:00 AM - 5:00 PM",
+      "thursday": "11:00 AM - 5:00 PM",
+      "friday": "11:00 AM - 5:00 PM",
+      "saturday": "12:00 PM - 6:00 PM",
+      "sunday": "12:00 PM - 6:00 PM",
+      "closed_days": ["Monday"],
+      "notes": "Free First Fridays 5-7 PM. Gallery hours listed; event hours vary."
+    },
+    "pricing": {
+      "base_price": 15,
+      "details": "Gallery: $15 non-members, $10 students/seniors. Family membership $125 (2 adults + 4 children). Free First Fridays 5-7 PM."
+    },
+    "category": "Cultural Center / Art Gallery",
+    "description": "Cultural center near the UN offering Kids & Family programs with storytelling, art workshops, and traditional Japanese festival celebrations including New Year, Children's Day, and the 7-5-3 Ceremony with performances, crafts, and hands-on activities. The Kamishibai (picture story) tradition is particularly engaging for toddlers.",
+    "website": "https://japansociety.org/kids-family",
+    "travel_minutes_from_79th_broadway": 25
+  },
+  {
+    "id": 6,
+    "name": "Museum of Arts and Design (MAD)",
+    "address": "2 Columbus Circle, New York, NY 10019",
+    "lat": 40.7672,
+    "lng": -73.9819,
+    "hours": {
+      "monday": "10:00 AM - 6:00 PM",
+      "tuesday": "10:00 AM - 6:00 PM",
+      "wednesday": "10:00 AM - 6:00 PM",
+      "thursday": "10:00 AM - 8:00 PM",
+      "friday": "10:00 AM - 6:00 PM",
+      "saturday": "10:00 AM - 6:00 PM",
+      "sunday": "10:00 AM - 6:00 PM",
+      "closed_days": [],
+      "notes": "Open 7 days. Free docent tours Wed 11:30 AM, Thu 2:30 PM, Fri-Sun 11:30 AM & 2:30 PM."
+    },
+    "pricing": {
+      "base_price": 18,
+      "details": "Adults $18, Seniors $14, Students $12, Under 18 free. Under 12 free."
+    },
+    "category": "Art / Design Museum",
+    "description": "Museum at Columbus Circle showcasing craft, art, and design with hands-on family workshops on select Sundays. The tactile nature of craft and design exhibits (textiles, ceramics, jewelry, furniture) appeals to toddlers' sensory curiosity. Free for children under 18. The 9th-floor restaurant has Central Park views for post-visit snacks.",
+    "website": "https://madmuseum.org/learn/family-programs",
+    "travel_minutes_from_79th_broadway": 12
+  },
+  {
+    "id": 7,
+    "name": "New Museum",
+    "address": "235 Bowery, New York, NY 10002",
+    "lat": 40.7224,
+    "lng": -73.9930,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "11:00 AM - 6:00 PM",
+      "wednesday": "11:00 AM - 6:00 PM",
+      "thursday": "11:00 AM - 9:00 PM",
+      "friday": "11:00 AM - 6:00 PM",
+      "saturday": "11:00 AM - 6:00 PM",
+      "sunday": "11:00 AM - 6:00 PM",
+      "closed_days": ["Monday"],
+      "notes": "Pay-what-you-wish Thu 7-9 PM. Free for under 18. New OMA-designed expansion opened March 2026."
+    },
+    "pricing": {
+      "base_price": 25,
+      "details": "Adults $25, Seniors $22, Students $19, Under 18 free. Pay-what-you-wish Thu 7-9 PM."
+    },
+    "category": "Contemporary Art Museum",
+    "description": "Contemporary art museum on the Lower East Side with a major new OMA-designed expansion that opened in March 2026. Hosts free Family Day events with art-making activities and gallery exploration. Immersive contemporary installations can captivate toddlers with light, color, and sound. Free for all children under 18.",
+    "website": "https://www.newmuseum.org",
+    "travel_minutes_from_79th_broadway": 35
+  },
+  {
+    "id": 8,
+    "name": "New Victory Theater",
+    "address": "209 West 42nd Street, New York, NY 10036",
+    "lat": 40.7567,
+    "lng": -73.9882,
+    "hours": {
+      "monday": "Varies by show",
+      "tuesday": "Varies by show",
+      "wednesday": "Varies by show",
+      "thursday": "Varies by show",
+      "friday": "Varies by show",
+      "saturday": "Varies by show",
+      "sunday": "Varies by show",
+      "closed_days": [],
+      "notes": "Box office open daily. Show schedule varies by production. Lap seats for under-3s available by calling 646-223-3010."
+    },
+    "pricing": {
+      "base_price": 25,
+      "details": "Tickets $25-$72 depending on seating. Members save 30%. Lap seats for under 3 available (call 646-223-3010)."
+    },
+    "category": "Children's Theater",
+    "description": "New York's premier theater for kids and families on 42nd Street, offering a full season of world-class performances including circus, puppetry, dance, and music. The 2025-26 season includes shows for ages 3+ like Chicka Chicka Boom Boom: The Musical. Free interactive activities in the lobby before and after every show. Lap seats available for children under 3.",
+    "website": "https://www.newvictory.org",
+    "travel_minutes_from_79th_broadway": 20
+  },
+  {
+    "id": 9,
+    "name": "Vital Theatre Company (Pinkalicious & more)",
+    "address": "339 West 47th Street, New York, NY 10036",
+    "lat": 40.7607,
+    "lng": -73.9891,
+    "hours": {
+      "monday": "11:00 AM (select Mondays)",
+      "tuesday": "Closed",
+      "wednesday": "11:00 AM (select Wednesdays)",
+      "thursday": "Closed",
+      "friday": "11:00 AM (select Fridays)",
+      "saturday": "11:00 AM",
+      "sunday": "11:00 AM",
+      "closed_days": [],
+      "notes": "Shows at 11:00 AM on select days. Check schedule for specific dates. Performs at Actors Temple Theatre."
+    },
+    "pricing": {
+      "base_price": 60,
+      "details": "Front Mezzanine $59.50, Premium Orchestra $79.50, VIP Orchestra $119 (includes backstage tour + wand). Shows ~60 min, no intermission."
+    },
+    "category": "Children's Theater",
+    "description": "Children's theater company performing at the Actors Temple Theatre in Midtown, staging shows designed for ages 2-8 including the long-running Pinkalicious The Musical and The Wizard of Oz. The 50-60 minute runtime with no intermission is perfect for toddlers' attention spans. Colorful, musical productions with audience interaction.",
+    "website": "https://vitaltheatre.org",
+    "travel_minutes_from_79th_broadway": 20
+  },
+  {
+    "id": 10,
+    "name": "TADA! Youth Theater",
+    "address": "15 West 28th Street, New York, NY 10001",
+    "lat": 40.7454,
+    "lng": -73.9889,
+    "hours": {
+      "monday": "Varies by show",
+      "tuesday": "Varies by show",
+      "wednesday": "Varies by show",
+      "thursday": "Varies by show",
+      "friday": "Varies by show",
+      "saturday": "Varies by show",
+      "sunday": "Varies by show",
+      "closed_days": [],
+      "notes": "Show schedule varies by production. Check website for dates/times. Near 28th St R/W station."
+    },
+    "pricing": {
+      "base_price": 25,
+      "details": "Affordable ticket prices, among the lowest in NYC. Contact box office: 212-252-1619 x5 or Boxoffice@tadatheater.com."
+    },
+    "category": "Children's Theater",
+    "description": "Award-winning youth theater between Broadway and 5th Ave producing original musicals recommended for ages 3+, performed entirely by young people ages 8-18. Shows feature music, puppetry, and physical comedy. Known for some of the most affordable children's theater tickets in the city. The intimate venue and high-energy performances engage toddlers.",
+    "website": "https://tadatheater.com",
+    "travel_minutes_from_79th_broadway": 25
+  },
+  {
+    "id": 11,
+    "name": "Central Park Zoo & Tisch Children's Zoo",
+    "address": "East 64th Street & 5th Avenue, New York, NY 10021",
+    "lat": 40.7678,
+    "lng": -73.9718,
+    "hours": {
+      "monday": "10:00 AM - 4:30 PM",
+      "tuesday": "10:00 AM - 4:30 PM",
+      "wednesday": "10:00 AM - 4:30 PM",
+      "thursday": "10:00 AM - 4:30 PM",
+      "friday": "10:00 AM - 4:30 PM",
+      "saturday": "10:00 AM - 4:30 PM",
+      "sunday": "10:00 AM - 4:30 PM",
+      "closed_days": [],
+      "notes": "Hours listed are winter; summer hours extend to 5:00 PM weekdays, 5:30 PM weekends. Tisch Children's Zoo is seasonal (Apr-Oct)."
+    },
+    "pricing": {
+      "base_price": 16,
+      "details": "Adults $22.95 (full) or $15.95 (limited, no 4D), Children 3-12 $16.95/$9.95, Seniors $18.95/$12.95, Under 2 free. Includes Tisch Children's Zoo."
+    },
+    "category": "Zoo",
+    "description": "Compact, toddler-perfect zoo in Central Park with the Tisch Children's Zoo where kids can pet and feed goats, sheep, cows, pigs, and rabbits. Offers Caregiver & Me programs for ages 2-3. The small scale means no stroller marathon. Sea lions, penguins, snow monkeys, and a tropical rainforest zone. 4D theater included with full admission.",
+    "website": "https://centralparkzoo.com",
+    "travel_minutes_from_79th_broadway": 15
+  },
+  {
+    "id": 12,
+    "name": "Prospect Park Zoo",
+    "address": "450 Flatbush Avenue, Brooklyn, NY 11225",
+    "lat": 40.6653,
+    "lng": -73.9653,
+    "hours": {
+      "monday": "10:00 AM - 4:30 PM",
+      "tuesday": "10:00 AM - 4:30 PM",
+      "wednesday": "10:00 AM - 4:30 PM",
+      "thursday": "10:00 AM - 4:30 PM",
+      "friday": "10:00 AM - 4:30 PM",
+      "saturday": "10:00 AM - 4:30 PM",
+      "sunday": "10:00 AM - 4:30 PM",
+      "closed_days": [],
+      "notes": "Hours may vary seasonally. Summer hours extend later on weekends."
+    },
+    "pricing": {
+      "base_price": 8,
+      "details": "Adults $8, Seniors $6, Children 3-12 $5, Under 2 free."
+    },
+    "category": "Zoo",
+    "description": "Small, intimate Brooklyn zoo ideal for toddlers with a Discovery Trail, animal encounters, and farm-themed exhibits. Offers Toddler Time summer programs for ages 2-3. Much less overwhelming than the Bronx Zoo, with prairie dogs, sea lions, dingoes, and a barnyard. The compact layout is perfect for short toddler attention spans.",
+    "website": "https://prospectparkzoo.com",
+    "travel_minutes_from_79th_broadway": 40
+  },
+  {
+    "id": 13,
+    "name": "New York Aquarium",
+    "address": "602 Surf Avenue, Brooklyn, NY 11224",
+    "lat": 40.5740,
+    "lng": -73.9757,
+    "hours": {
+      "monday": "10:00 AM - 5:00 PM",
+      "tuesday": "10:00 AM - 5:00 PM",
+      "wednesday": "10:00 AM - 5:00 PM",
+      "thursday": "10:00 AM - 5:00 PM",
+      "friday": "10:00 AM - 5:00 PM",
+      "saturday": "10:00 AM - 5:30 PM",
+      "sunday": "10:00 AM - 5:30 PM",
+      "closed_days": [],
+      "notes": "Last entry 1 hour before closing. Free Wednesdays after 3 PM (advance tickets required). All tickets require advance reservation."
+    },
+    "pricing": {
+      "base_price": 30,
+      "details": "Off-peak: Adults $29.95, Seniors $27.95, Children 3-12 $25.95. Peak: Adults $32.95, Seniors $29.95, Children 3-12 $27.95. Under 2 free. Free Wed after 3 PM."
+    },
+    "category": "Aquarium",
+    "description": "The only aquarium in NYC, located on the Coney Island boardwalk. Toddlers love the sea lion shows, touch tanks, shark exhibits, and the Ocean Wonders pavilion. The stroller-accessible layout and 4D theater make it a full toddler outing. Combine with a boardwalk stroll along Coney Island beach afterward.",
+    "website": "https://nyaquarium.com",
+    "travel_minutes_from_79th_broadway": 45
+  },
+  {
+    "id": 14,
+    "name": "Brooklyn Botanic Garden",
+    "address": "990 Washington Avenue, Brooklyn, NY 11225",
+    "lat": 40.6694,
+    "lng": -73.9625,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "8:00 AM - 8:00 PM",
+      "wednesday": "8:00 AM - 8:00 PM",
+      "thursday": "8:00 AM - 8:00 PM",
+      "friday": "8:00 AM - 6:00 PM",
+      "saturday": "8:00 AM - 6:00 PM",
+      "sunday": "8:00 AM - 6:00 PM",
+      "closed_days": ["Monday"],
+      "notes": "Bloom season hours (through May 10). Discovery Garden open seasonally. Early Learner drop-ins Wed & Fri 10:30 AM-12:30 PM."
+    },
+    "pricing": {
+      "base_price": 22,
+      "details": "Adults $22 ($23.67 online), Students/Seniors $16, Under 12 free."
+    },
+    "category": "Botanical Garden",
+    "description": "52-acre garden with the Discovery Garden, a one-acre landscape for kids with pond, woodland, meadow habitats, and hands-on nature exploration. Drop-in Early Learner programs (ages 0-4) on Wednesdays and Fridays include potting plants, crafts, story time, and sensory activities. Toddler gardening classes for ages 2-3 run spring through early summer. Under 12 always free.",
+    "website": "https://www.bbg.org/learn/kids_and_families",
+    "travel_minutes_from_79th_broadway": 40
+  },
+  {
+    "id": 15,
+    "name": "New York Botanical Garden (Everett Children's Adventure Garden)",
+    "address": "2900 Southern Boulevard, Bronx, NY 10458",
+    "lat": 40.8631,
+    "lng": -73.8772,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "10:00 AM - 6:00 PM",
+      "wednesday": "10:00 AM - 6:00 PM",
+      "thursday": "10:00 AM - 6:00 PM",
+      "friday": "10:00 AM - 6:00 PM",
+      "saturday": "10:00 AM - 6:00 PM",
+      "sunday": "10:00 AM - 6:00 PM",
+      "closed_days": ["Monday"],
+      "notes": "Children's Adventure Garden guided activities: weekdays 1:30-5 PM, weekends 11 AM-5 PM. Self-guided exploration 10 AM-5:30 PM."
+    },
+    "pricing": {
+      "base_price": 35,
+      "details": "Weekday: Adults $35, Seniors/Students $31, Children 2-12 $15. Weekend: Adults $39, Seniors/Students $35, Children 2-12 $17. Under 2 free."
+    },
+    "category": "Botanical Garden / Children's Garden",
+    "description": "250-acre garden with the 12-acre Everett Children's Adventure Garden featuring tunnels, boardwalks, a wetland pond, sensory-rich planting areas, and the Seedling Circle with plant-inspired instruments. Nature Explorers programs for ages 2-3 introduce toddlers to the natural world. Drop-in family programs with hands-on science activities run daily. The outdoor scale gives toddlers room to roam.",
+    "website": "https://www.nybg.org/education/childrens-education/everett-childrens-adventure-garden",
+    "travel_minutes_from_79th_broadway": 45
+  },
+  {
+    "id": 16,
+    "name": "CAMP (Bluey x CAMP Experience)",
+    "address": "110 Fifth Avenue, New York, NY 10011",
+    "lat": 40.7383,
+    "lng": -73.9918,
+    "hours": {
+      "monday": "10:00 AM - 6:00 PM",
+      "tuesday": "10:00 AM - 6:00 PM",
+      "wednesday": "10:00 AM - 6:00 PM",
+      "thursday": "10:00 AM - 6:00 PM",
+      "friday": "10:00 AM - 7:00 PM",
+      "saturday": "8:30 AM - 7:00 PM",
+      "sunday": "8:30 AM - 6:00 PM",
+      "closed_days": [],
+      "notes": "Open 7 days. Advance booking recommended for immersive experience as sessions sell out. Front retail store is free to browse."
+    },
+    "pricing": {
+      "base_price": 38,
+      "details": "Immersive experience ~$38/person for ages 2+ (varies by day/time, weekends higher). Under 2 free. Front store free to browse. Also offers Slime Bar and Craft Studio."
+    },
+    "category": "Immersive Experience / Retail",
+    "description": "Family experience store at 16th & 5th Ave with a ticketed immersive Bluey adventure where families step inside Bluey's house for counselor-led activities and a meet-and-greet with Bluey and Bingo (~1 hour). Also features The Slime Bar and a Craft Studio. The front store is free to explore with toys and activities. Perfectly designed for toddlers who love Bluey.",
+    "website": "https://camp.com/bluey-x-camp-nyc",
+    "travel_minutes_from_79th_broadway": 25
+  },
+  {
+    "id": 17,
+    "name": "Sloomoo Institute",
+    "address": "475 Broadway, New York, NY 10013",
+    "lat": 40.7213,
+    "lng": -73.9990,
+    "hours": {
+      "monday": "Check website",
+      "tuesday": "Check website",
+      "wednesday": "Check website",
+      "thursday": "Check website",
+      "friday": "Check website",
+      "saturday": "Check website",
+      "sunday": "Check website",
+      "closed_days": [],
+      "notes": "Hours vary; check sloomoo.com for current schedule. Advance reservation recommended."
+    },
+    "pricing": {
+      "base_price": 39,
+      "details": "Starting at ~$39-50/person. Each ticket includes DIY slime bar (custom 8oz slime to take home). Under 5 must be closely supervised."
+    },
+    "category": "Immersive Experience / Sensory Play",
+    "description": "Immersive slime experience in SoHo with ASMR tunnels, slime waterfalls, interactive slime stations, and a DIY Bar where you design a custom slime to take home. Stroller and wheelchair accessible with sensory-friendly accommodations. Toddlers love the tactile, messy sensory play. All ages welcome; under 5 must be closely supervised by parent/guardian.",
+    "website": "https://www.sloomoo.com/locations/new-york",
+    "travel_minutes_from_79th_broadway": 30
+  },
+  {
+    "id": 18,
+    "name": "INTER",
+    "address": "415 Broadway, New York, NY 10013",
+    "lat": 40.7193,
+    "lng": -73.9997,
+    "hours": {
+      "monday": "10:00 AM - 8:00 PM",
+      "tuesday": "1:00 PM - 8:00 PM",
+      "wednesday": "10:00 AM - 8:00 PM",
+      "thursday": "10:00 AM - 8:00 PM",
+      "friday": "10:00 AM - 8:00 PM",
+      "saturday": "10:00 AM - 8:00 PM",
+      "sunday": "10:00 AM - 8:00 PM",
+      "closed_days": [],
+      "notes": "Open 7 days (Tue opens at 1 PM). Strollers must be folded and stored in lobby. Book online in advance."
+    },
+    "pricing": {
+      "base_price": 35,
+      "details": "Starting at ~$35/person (varies by time slot). Under 4 free. Plan for 2-3 hours."
+    },
+    "category": "Immersive Experience",
+    "description": "Intergalactic immersive adventure in a former bank building at Broadway & Canal. Families board a starship and explore 10 zones with motion-sensitive displays that respond to movement, lights, and sound. Gentle pace and open areas are toddler-friendly; 2-5 year olds thrive on the sensory play as colors shift around them. Under 4 free. Strollers must be stored in lobby.",
+    "website": "https://www.inter.nyc",
+    "travel_minutes_from_79th_broadway": 30
+  },
+  {
+    "id": 19,
+    "name": "Arte Museum New York",
+    "address": "61 Chelsea Piers, New York, NY 10011",
+    "lat": 40.7480,
+    "lng": -74.0060,
+    "hours": {
+      "monday": "10:00 AM - 7:00 PM",
+      "tuesday": "10:00 AM - 7:00 PM",
+      "wednesday": "10:00 AM - 7:00 PM",
+      "thursday": "10:00 AM - 7:00 PM",
+      "friday": "10:00 AM - 9:00 PM",
+      "saturday": "10:00 AM - 9:00 PM",
+      "sunday": "10:00 AM - 9:00 PM",
+      "closed_days": [],
+      "notes": "Last admission: weekdays 5:30 PM, weekends 7:30 PM. Some rooms do not allow strollers due to mirrored glass floors."
+    },
+    "pricing": {
+      "base_price": 55,
+      "details": "Weekday: Adults $55, Children 4-12 $45. Weekend: Adults $65, Children 4-12 $55. Ages 0-3 free. Visit takes 60-90 min."
+    },
+    "category": "Immersive Art Experience",
+    "description": "Immersive media art exhibition at Chelsea Piers with floor-to-ceiling projections of nature scenes including waterfalls, forests, and auroras across themed rooms with mirrors creating infinite-seeming spaces. Children ages 0-3 enter free. Caveat for toddlers: some rooms are dark with mirrored floors, requiring close supervision, and some rooms restrict strollers. Best for toddlers who enjoy visual spectacles and aren't spooked by dark environments.",
+    "website": "https://newyork.artemuseum.com",
+    "travel_minutes_from_79th_broadway": 25
+  },
+  {
+    "id": 20,
+    "name": "Long Island Children's Museum",
+    "address": "11 Davis Avenue, Garden City, NY 11530",
+    "lat": 40.7260,
+    "lng": -73.6130,
+    "hours": {
+      "monday": "Closed",
+      "tuesday": "10:00 AM - 4:00 PM",
+      "wednesday": "10:00 AM - 4:00 PM",
+      "thursday": "10:00 AM - 4:00 PM",
+      "friday": "10:00 AM - 4:00 PM",
+      "saturday": "10:00 AM - 5:00 PM",
+      "sunday": "10:00 AM - 5:00 PM",
+      "closed_days": ["Monday"],
+      "notes": "Open on most public school holidays 10 AM-5 PM. Tot Spot designed for birth to age 3."
+    },
+    "pricing": {
+      "base_price": 14,
+      "details": "$14 per person ages 3+. Under 3 free. Members free."
+    },
+    "category": "Children's Museum",
+    "description": "Dedicated children's museum in Garden City with the Tot Spot, a sensory-rich area designed specifically for birth to age 3 with soft play structures, age-appropriate manipulatives, mirrors, and gentle sounds. Daily early childhood programs supplement the interactive exhibits. A top destination for toddlers on Long Island, reachable via LIRR from Penn Station to Garden City.",
+    "website": "https://www.licm.org",
+    "travel_minutes_from_79th_broadway": 45
+  }
+]
