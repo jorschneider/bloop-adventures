@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Bloop Adventures — 200 rainy-day stops for toddlers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2 Year Old Adventures — 200 rainy-day stops for toddlers</title>
+<meta name="description" content="200 rainy-day stops for toddlers around NYC — play spaces, museums, animals, books, classes, and shows, mapped from 79 St &amp; Broadway.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23EE352E'/><text x='50' y='72' font-size='52' text-anchor='middle'>&#x1F353;</text></svg>">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --ink:#1A1A1A;--paper:#F5F1E8;--card:#FFFFFF;
-  --red:#EE352E;--orange:#FF6319;--yellow:#FCCC0A;--green:#00933C;
+  --red:#EE352E;--red-deep:#C7241E;--orange:#FF6319;--yellow:#FCCC0A;--green:#00933C;
   --blue:#0039A6;--purple:#B933AD;--lgreen:#6CBE45;
   --muted:#6F6857;--rule:#1A1A1A;
 }
@@ -26,6 +27,14 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
 .search svg{width:14px;height:14px;color:var(--ink);flex-shrink:0}
 .search input{border:0;background:0;outline:0;font:inherit;font-size:13px;font-weight:500;color:var(--ink);width:160px;min-width:0}
 .search input::placeholder{color:#999}
+.q-x{border:0;background:0;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;font-family:inherit;line-height:1;width:26px;height:26px;margin:-4px -8px -4px 0;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.q-x:hover{color:var(--ink);background:#EFE9DB}
+.q-x[hidden]{display:none}
+.city-nav{display:flex;gap:5px;margin-left:2px;flex-shrink:0}
+.city{font-size:10px;font-weight:700;letter-spacing:1px;padding:5px 11px;border-radius:999px;border:1.5px solid #fff;color:#fff;text-decoration:none;transition:background .12s,color .12s}
+.city:hover{background:var(--red);border-color:var(--red)}
+.city.on{background:#fff;color:var(--ink)}
+.city.on:hover{background:#fff;color:var(--ink);border-color:#fff}
 .cnt-badge{background:#fff;color:var(--ink);font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;flex-shrink:0;white-space:nowrap}
 .cnt-badge small{font-weight:500;font-size:10px;letter-spacing:.5px}
 
@@ -46,9 +55,10 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
 .pill.on .dot{border-color:rgba(255,255,255,.6)}
 .pill.today::after{content:"";display:block;width:5px;height:5px;border-radius:50%;background:var(--red)}
 .pill.today.on::after{background:#fff}
-.fcount{background:var(--red);color:#fff;border-radius:999px;font-size:10px;font-weight:700;min-width:17px;height:17px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.fcount{background:var(--red-deep);color:#fff;border-radius:999px;font-size:10px;font-weight:700;min-width:17px;height:17px;display:flex;align-items:center;justify-content:center;padding:0 4px}
 .fcount[hidden]{display:none}
 .pill.on .fcount{background:#fff;color:var(--ink)}
+.fav-pill.on{background:var(--red-deep);border-color:var(--red-deep);color:#fff}
 .fpanel{position:absolute;left:0;right:0;top:100%;background:var(--paper);border-bottom:2px solid var(--ink);padding:14px 20px 16px;display:flex;flex-wrap:wrap;gap:16px 30px;z-index:1100;box-shadow:0 10px 20px rgba(26,26,26,.12)}
 .fpanel[hidden]{display:none}
 .fgrp h5{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
@@ -65,7 +75,7 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
 .main{display:flex;flex-direction:column;flex:1;min-height:0}
 #map{height:38%;min-height:200px;flex-shrink:0;border-bottom:2px solid var(--ink)}
 .list-wrap{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
-.grid{display:grid;gap:12px}
+.grid{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
 .foot-note{grid-column:1/-1;text-align:center;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;padding:18px 0 8px}
 
 /* ── CARDS ── */
@@ -73,10 +83,15 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
 .vc::before{content:"";position:absolute;left:-1.5px;top:-1.5px;bottom:-1.5px;width:5px;background:var(--gc,var(--ink))}
 .vc:hover{box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}
 .vc.on{box-shadow:4px 4px 0 var(--gc,var(--ink));transform:translate(-2px,-2px);border-width:2px}
+.fav-btn{position:relative;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--ink);background:var(--card);cursor:pointer;font-size:13px;line-height:1;color:var(--muted);flex-shrink:0;font-family:inherit;padding:0;display:flex;align-items:center;justify-content:center;transition:background .12s,color .12s}
+.fav-btn::after{content:"";position:absolute;inset:-9px;border-radius:50%}
+.fav-btn:hover{background:#EFE9DB;color:var(--red)}
+.fav-btn.on{background:var(--red);border-color:var(--red);color:#fff}
 .vc .vc-top{display:flex;align-items:center;gap:11px}
 .bullet{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
 .vc .vc-title{flex:1;min-width:0}
-.vc .nm{font-size:15px;font-weight:700;letter-spacing:-.2px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vc .nm{font-size:15px;font-weight:700;letter-spacing:-.2px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;width:100%;max-width:100%;background:none;border:0;padding:0;color:inherit;font-family:inherit;text-align:left;cursor:pointer}
+.vc .nm:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .vc .cat-line{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vc .vc-price{text-align:right;flex-shrink:0;font-size:16px;font-weight:800;letter-spacing:-.3px}
 .vc .vc-price.free{color:var(--green)}
@@ -91,8 +106,8 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
 .leaflet-popup-content{margin:0!important;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
 
 /* ── DETAIL SHEET ── */
-#sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:2px solid var(--ink);z-index:1200;transform:translateY(108%);transition:transform .22s ease,visibility .22s;max-height:62dvh;display:flex;flex-direction:column;visibility:hidden}
-#sheet.open{transform:translateY(0);visibility:visible}
+#sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:2px solid var(--ink);z-index:1200;transform:translateY(108%);transition:transform .22s ease,visibility 0s .22s;max-height:62dvh;display:flex;flex-direction:column;visibility:hidden}
+#sheet.open{transform:translateY(0);visibility:visible;transition:transform .22s ease}
 .sh-h{background:var(--ink);color:#fff;padding:13px 16px;display:flex;gap:11px;align-items:center;flex-shrink:0}
 .sh-h .bullet{border:2px solid #fff;width:32px;height:32px}
 .sh-t{flex:1;min-width:0}
@@ -115,10 +130,15 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
 .sh-b .pr-row .v{font-weight:700;text-align:right}
 .sh-b .note{font-size:11px;color:var(--green);margin-top:6px;font-weight:700}
 .sh-f{padding:11px 16px;background:var(--paper);border-top:2px solid var(--ink);display:flex;gap:8px;flex-shrink:0}
-.sh-f .btn{flex:1;text-align:center;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;text-decoration:none;padding:9px 12px;background:var(--ink);border-radius:999px;white-space:nowrap}
+.sh-f .btn{flex:1;text-align:center;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#fff;text-decoration:none;padding:9px 10px;background:var(--ink);border-radius:999px;white-space:nowrap;border:0;cursor:pointer;font-family:inherit;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .sh-f .btn:hover{background:var(--red)}
 .sh-f .btn.alt{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
 .sh-f .btn.alt:hover{background:var(--ink);color:#fff}
+.sh-f .btn.save{flex:0 0 auto;min-width:78px;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.sh-f .btn.save:hover{color:var(--red);box-shadow:inset 0 0 0 1.5px var(--red);background:#fff}
+.sh-f .btn.save.on{background:var(--red-deep);color:#fff;box-shadow:none}
+.sh-f .btn.save.on:hover{background:var(--red-deep);color:#fff}
+#sheet:focus{outline:none}
 
 /* ── MAP MARKERS ── */
 .cm{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.35);border:2px solid #fff}
@@ -135,12 +155,12 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
   .main{flex-direction:row}
   #map{height:100%!important;width:46%;flex:none;order:2;border-bottom:0;border-left:2px solid var(--ink)}
   .list-wrap{flex:1;order:1;padding:16px 20px}
-  .grid{grid-template-columns:1fr 1fr}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .search input{width:200px}
   #sheet{left:auto;right:14px;bottom:14px;width:370px;border:2px solid var(--ink);box-shadow:5px 5px 0 rgba(26,26,26,.85);max-height:calc(100dvh - 200px)}
 }
 @media(min-width:1500px){
-  .grid{grid-template-columns:1fr 1fr 1fr}
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   #map{width:42%}
 }
 @media(max-width:768px){
@@ -154,16 +174,17 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
   .trow{padding:8px 14px;gap:5px}
   .pill{padding:5px 11px;font-size:11px}
   .fpanel{padding:12px 14px 14px;gap:13px 22px}
-  .grid{grid-template-columns:1fr}
+  .grid{grid-template-columns:minmax(0,1fr)}
 }
 </style>
 </head>
 <body>
 <div class="hdr">
   <span class="logo">&#x1F353;</span>
-  <div><h1>Bloop Adventures</h1><div class="sub">79 St&ndash;Broadway &middot; 200 rainy-day stops for toddlers</div></div>
-  <span class="cnt-badge"><b id="count">200</b> <small>STOPS</small></span>
-  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="q" placeholder="Search stops, places, addresses&hellip;"></div>
+  <div><h1>2 Year Old Adventures</h1><div class="sub">79 St&ndash;Broadway &middot; 200 rainy-day stops for toddlers</div></div>
+  <nav class="city-nav" aria-label="City"><a class="city on" href="index.html" aria-current="page">NYC</a><a class="city" href="dc.html">DC</a></nav>
+  <span class="cnt-badge" aria-live="polite" aria-atomic="true"><b id="count">200</b> <small>STOPS</small></span>
+  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="q" placeholder="Search stops, places, addresses&hellip;" aria-label="Search stops, places, addresses"><button class="q-x" id="q-clear" aria-label="Clear search" hidden>&#x2715;</button></div>
 </div>
 <div class="toolbar">
   <div class="trow">
@@ -175,9 +196,12 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
     <button class="pill" data-g="g" data-v="classes"><span class="dot" style="background:#FCCC0A"></span>Classes</button>
     <button class="pill" data-g="g" data-v="shows"><span class="dot" style="background:#6CBE45"></span>Shows</button>
     <span class="spacer"></span>
-    <button class="pill" id="open-today">Open today</button>
+    <button class="pill" id="open-today" aria-pressed="false">Open today</button>
+    <button class="pill" id="free-only" aria-pressed="false">Free</button>
+    <button class="pill fav-pill" id="fav-only" aria-pressed="false">&hearts; Saved <span class="fcount" id="favcount" hidden></span></button>
     <button class="pill" id="fbtn">Filters <span class="fcount" id="fcount" hidden></span> &#x25BE;</button>
     <select class="sortsel" id="sort" aria-label="Sort by"><option value="near">Sort: Nearest</option><option value="price">Sort: Cheapest</option><option value="name">Sort: A&ndash;Z</option></select>
+    <button class="pill" id="surprise" title="Pick a random stop that matches your filters">&#x1F3B2; Surprise me</button>
   </div>
   <div class="fpanel" id="fpanel" hidden>
     <div class="fgrp"><h5>Day of week</h5><div class="seg">
@@ -214,14 +238,28 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
   <div id="map"></div>
   <div class="list-wrap" id="list-wrap"><div class="grid" id="grid"></div></div>
 </div>
-<div id="sheet" role="dialog" aria-label="Venue details"></div>
+<div id="sheet" role="dialog" aria-label="Venue details" tabindex="-1"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const today=new Date().getDay();
 const todayIdx=today===0?6:today-1;
-let filters={day:"any",io:"any",tp:"any",pr:100,af:"any",g:"any",t:99};
+let filters={day:"any",io:"any",tp:"any",pr:100,af:"any",g:"any",t:99,fav:false};
 let sortBy="near";
+
+// Saved stops — persisted in localStorage
+let favs=new Set();
+try{favs=new Set(JSON.parse(localStorage.getItem('tya-favs-nyc')||'[]'))}catch(e){}
+function saveFavs(){try{localStorage.setItem('tya-favs-nyc',JSON.stringify([...favs]))}catch(e){}}
+function toggleFav(id){
+  if(favs.has(id))favs.delete(id);else favs.add(id);
+  const refocus=document.activeElement&&document.activeElement.classList.contains('fav-btn');
+  saveFavs();syncQuick();render();updateSheetSave();
+  if(refocus){
+    const b=document.querySelector(`.vc[data-id="${id}"] .fav-btn`)||document.getElementById('fav-only');
+    b.focus({preventScroll:true});
+  }
+}
 
 // Venue data: io: i=indoor o=outdoor b=both | tp: p=play c=class b=both | $=basic price (0=free)
 // days: [Mon..Sun] null=closed, string=hours, "v"=varies
@@ -444,6 +482,7 @@ function bullet(v,extra){const g=grp(v);const fg=g==="classes"?"#1A1A1A":"#fff";
 
 function isOpenDay(v,di){if(di==="any")return true;const h=v.days[parseInt(di)];return h!==null&&h!=="v";}
 function matchF(v){
+  if(filters.fav&&!favs.has(v.id))return false;
   if(filters.g!=="any"&&grp(v)!==filters.g)return false;
   if(filters.day!=="any"&&!isOpenDay(v,filters.day))return false;
   if(filters.t<99&&v.t>filters.t)return false;
@@ -479,7 +518,20 @@ function clearSel(){
   document.querySelectorAll('.vc.on').forEach(x=>x.classList.remove('on'));
   document.querySelectorAll('.cm.sel').forEach(x=>x.classList.remove('sel'));
 }
-function closeSheet(){sheet.classList.remove('open');clearSel();}
+function closeSheet(){
+  const wasOpen=sheet.classList.contains('open');
+  const card=selId!=null?document.querySelector(`.vc[data-id="${selId}"] .nm`):null;
+  sheet.classList.remove('open');clearSel();
+  if(wasOpen&&sheet.contains(document.activeElement))(card||document.getElementById('fav-only')).focus({preventScroll:true});
+}
+function updateSheetSave(){
+  const b=sheet.querySelector('.btn.save');
+  if(!b||selId==null)return;
+  const on=favs.has(selId);
+  b.classList.toggle('on',on);
+  b.innerHTML=on?'&hearts; Saved':'&#9825; Save';
+  b.setAttribute('aria-pressed',on);
+}
 function renderSheet(v){
   const s=openSt(v);
   const hH=v.days.map((h,i)=>`<div class="hr-row${i===todayIdx?' tdy':''}"><span class="d">${DAYS[i]}</span>${h===null?'<span class="closed">Closed</span>':h==="v"?"Varies":h}</div>`).join('');
@@ -496,8 +548,9 @@ function renderSheet(v){
       <div><h4>Pricing</h4>${pH}${v.pn?`<div class="note">${v.pn}</div>`:''}</div>
     </div>
   </div>
-  <div class="sh-f"><a class="btn" href="${v.w}" target="_blank" rel="noopener">Website &rarr;</a><a class="btn alt" href="https://www.google.com/maps/dir/?api=1&destination=${v.lt},${v.ln}" target="_blank" rel="noopener">Directions &rarr;</a></div>`;
+  <div class="sh-f"><button class="btn save${favs.has(v.id)?' on':''}" aria-pressed="${favs.has(v.id)}">${favs.has(v.id)?'&hearts; Saved':'&#9825; Save'}</button><a class="btn" href="${v.w}" target="_blank" rel="noopener">Website &rarr;</a><a class="btn alt" href="https://www.google.com/maps/dir/?api=1&destination=${v.lt},${v.ln}" target="_blank" rel="noopener">Directions &rarr;</a></div>`;
   sheet.querySelector('.sh-x').onclick=closeSheet;
+  sheet.querySelector('.btn.save').onclick=()=>toggleFav(v.id);
 }
 function select(v,from){
   clearSel();
@@ -510,21 +563,31 @@ function select(v,from){
   map.flyTo([v.lt,v.ln],Math.max(map.getZoom(),14),{duration:.4});
   renderSheet(v);
   sheet.classList.add('open');
+  sheet.focus({preventScroll:true});
 }
 map.on('click',closeSheet);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheet();closePanel();}});
 
 let searchQ='';
 
+function passes(v){
+  if(searchQ&&!v.n.toLowerCase().includes(searchQ)&&!v.d.toLowerCase().includes(searchQ)&&!v.cat.toLowerCase().includes(searchQ)&&!v.a.toLowerCase().includes(searchQ))return false;
+  return matchF(v);
+}
+
 function render(){
   const g=document.getElementById('grid');g.innerHTML='';
-  const f=D.filter(v=>{
-    if(searchQ&&!v.n.toLowerCase().includes(searchQ)&&!v.d.toLowerCase().includes(searchQ)&&!v.cat.toLowerCase().includes(searchQ)&&!v.a.toLowerCase().includes(searchQ))return false;
-    return matchF(v);
-  });
+  const f=D.filter(passes);
+  const fset=new Set(f.map(v=>v.id));
+  if(selId!=null&&!fset.has(selId)&&sheet.classList.contains('open'))closeSheet();
   document.getElementById('count').textContent=f.length;
-  D.forEach(v=>{const m=MK[v.id];const show=f.includes(v);if(show){if(!map.hasLayer(m))m.addTo(map);if(v.id===selId){const el=m.getElement();if(el&&el.firstChild)el.firstChild.classList.add('sel');}}else{if(map.hasLayer(m))map.removeLayer(m);}});
-  if(!f.length){g.innerHTML='<div class="empty-msg" style="grid-column:1/-1"><span>!</span>No stops match your filters.<br>Try widening the search.</div>';return;}
+  D.forEach(v=>{const m=MK[v.id];const show=fset.has(v.id);if(show){if(!map.hasLayer(m))m.addTo(map);if(v.id===selId){const el=m.getElement();if(el&&el.firstChild)el.firstChild.classList.add('sel');}}else{if(map.hasLayer(m))map.removeLayer(m);}});
+  if(!f.length){
+    const msg=filters.fav&&!favs.size
+      ?'<span>&hearts;</span>No saved stops yet.<br>Tap the &#9825; on any stop to save it.'
+      :'<span>!</span>No stops match your filters.<br>Try widening the search.';
+    g.innerHTML=`<div class="empty-msg" style="grid-column:1/-1">${msg}</div>`;return;
+  }
   if(sortBy==="near")f.sort((a,b)=>a.t-b.t||a.id-b.id);
   else if(sortBy==="price")f.sort((a,b)=>a.$-b.$||a.t-b.t);
   else f.sort((a,b)=>a.n.localeCompare(b.n));
@@ -533,11 +596,13 @@ function render(){
     const io=v.io==='b'?'In + Out':v.io==='i'?'Indoor':'Outdoor';
     const tp=v.tp==='b'?'Play & Classes':v.tp==='p'?'Open Play':'Classes';
     const c=document.createElement('div');c.className='vc';c.dataset.id=v.id;c.style.setProperty('--gc',GC[grp(v)]);
+    const isFav=favs.has(v.id);
     c.innerHTML=`
       <div class="vc-top">
         ${bullet(v)}
-        <div class="vc-title"><div class="nm">${v.n}</div><div class="cat-line">${v.cat} &middot; ${v.a}</div></div>
+        <div class="vc-title"><button class="nm">${v.n}</button><div class="cat-line">${v.cat} &middot; ${v.a}</div></div>
         <div class="vc-price ${v.$===0?'free':''}">${fmtP(v)}</div>
+        <button class="fav-btn${isFav?' on':''}" aria-label="Save ${v.n}" aria-pressed="${isFav}">${isFav?'&hearts;':'&#9825;'}</button>
       </div>
       <div class="desc-line">${v.d}</div>
       <div class="meta">
@@ -549,6 +614,7 @@ function render(){
       </div>`;
     if(v.id===selId)c.classList.add('on');
     c.onclick=()=>select(v,'list');
+    c.querySelector('.fav-btn').onclick=e=>{e.stopPropagation();closePanel();toggleFav(v.id);};
     g.appendChild(c);
   });
   const fn=document.createElement('div');fn.className='foot-note';fn.textContent='Hours and prices drift — check the website before heading out';g.appendChild(fn);
@@ -556,7 +622,15 @@ function render(){
 
 // Quick-toggle + filter-count sync
 function syncQuick(){
-  document.getElementById('open-today').classList.toggle('on',filters.day===String(todayIdx));
+  const ot=document.getElementById('open-today');
+  const otOn=filters.day===String(todayIdx);
+  ot.classList.toggle('on',otOn);ot.setAttribute('aria-pressed',otOn);
+  const fr=document.getElementById('free-only');
+  fr.classList.toggle('on',filters.pr===0);fr.setAttribute('aria-pressed',filters.pr===0);
+  const fv=document.getElementById('fav-only');
+  fv.classList.toggle('on',filters.fav);fv.setAttribute('aria-pressed',filters.fav);
+  const fvc=document.getElementById('favcount');
+  fvc.hidden=!favs.size;fvc.textContent=favs.size;
   const n=(filters.day!=="any")+(filters.t<99)+(filters.io!=="any")+(filters.tp!=="any")+(filters.pr<100)+(filters.af==="1");
   const fc=document.getElementById('fcount');
   fc.hidden=!n;fc.textContent=n;
@@ -585,6 +659,28 @@ document.getElementById('open-today').onclick=()=>{
   syncQuick();render();
 };
 
+// "Free" quick toggle mirrors the price slider
+document.getElementById('free-only').onclick=()=>{
+  filters.pr=filters.pr===0?100:0;
+  ps.value=filters.pr;
+  pl.textContent=filters.pr===0?'Free only':'Any price';
+  syncQuick();render();
+};
+
+// "Saved" quick toggle
+document.getElementById('fav-only').onclick=()=>{
+  filters.fav=!filters.fav;
+  syncQuick();render();
+};
+
+// Surprise me — pick a random stop matching the current filters
+document.getElementById('surprise').onclick=()=>{
+  const f=D.filter(passes);
+  if(!f.length)return;
+  const v=f[Math.floor(Math.random()*f.length)];
+  select(v,'map');
+};
+
 // Filters panel
 const fbtn=document.getElementById('fbtn');
 const fpanel=document.getElementById('fpanel');
@@ -604,7 +700,7 @@ ps.addEventListener('input',()=>{
 
 // Reset all (keeps category + search)
 document.getElementById('freset').onclick=()=>{
-  filters={...filters,day:"any",io:"any",tp:"any",pr:100,af:"any",t:99};
+  filters={...filters,day:"any",io:"any",tp:"any",pr:100,af:"any",t:99,fav:false};
   ['day','t','io','tp'].forEach(gr=>{
     const def=gr==='t'?'99':'any';
     document.querySelectorAll(`.pill[data-g="${gr}"]`).forEach(x=>x.classList.toggle('on',x.dataset.v===def));
@@ -618,9 +714,12 @@ document.getElementById('freset').onclick=()=>{
 document.getElementById('sort').addEventListener('change',e=>{sortBy=e.target.value;render();});
 
 // Search
-document.getElementById('q').addEventListener('input',e=>{searchQ=e.target.value.toLowerCase().trim();render();});
+const qEl=document.getElementById('q');
+const qClear=document.getElementById('q-clear');
+qEl.addEventListener('input',()=>{searchQ=qEl.value.toLowerCase().trim();qClear.hidden=!qEl.value;render();});
+qClear.onclick=()=>{qEl.value='';searchQ='';qClear.hidden=true;qEl.focus();render();};
 
-render();
+syncQuick();render();
 </script>
 </body>
 </html>
