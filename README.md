@@ -3,7 +3,7 @@
 Rainy-day stops for toddlers, mapped subway-style.
 
 - **`index.html` — NYC**: 200 stops, home base 79 St & Broadway.
-- **`dc.html` — Washington, DC**: stops around the District and close-in
+- **`dc.html` — Washington, DC**: 94 stops around the District and close-in
   suburbs, home base Gallery Place–Chinatown.
 
 Use the NYC/DC toggle in the header to switch cities. Saved stops are kept

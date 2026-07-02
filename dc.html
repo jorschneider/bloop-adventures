@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2 Year Old Adventures: DC — 94 rainy-day stops for toddlers</title>
+<meta name="description" content="94 rainy-day stops for toddlers around Washington, DC — play spaces, museums, animals, books, classes, and shows, mapped from Gallery Place.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23EE352E'/><text x='50' y='72' font-size='52' text-anchor='middle'>&#x1F338;</text></svg>">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#1A1A1A;--paper:#F5F1E8;--card:#FFFFFF;
+  --red:#EE352E;--red-deep:#C7241E;--orange:#FF6319;--yellow:#FCCC0A;--green:#00933C;
+  --blue:#0039A6;--purple:#B933AD;--lgreen:#6CBE45;
+  --muted:#6F6857;--rule:#1A1A1A;
+}
+html,body{height:100dvh;overflow:hidden}
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+
+/* ── HEADER: station signage ── */
+.hdr{background:var(--ink);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:14px;position:relative;z-index:1001;border-bottom:4px solid #fff}
+.hdr .logo{width:42px;height:42px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:2px solid #fff}
+.hdr h1{font-size:21px;font-weight:700;letter-spacing:-.5px;line-height:1.1}
+.hdr .sub{font-size:9px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#B8B2A4;margin-top:3px}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:7px 14px;min-width:0}
+.search svg{width:14px;height:14px;color:var(--ink);flex-shrink:0}
+.search input{border:0;background:0;outline:0;font:inherit;font-size:13px;font-weight:500;color:var(--ink);width:160px;min-width:0}
+.search input::placeholder{color:#999}
+.q-x{border:0;background:0;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;font-family:inherit;line-height:1;width:26px;height:26px;margin:-4px -8px -4px 0;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.q-x:hover{color:var(--ink);background:#EFE9DB}
+.q-x[hidden]{display:none}
+.city-nav{display:flex;gap:5px;margin-left:2px;flex-shrink:0}
+.city{font-size:10px;font-weight:700;letter-spacing:1px;padding:5px 11px;border-radius:999px;border:1.5px solid #fff;color:#fff;text-decoration:none;transition:background .12s,color .12s}
+.city:hover{background:var(--red);border-color:var(--red)}
+.city.on{background:#fff;color:var(--ink)}
+.city.on:hover{background:#fff;color:var(--ink);border-color:#fff}
+.cnt-badge{background:#fff;color:var(--ink);font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;flex-shrink:0;white-space:nowrap}
+.cnt-badge small{font-weight:500;font-size:10px;letter-spacing:.5px}
+
+/* ── TOOLBAR ── */
+.toolbar{background:var(--paper);border-bottom:2px solid var(--ink);position:relative;z-index:1001}
+.trow{display:flex;flex-wrap:wrap;gap:6px;padding:9px 20px;align-items:center}
+.trow .spacer{flex:1;min-width:8px}
+.pill{padding:6px 13px;border-radius:999px;font-size:12px;font-weight:700;border:1.5px solid var(--ink);background:var(--card);color:var(--ink);cursor:pointer;white-space:nowrap;transition:background .12s,color .12s;flex-shrink:0;font-family:inherit;display:flex;align-items:center;gap:7px}
+.pill:hover{background:#EFE9DB}
+.pill.on{background:var(--ink);color:#fff}
+.pill .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.15)}
+.pill[data-v="play"].on{background:var(--orange);border-color:var(--orange);color:#fff}
+.pill[data-v="museum"].on{background:var(--blue);border-color:var(--blue);color:#fff}
+.pill[data-v="nature"].on{background:var(--green);border-color:var(--green);color:#fff}
+.pill[data-v="books"].on{background:var(--purple);border-color:var(--purple);color:#fff}
+.pill[data-v="classes"].on{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.pill[data-v="shows"].on{background:var(--lgreen);border-color:var(--lgreen);color:#fff}
+.pill.on .dot{border-color:rgba(255,255,255,.6)}
+.pill.today::after{content:"";display:block;width:5px;height:5px;border-radius:50%;background:var(--red)}
+.pill.today.on::after{background:#fff}
+.fcount{background:var(--red-deep);color:#fff;border-radius:999px;font-size:10px;font-weight:700;min-width:17px;height:17px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.fcount[hidden]{display:none}
+.pill.on .fcount{background:#fff;color:var(--ink)}
+.fav-pill.on{background:var(--red-deep);border-color:var(--red-deep);color:#fff}
+.fpanel{position:absolute;left:0;right:0;top:100%;background:var(--paper);border-bottom:2px solid var(--ink);padding:14px 20px 16px;display:flex;flex-wrap:wrap;gap:16px 30px;z-index:1100;box-shadow:0 10px 20px rgba(26,26,26,.12)}
+.fpanel[hidden]{display:none}
+.fgrp h5{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.seg{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.factions{display:flex;gap:8px;margin-left:auto;align-self:flex-end}
+.slider-wrap{display:flex;align-items:center;gap:8px;flex-shrink:0;height:31px}
+.slider-lbl{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;min-width:74px}
+.slider{-webkit-appearance:none;width:90px;height:4px;border-radius:2px;background:var(--ink);outline:none;cursor:pointer}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--ink);cursor:pointer}
+.slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--ink);cursor:pointer}
+.sortsel{font:inherit;font-size:12px;font-weight:700;border:1.5px solid var(--ink);border-radius:999px;background:var(--card);color:var(--ink);padding:6px 10px;cursor:pointer;flex-shrink:0;-webkit-appearance:none;appearance:none}
+
+/* ── LAYOUT ── */
+.main{display:flex;flex-direction:column;flex:1;min-height:0}
+#map{height:38%;min-height:200px;flex-shrink:0;border-bottom:2px solid var(--ink)}
+.list-wrap{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+.grid{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+.foot-note{grid-column:1/-1;text-align:center;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;padding:18px 0 8px}
+
+/* ── CARDS ── */
+.vc{background:var(--card);border:1.5px solid var(--ink);border-radius:2px;padding:14px 16px;cursor:pointer;transition:box-shadow .12s,transform .12s;display:flex;flex-direction:column;gap:9px;position:relative}
+.vc::before{content:"";position:absolute;left:-1.5px;top:-1.5px;bottom:-1.5px;width:5px;background:var(--gc,var(--ink))}
+.vc:hover{box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}
+.vc.on{box-shadow:4px 4px 0 var(--gc,var(--ink));transform:translate(-2px,-2px);border-width:2px}
+.fav-btn{position:relative;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--ink);background:var(--card);cursor:pointer;font-size:13px;line-height:1;color:var(--muted);flex-shrink:0;font-family:inherit;padding:0;display:flex;align-items:center;justify-content:center;transition:background .12s,color .12s}
+.fav-btn::after{content:"";position:absolute;inset:-9px;border-radius:50%}
+.fav-btn:hover{background:#EFE9DB;color:var(--red)}
+.fav-btn.on{background:var(--red);border-color:var(--red);color:#fff}
+.vc .vc-top{display:flex;align-items:center;gap:11px}
+.bullet{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.vc .vc-title{flex:1;min-width:0}
+.vc .nm{font-size:15px;font-weight:700;letter-spacing:-.2px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;width:100%;max-width:100%;background:none;border:0;padding:0;color:inherit;font-family:inherit;text-align:left;cursor:pointer}
+.vc .nm:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.vc .cat-line{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vc .vc-price{text-align:right;flex-shrink:0;font-size:16px;font-weight:800;letter-spacing:-.3px}
+.vc .vc-price.free{color:var(--green)}
+.vc .desc-line{font-size:13px;color:#3D3A30;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vc .meta{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px}
+.vc .meta .ok{color:var(--green)}
+.vc .meta .no{color:var(--red)}
+
+/* ── HOME POPUP ── */
+.leaflet-popup-content-wrapper{border-radius:2px!important;box-shadow:5px 5px 0 rgba(26,26,26,.85)!important;padding:0!important;overflow:hidden;border:2px solid var(--ink)!important}
+.leaflet-popup-tip{display:none}
+.leaflet-popup-content{margin:0!important;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+
+/* ── DETAIL SHEET ── */
+#sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:2px solid var(--ink);z-index:1200;transform:translateY(108%);transition:transform .22s ease,visibility 0s .22s;max-height:62dvh;display:flex;flex-direction:column;visibility:hidden}
+#sheet.open{transform:translateY(0);visibility:visible;transition:transform .22s ease}
+.sh-h{background:var(--ink);color:#fff;padding:13px 16px;display:flex;gap:11px;align-items:center;flex-shrink:0}
+.sh-h .bullet{border:2px solid #fff;width:32px;height:32px}
+.sh-t{flex:1;min-width:0}
+.sh-h h3{font-size:16px;font-weight:700;line-height:1.25;letter-spacing:-.2px}
+.sh-h .cat{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:#B8B2A4;margin-top:3px;font-weight:700}
+.sh-x{flex-shrink:0;width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;line-height:1;font-family:inherit;padding:0}
+.sh-x:hover{background:var(--red);border-color:var(--red)}
+.sh-b{padding:14px 16px;overflow-y:auto;font-size:13px;line-height:1.55;color:#3D3A30}
+.sh-b .desc{margin-bottom:12px}
+.sh-meta{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px;margin-bottom:13px;padding-bottom:13px;border-bottom:1.5px solid var(--ink)}
+.sh-meta .ok{color:var(--green)}
+.sh-meta .no{color:var(--red)}
+.sh-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.sh-b h4{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink);margin-bottom:6px}
+.sh-b .hr-row{display:flex;gap:8px;padding:1px 0;font-size:12px}
+.sh-b .hr-row .d{width:36px;font-weight:700;color:var(--ink);flex-shrink:0}
+.sh-b .hr-row.tdy{background:var(--paper);margin:0 -6px;padding:1px 6px}
+.sh-b .hr-row .closed{color:var(--red);font-weight:700}
+.sh-b .pr-row{display:flex;justify-content:space-between;gap:8px;padding:2px 0;font-size:12px}
+.sh-b .pr-row .v{font-weight:700;text-align:right}
+.sh-b .note{font-size:11px;color:var(--green);margin-top:6px;font-weight:700}
+.sh-f{padding:11px 16px;background:var(--paper);border-top:2px solid var(--ink);display:flex;gap:8px;flex-shrink:0}
+.sh-f .btn{flex:1;text-align:center;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#fff;text-decoration:none;padding:9px 10px;background:var(--ink);border-radius:999px;white-space:nowrap;border:0;cursor:pointer;font-family:inherit;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.sh-f .btn:hover{background:var(--red)}
+.sh-f .btn.alt{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.sh-f .btn.alt:hover{background:var(--ink);color:#fff}
+.sh-f .btn.save{flex:0 0 auto;min-width:78px;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.sh-f .btn.save:hover{color:var(--red);box-shadow:inset 0 0 0 1.5px var(--red);background:#fff}
+.sh-f .btn.save.on{background:var(--red-deep);color:#fff;box-shadow:none}
+.sh-f .btn.save.on:hover{background:var(--red-deep);color:#fff}
+#sheet:focus{outline:none}
+
+/* ── MAP MARKERS ── */
+.cm{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.35);border:2px solid #fff}
+.cm.home{background:var(--red);width:40px;height:40px;font-size:19px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.cm{cursor:pointer;transition:transform .15s}
+.cm.sel{transform:scale(1.3);box-shadow:0 0 0 3px var(--ink),0 2px 8px rgba(0,0,0,.4)}
+.leaflet-container{background:#EAE6DB;font-family:inherit}
+
+.empty-msg{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;line-height:2}
+.empty-msg span{display:block;width:44px;height:44px;border-radius:50%;background:var(--ink);color:#fff;font-size:22px;line-height:44px;margin:0 auto 14px}
+
+/* ── RESPONSIVE ── */
+@media(min-width:769px){
+  .main{flex-direction:row}
+  #map{height:100%!important;width:46%;flex:none;order:2;border-bottom:0;border-left:2px solid var(--ink)}
+  .list-wrap{flex:1;order:1;padding:16px 20px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .search input{width:200px}
+  #sheet{left:auto;right:14px;bottom:14px;width:370px;border:2px solid var(--ink);box-shadow:5px 5px 0 rgba(26,26,26,.85);max-height:calc(100dvh - 200px)}
+}
+@media(min-width:1500px){
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #map{width:42%}
+}
+@media(max-width:768px){
+  .hdr{padding:10px 14px;gap:10px;flex-wrap:wrap}
+  .hdr h1{font-size:17px}
+  .hdr .logo{width:34px;height:34px;font-size:17px}
+  .hdr .sub{font-size:8px;letter-spacing:1.2px}
+  .cnt-badge{margin-left:auto}
+  .search{order:5;flex-basis:100%;margin-left:0}
+  .search input{flex:1;width:auto}
+  .trow{padding:8px 14px;gap:5px}
+  .pill{padding:5px 11px;font-size:11px}
+  .fpanel{padding:12px 14px 14px;gap:13px 22px}
+  .grid{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <span class="logo">&#x1F338;</span>
+  <div><h1>2 Year Old Adventures</h1><div class="sub">Gallery Pl&ndash;Chinatown &middot; 94 rainy-day stops for toddlers</div></div>
+  <nav class="city-nav" aria-label="City"><a class="city" href="index.html">NYC</a><a class="city on" href="dc.html" aria-current="page">DC</a></nav>
+  <span class="cnt-badge" aria-live="polite" aria-atomic="true"><b id="count">94</b> <small>STOPS</small></span>
+  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="q" placeholder="Search stops, places, addresses&hellip;" aria-label="Search stops, places, addresses"><button class="q-x" id="q-clear" aria-label="Clear search" hidden>&#x2715;</button></div>
+</div>
+<div class="toolbar">
+  <div class="trow">
+    <button class="pill on" data-g="g" data-v="any">All stops</button>
+    <button class="pill" data-g="g" data-v="play"><span class="dot" style="background:#FF6319"></span>Play</button>
+    <button class="pill" data-g="g" data-v="museum"><span class="dot" style="background:#0039A6"></span>Museums</button>
+    <button class="pill" data-g="g" data-v="nature"><span class="dot" style="background:#00933C"></span>Animals</button>
+    <button class="pill" data-g="g" data-v="books"><span class="dot" style="background:#B933AD"></span>Books</button>
+    <button class="pill" data-g="g" data-v="classes"><span class="dot" style="background:#FCCC0A"></span>Classes</button>
+    <button class="pill" data-g="g" data-v="shows"><span class="dot" style="background:#6CBE45"></span>Shows</button>
+    <span class="spacer"></span>
+    <button class="pill" id="open-today" aria-pressed="false">Open today</button>
+    <button class="pill" id="free-only" aria-pressed="false">Free</button>
+    <button class="pill fav-pill" id="fav-only" aria-pressed="false">&hearts; Saved <span class="fcount" id="favcount" hidden></span></button>
+    <button class="pill" id="fbtn">Filters <span class="fcount" id="fcount" hidden></span> &#x25BE;</button>
+    <select class="sortsel" id="sort" aria-label="Sort by"><option value="near">Sort: Nearest</option><option value="price">Sort: Cheapest</option><option value="name">Sort: A&ndash;Z</option></select>
+    <button class="pill" id="surprise" title="Pick a random stop that matches your filters">&#x1F3B2; Surprise me</button>
+  </div>
+  <div class="fpanel" id="fpanel" hidden>
+    <div class="fgrp"><h5>Day of week</h5><div class="seg">
+      <button class="pill on" data-g="day" data-v="any">Any</button>
+      <button class="pill" data-g="day" data-v="0">Mon</button>
+      <button class="pill" data-g="day" data-v="1">Tue</button>
+      <button class="pill" data-g="day" data-v="2">Wed</button>
+      <button class="pill" data-g="day" data-v="3">Thu</button>
+      <button class="pill" data-g="day" data-v="4">Fri</button>
+      <button class="pill" data-g="day" data-v="5">Sat</button>
+      <button class="pill" data-g="day" data-v="6">Sun</button>
+    </div></div>
+    <div class="fgrp"><h5>Trip from home</h5><div class="seg">
+      <button class="pill on" data-g="t" data-v="99">Any</button>
+      <button class="pill" data-g="t" data-v="15">&le;15 min</button>
+      <button class="pill" data-g="t" data-v="30">&le;30 min</button>
+    </div></div>
+    <div class="fgrp"><h5>Space</h5><div class="seg">
+      <button class="pill on" data-g="io" data-v="any">Any</button>
+      <button class="pill" data-g="io" data-v="indoor">Indoor</button>
+      <button class="pill" data-g="io" data-v="outdoor">Outdoor</button>
+    </div></div>
+    <div class="fgrp"><h5>Type</h5><div class="seg">
+      <button class="pill on" data-g="tp" data-v="any">Any</button>
+      <button class="pill" data-g="tp" data-v="play">Open play</button>
+      <button class="pill" data-g="tp" data-v="class">Classes</button>
+    </div></div>
+    <div class="fgrp"><h5>Price</h5><div class="seg slider-wrap"><span class="slider-lbl" id="price-lbl">Any price</span><input type="range" id="price-slider" min="0" max="100" value="100" step="5" class="slider"></div></div>
+    <div class="fgrp"><h5>Grown-ups</h5><div class="seg"><button class="pill" data-g="af" data-v="1">Adults enjoy too</button></div></div>
+    <div class="factions"><button class="pill" id="freset">Reset all</button><button class="pill on" id="fdone">Done</button></div>
+  </div>
+</div>
+<div class="main">
+  <div id="map"></div>
+  <div class="list-wrap" id="list-wrap"><div class="grid" id="grid"></div></div>
+</div>
+<div id="sheet" role="dialog" aria-label="Venue details" tabindex="-1"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const today=new Date().getDay();
+const todayIdx=today===0?6:today-1;
+let filters={day:"any",io:"any",tp:"any",pr:100,af:"any",g:"any",t:99,fav:false};
+let sortBy="near";
+
+// Saved stops — persisted in localStorage
+let favs=new Set();
+try{favs=new Set(JSON.parse(localStorage.getItem('tya-favs-dc')||'[]'))}catch(e){}
+function saveFavs(){try{localStorage.setItem('tya-favs-dc',JSON.stringify([...favs]))}catch(e){}}
+function toggleFav(id){
+  if(favs.has(id))favs.delete(id);else favs.add(id);
+  const refocus=document.activeElement&&document.activeElement.classList.contains('fav-btn');
+  saveFavs();syncQuick();render();updateSheetSave();
+  if(refocus){
+    const b=document.querySelector(`.vc[data-id="${id}"] .fav-btn`)||document.getElementById('fav-only');
+    b.focus({preventScroll:true});
+  }
+}
+
+// Venue data: io: i=indoor o=outdoor b=both | tp: p=play c=class b=both | $=basic price (0=free)
+// days: [Mon..Sun] null=closed, string=hours, "v"=varies
+const D=[
+{id:1,n:"American Art Museum & Portrait Gallery",a:"8th & G Sts NW",lt:38.8977,ln:-77.0229,cat:"Museum",ic:"⛲",t:5,io:"i",tp:"p",af:1,$:0,d:"The glass-roofed Kogod Courtyard has shallow water scrims toddlers love splash-walking through, plus cafe tables for you. Two museums of wander space, free.",days:["11:30-7","11:30-7","11:30-7","11:30-7","11:30-7","11:30-7","11:30-7"],pr:[["Everyone","Free"]],pn:"Open till 7pm daily — rare good option for late afternoons",w:"https://americanart.si.edu"},
+{id:2,n:"Martin Luther King Jr. Memorial Library (MLK Central)",a:"901 G St NW",lt:38.8986,ln:-77.0246,cat:"Library",ic:"📚",t:5,io:"i",tp:"b",af:1,$:0,d:"Huge ground-floor children's room with a slide, reading nooks and near-daily story times in the kids' amphitheater. Free, air-conditioned, and literally across from Gallery Place Metro.",days:["9:30-9","9:30-9","9:30-9","9:30-9","9:30-5:30","9:30-5:30","1-5"],pr:[["Everyone","Free"]],pn:"Check the online events calendar — baby/toddler story times fill up fast",w:"https://www.dclibrary.org/plan-visit/martin-luther-king-jr-memorial-library"},
+{id:3,n:"Museum of Illusions DC",a:"927 H St NW",lt:38.8997,ln:-77.0244,cat:"Immersive Art",ic:"🪞",t:5,io:"i",tp:"p",af:1,$:23.95,d:"Mirror mazes, tilted rooms, and the spinning vortex tunnel. Short-attention-span friendly, under-5s are free, and it's two minutes from the Gallery Place Metro.",days:["10-9","10-9","10-9","10-9","10-10","10-10","10-9"],pr:[["Under 5","Free"],["Child 5-12","$23.95"],["Adult","$28.95"]],pn:"Buy timed tickets online to skip the door line",w:"https://moiwashington.com"},
+{id:4,n:"National Building Museum",a:"401 F St NW",lt:38.8976,ln:-77.0173,cat:"Museum",ic:"🧱",t:5,io:"i",tp:"p",af:1,$:7,d:"The Building Zone playroom (ages 2-6) has foam blocks, toy trucks, and a build-it-yourself house. The colossal Great Hall is a rainy-day run-around space in itself.",days:["10-5",null,null,"10-5","10-5","10-5","10-5"],pr:[["Under 3","Free"],["Youth 3-17","$7"],["Adult","$10"]],pn:"Building Zone runs timed 45-min sessions, included with admission; closed Tue-Wed",w:"https://nbm.org"},
+{id:5,n:"National Postal Museum",a:"2 Massachusetts Ave NE",lt:38.8982,ln:-77.0084,cat:"Museum",ic:"📮",t:10,io:"i",tp:"p",af:1,$:0,d:"Mail trucks, a train car, a stagecoach to climb aboard, and real mail planes hanging overhead. Small, calm, and never crowded — a perfect one-hour toddler dose.",days:["10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30"],pr:[["Everyone","Free"]],pn:"One of the least crowded Smithsonians — great backup plan",w:"https://postalmuseum.si.edu"},
+{id:6,n:"Saturday Morning Live! at the National Theatre",a:"1321 Pennsylvania Ave NW",lt:38.8961,ln:-77.0304,cat:"Theater",ic:"🎟️",t:10,io:"i",tp:"p",af:0,$:0,d:"Free Saturday-morning kids' shows in the historic National Theatre roughly once a month during the season — puppets, music, magic, taiko drums. All shows ASL-interpreted.",days:[null,null,null,null,null,"v",null],pr:[["All ages","Free"]],pn:"Free pre-registration via Eventbrite; walk-ups accepted if space allows",w:"https://www.nationaltheatre.org/saturday-morning-live/"},
+{id:7,n:"Union Station Train Watching",a:"50 Massachusetts Ave NE",lt:38.8975,ln:-77.0063,cat:"Landmark",ic:"🚂",t:10,io:"i",tp:"p",af:1,$:0,d:"Free indoor train heaven: Amtrak and MARC trains from the gate concourse, Metro escalators, and a grand marble hall to toddle across. Food hall and bathrooms right there.",days:["v","v","v","v","v","v","v"],pr:[["Everyone","Free"]],pn:"Weekday mornings have the most train action",w:"https://www.unionstationdc.com/"},
+{id:8,n:"Canal Park",a:"200 M St SE",lt:38.8766,ln:-77.0034,cat:"Play Space",ic:"⛸️",t:15,io:"o",tp:"p",af:1,$:0,d:"42-jet dancing splash fountain in summer flips to a small outdoor ice rink in winter, two blocks from Navy Yard Metro. Cafes across the street for warming up or drying off.",days:["v","v","v","v","v","v","v"],pr:[["Splash fountain","Free"],["Winter skating","Admission + rental"]],pn:"Rink runs roughly Nov-Feb; fountain in warm months",w:"https://navyyarddc.org/parks-plazas/canal-park"},
+{id:9,n:"Carousel on the National Mall",a:"900 Jefferson Dr SW",lt:38.8886,ln:-77.0245,cat:"Carousel",ic:"🎠",t:15,io:"o",tp:"p",af:1,$:6,d:"The 1947 Smithsonian carousel is back on the Mall (reopened April 2026) after a 3-year restoration: hand-carved horses, band-organ music, and civil rights history. Easy add-on to any museum morning.",days:["10-5","10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Per rider","$6"]],pn:"No reservations needed; closes in bad weather",w:"https://smithsonian.com/carousel/"},
+{id:10,n:"City Sing and Play (Music Together)",a:"222 M St SW",lt:38.8766,ln:-77.0148,cat:"Music",ic:"🎶",t:15,io:"i",tp:"c",af:1,$:25,d:"Music Together in Southwest Waterfront: 45 minutes of singing, drumming, and scarf-waving with your kid on your lap. Classes meet at St. Matthew's Lutheran Church; also runs classes in Navy Yard.",days:["v","v","v","v","v","v","v"],pr:[["10-wk semester","Varies"],["Demo class","Free"]],pn:"Sign up for a free demo class",w:"https://www.citysingandplay.com/"},
+{id:11,n:"GALA Hispanic Theatre (GALita)",a:"3333 14th St NW",lt:38.9313,ln:-77.033,cat:"Theater",ic:"🦜",t:15,io:"i",tp:"p",af:1,$:10,d:"Bilingual Spanish/English children's shows a few times a year in Columbia Heights, plus a big Three Kings Day fiesta each January.",days:["v","v","v","v","v","v","v"],pr:[["Child","$10"],["Adult","$12"]],pn:"GALita shows run select weekends only — check the calendar",w:"https://www.galatheatre.org/"},
+{id:12,n:"Magic Ground",a:"3100 14th St NW",lt:38.9299,ln:-77.0333,cat:"Play Space",ic:"🏰",t:15,io:"i",tp:"p",af:0,$:15,d:"Castle-themed indoor playground above the Columbia Heights Target: toddler cave, slides, arts-and-crafts corner, cafe on site. Easiest Metro trip of the big play spaces.",days:["3-8","3-8","3-8","3-8","3-8","9-8","9-8"],pr:[["1 hour (wkdy)","$12"],["1 hour (wknd)","$14"],["Unlimited","$15-19"],["Infant","$5"]],pn:"Weekdays it doesn't open until 3pm; first adult free, extras $5",w:"https://magicground.com/"},
+{id:13,n:"National Children's Museum",a:"1300 Pennsylvania Ave NW",lt:38.8939,ln:-77.0305,cat:"Children's Museum",ic:"🛝",t:15,io:"i",tp:"p",af:0,$:18.95,d:"Three floors built for exactly this age: the giant Dream Machine climber-slide, water play, wind tubes, pretend veggie garden. The one paid museum worth it for a 2-year-old.",days:["9:30-4:30",null,"9:30-4:30","9:30-4:30","9:30-4:30","9:30-4:30","9:30-4:30"],pr:[["Under 1","Free"],["Ages 1+","$18.95"]],pn:"Timed entry — book online; closed Tuesdays",w:"https://nationalchildrensmuseum.org"},
+{id:14,n:"National Gallery of Art",a:"6th St & Constitution Ave NW",lt:38.8912,ln:-77.02,cat:"Museum",ic:"🎨",t:15,io:"b",tp:"p",af:1,$:0,d:"Toddler hits: the fountains, the glowing moving-walkway tunnel between buildings, and the Sculpture Garden with its big fountain. The art is a bonus for you.",days:["10-5","10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Everyone","Free"]],pn:"Sculpture Garden fountain becomes an ice rink in winter",w:"https://www.nga.gov"},
+{id:15,n:"National Museum of Natural History",a:"10th St & Constitution Ave NW",lt:38.8913,ln:-77.0261,cat:"Museum",ic:"🦖",t:15,io:"i",tp:"p",af:1,$:0,d:"The elephant in the rotunda, the dinosaur hall, and the O. Orkin Insect Zoo — animals a 2-year-old actually recognizes. No passes needed, just walk in.",days:["10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30"],pr:[["Everyone","Free"]],pn:"No timed passes needed; the live Butterfly Pavilion closed permanently, but the insect zoo is still open",w:"https://naturalhistory.si.edu"},
+{id:16,n:"Planet Word",a:"925 13th St NW",lt:38.9024,ln:-77.0297,cat:"Museum",ic:"💬",t:15,io:"i",tp:"p",af:1,$:0,d:"Talking word walls, a karaoke room, and a magical library with hidden surprises. Aimed older but the lights, sounds, and buttons keep a 2-year-old busy — and it's free.",days:["10-5",null,"10-5","10-5","10-5","10-6","10-6"],pr:[["Everyone","Free"],["Suggested donation","$15"]],pn:"Free, but reserve a timed pass online; closed Tuesdays",w:"https://planetwordmuseum.org"},
+{id:17,n:"Smithsonian Discovery Theater",a:"1100 Jefferson Dr SW",lt:38.8882,ln:-77.0263,cat:"Theater",ic:"🔎",t:15,io:"i",tp:"p",af:0,$:7,d:"Smithsonian's own kids' theater in the Ripley Center on the Mall: weekday-morning shows (10:15 and 11:30am) aimed at preschool and elementary ages. Cheapest live show in town.",days:["v","v","v","v","v","v","v"],pr:[["Child (2-16)","$7"],["Adult","$7"],["Under 2","Free"]],pn:"Reserve ahead — weekday shows fill with school groups; check each show's recommended ages",w:"https://discoverytheater.org/"},
+{id:18,n:"Southwest Neighborhood Library",a:"900 Wesley Place SW",lt:38.8788,ln:-77.0157,cat:"Library",ic:"📚",t:15,io:"i",tp:"b",af:0,$:0,d:"DC's newest library building (2021) with a sunny children's room and regular Baby Lap Time. Short walk from Waterfront Metro and The Wharf playgrounds.",days:["9-8","9-8","9-8","12-8","10-6","10-6","1-5"],pr:[["Everyone","Free"]],pn:"Baby Lap Time (birth-5) runs regularly — check the events calendar",w:"https://www.dclibrary.org/plan-visit/southwest-library"},
+{id:19,n:"The Yards Park",a:"355 Water St SE",lt:38.874,ln:-77.0008,cat:"Play Space",ic:"💦",t:15,io:"o",tp:"p",af:1,$:0,d:"Foot-deep canal basin with a waterfall plus dancing fountain jets: the classic DC toddler splash stop. Restrooms and Ice Cream Jubilee in the Lumber Shed next door.",days:["v","v","v","v","v","v","v"],pr:[["Everyone","Free"]],pn:"Fountains can close Mon-Wed for weekly cleaning",w:"https://theyardsdc.com/yards-park/"},
+{id:20,n:"YMCA Anthony Bowen",a:"1325 W St NW",lt:38.9196,ln:-77.031,cat:"Swim",ic:"🏊",t:15,io:"i",tp:"b",af:1,$:25,d:"Parent & Child swim lessons in a warm six-lane indoor pool near U Street. Session-based; a 30-minute splash class doubles as nap fuel.",days:["v","v","v","v","v","v","v"],pr:[["Session, member","~$113"],["Session, non-member","~$186"]],pn:"Sessions fill fast — register early",w:"https://www.ymcadc.org/locations/ymca-anthony-bowen/"},
+{id:21,n:"All Fired Up",a:"3413 Connecticut Ave NW",lt:38.9349,ln:-77.0577,cat:"Art Studio",ic:"🏺",t:20,io:"i",tp:"p",af:1,$:20,d:"Paint-your-own-pottery studio in Cleveland Park, steps from the Metro. Toddlers slap washable paint on a dinosaur figurine; you pick up the fired piece a week later.",days:[null,"12-8","12-8","12-8","12-8","12-8","12-6"],pr:[["Pottery piece","$6-60"],["Paint, glaze & firing","Included"]],pn:"Reserve an open-studio spot online (walk-ins not guaranteed); no studio fee — pieces are fired and ready in 7-10 days",w:"https://allfiredupdc.com/"},
+{id:22,n:"BloomBars",a:"3222 11th St NW",lt:38.9302,ln:-77.0281,cat:"Music",ic:"🥁",t:20,io:"i",tp:"c",af:1,$:10,d:"Scrappy nonprofit arts house in Columbia Heights with kids' music most mornings — Singing Lizard Tuesdays are a toddler institution. True drop-in.",days:["v","v","v","v","v","v","v"],pr:[["Suggested donation","$7-15"]],pn:"Pay what you can; most kids' shows ~10am",w:"https://bloombars.com/"},
+{id:23,n:"British Swim School (Hyatt Place West End)",a:"2121 M St NW",lt:38.9055,ln:-77.0476,cat:"Swim",ic:"🌊",t:20,io:"i",tp:"c",af:0,$:35,d:"Survival-first swim lessons in a warm hotel pool; toddler levels are parent-and-me with a 4:1 ratio. Starts as young as 3 months.",days:["v","v","v","v","v","v","v"],pr:[["Per lesson","~$35/wk, billed monthly"]],pn:"Weekly lessons billed monthly; free assessment",w:"https://britishswimschool.com/north-washington-dc-capital-suburbs/"},
+{id:24,n:"Dance Place",a:"3225 8th St NE",lt:38.931,ln:-76.9946,cat:"Dance",ic:"💃",t:20,io:"i",tp:"c",af:0,$:25,d:"Move with Me class (18 months-3 years with a grown-up) weekend mornings in Brookland — singing, props, and basic motor-skill play.",days:["v","v","v","v","v","v","v"],pr:[["Session","$220-300 sliding scale"]],pn:"Pick-your-price tiers; scholarships available",w:"https://www.danceplace.org/"},
+{id:25,n:"Edlavitch DCJCC",a:"1529 16th St NW",lt:38.9105,ln:-77.0366,cat:"Community Center",ic:"🤹",t:20,io:"i",tp:"c",af:1,$:30,d:"A full weekly menu of caregiver-and-me classes: music, yoga, baby signs, swim, and preschool-prep for babies and toddlers. One-stop rainy-week fix near Dupont.",days:["v","v","v","v","v","v","v"],pr:[["Session classes","Varies"],["Members","Discounted"]],pn:"Open to all — no membership required for classes",w:"https://www.edcjcc.org/"},
+{id:26,n:"Hirshhorn Museum",a:"Independence Ave & 7th St SW",lt:38.8881,ln:-77.023,cat:"Museum",ic:"🌀",t:20,io:"i",tp:"p",af:1,$:0,d:"Doughnut-shaped modern art museum: one continuous stroller loop of big, bright, weird art a 2-year-old will happily point at. Quick, free, easy in-and-out.",days:["10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30"],pr:[["Everyone","Free"]],pn:"Some immersive installations need free timed passes — check site",w:"https://hirshhorn.si.edu"},
+{id:27,n:"National Air and Space Museum",a:"600 Independence Ave SW",lt:38.8882,ln:-77.0199,cat:"Museum",ic:"🚀",t:20,io:"i",tp:"p",af:1,$:0,d:"Rockets and planes hanging overhead deliver a huge wow for toddlers. Head straight to the hands-on How Things Fly gallery, the floor built for little kids.",days:["10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30"],pr:[["Everyone","Free"]],pn:"Free timed-entry passes required — book online ahead",w:"https://airandspace.si.edu"},
+{id:28,n:"National Museum of American History",a:"1300 Constitution Ave NW",lt:38.8912,ln:-77.0301,cat:"Museum",ic:"🚂",t:20,io:"i",tp:"p",af:1,$:0,d:"Wegmans Wonderplace is a dedicated 0-6 play space: a climbable mini Smithsonian Castle, a tugboat to captain, play kitchen and farm. Free and made for this age.",days:["10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30"],pr:[["Everyone","Free"]],pn:"Wonderplace open Wed-Sun 10-4 only; go early on weekends",w:"https://americanhistory.si.edu"},
+{id:29,n:"National Museum of the American Indian",a:"4th St & Independence Ave SW",lt:38.8884,ln:-77.0164,cat:"Museum",ic:"🛶",t:20,io:"i",tp:"p",af:1,$:0,d:"The imagiNATIONS activity center is the draw: a tipi to explore, giant basket to weave, and hands-on stations sized for small kids. Mitsitam Cafe is a solid lunch stop.",days:["10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30"],pr:[["Everyone","Free"]],pn:"imagiNATIONS open Tue-Sun 10-4:30, closed Mondays; first-come first-served",w:"https://americanindian.si.edu"},
+{id:30,n:"Northwest One Neighborhood Library",a:"155 L St NW",lt:38.9037,ln:-77.0117,cat:"Library",ic:"📚",t:20,io:"i",tp:"b",af:0,$:0,d:"Bright modern branch a short hop from downtown with a good kids' area. Strong Start play group Tuesdays at 11 am for the under-5 crowd.",days:["10-6","10-6","10-6","12-8","10-6","10-6","1-5"],pr:[["Everyone","Free"]],pn:"Strong Start play group runs Tuesdays at 11 am",w:"https://www.dclibrary.org/plan-visit/northwest-one-library"},
+{id:31,n:"Potomac Water Taxi (City Cruises)",a:"950 Wharf St SW",lt:38.88,ln:-77.0262,cat:"Adventure",ic:"⛴️",t:20,io:"b",tp:"p",af:1,$:22,d:"Real boat ride on the Potomac from Transit Pier to Georgetown (30 min), Alexandria, or National Harbor (45 min). Toddlers love the ride itself; strollers roll right on.",days:["v","v","v","v","v","v","v"],pr:[["Adult one-way","from $22"],["All-day pass","from $36"]],pn:"Runs March-Dec; check the seasonal schedule before you go",w:"https://www.cityexperiences.com/washington-dc/city-cruises/water-taxi/"},
+{id:32,n:"The Little Gym of Capitol Hill",a:"625 Pennsylvania Ave SE",lt:38.8843,ln:-76.9975,cat:"Gym",ic:"🤸",t:20,io:"i",tp:"c",af:0,$:35,d:"Parent-child gymnastics from 4 months up: mini balance beams, bars, and endless bubbles. Membership model, but the free intro class is an easy way to test the waters.",days:["v","v","v","v","v","v","v"],pr:[["Monthly (1 class/wk)","~$140"],["Intro class","Free"]],pn:"Book a free intro class online",w:"https://www.thelittlegym.com/dc-capitol-hill/"},
+{id:33,n:"The Wharf: Recreation Pier & Splash Fountain",a:"760 Maine Ave SW",lt:38.8808,ln:-77.0264,cat:"Adventure",ic:"⛲",t:20,io:"o",tp:"p",af:1,$:0,d:"Splash fountain at 7th Street Park, oversized porch swings and a fire feature on Recreation Pier, and boats everywhere. The free Wharf Jitney boat hops across to East Potomac Park.",days:["v","v","v","v","v","v","v"],pr:[["Fountain & swings","Free"],["Jitney boat ride","Free"]],pn:"Fountain runs roughly 8am-midnight in warm months",w:"https://www.wharfdc.com/things-to-do/kids-activities/"},
+{id:34,n:"United States Botanic Garden",a:"100 Maryland Ave SW",lt:38.8882,ln:-77.0125,cat:"Garden",ic:"🌺",t:20,io:"b",tp:"p",af:1,$:0,d:"Steamy jungle conservatory two blocks from the Capitol, with a children's garden outside in warm months. Reliable free rainy-day hour.",days:["10-5","10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Everyone","Free"]],pn:"No tickets needed; outdoor National Garden open 7:30-5",w:"https://www.usbg.gov"},
+{id:35,n:"West End Neighborhood Library",a:"2301 L St NW",lt:38.9037,ln:-77.051,cat:"Library",ic:"📚",t:20,io:"i",tp:"b",af:0,$:0,d:"Sleek modern branch between Foggy Bottom and Dupont with a calm children's corner. A reliable rainy-hour stop when you're stuck downtown with a toddler.",days:["9-8","9-8","9-8","12-8","10-6","10-6","1-5"],pr:[["Everyone","Free"]],pn:"Check the branch calendar for story time days before you trek over",w:"https://www.dclibrary.org/plan-visit/west-end-library"},
+{id:36,n:"Arthur Capper Community Center",a:"1000 5th St SE",lt:38.878,ln:-76.9991,cat:"Play Space",ic:"🛝",t:25,io:"i",tp:"p",af:0,$:0,d:"Free DC rec center near Navy Yard with a dedicated soft-play room for toddlers. Zero dollars, and blissfully quiet on weekday mornings.",days:["8-9","8-9","8-9","8-9","8-9","9-5",null],pr:[["Admission","Free"]],pn:"Call ahead to confirm the toddler soft-play room is open that day",w:"https://dpr.dc.gov/arthurcapper"},
+{id:37,n:"Atlas Performing Arts Center",a:"1333 H St NE",lt:38.9001,ln:-76.9866,cat:"Theater",ic:"🎪",t:25,io:"i",tp:"p",af:1,$:15,d:"H Street arts center with an Arts for Young Audiences series (theater, puppetry, music) and free Family Fun Days with The Great Zucchini.",days:["v","v","v","v","v","v","v"],pr:[["Family shows","varies"],["Family Fun Days","Free"]],pn:"Family shows are occasional — check the calendar before heading over",w:"https://www.atlasarts.org/"},
+{id:38,n:"Capitol Hill Arts Workshop",a:"545 7th St SE",lt:38.8812,ln:-76.9962,cat:"Classes",ic:"🎨",t:25,io:"i",tp:"c",af:0,$:20,d:"Creative movement and Suzuki-style music classes for ages 0-3 at Capitol Hill's beloved neighborhood arts co-op. Caregiver stays and plays.",days:["v","v","v","v","v","v","v"],pr:[["Session","Sliding scale"],["Typical class","~$20"]],pn:"Sliding-scale tuition — no child turned away",w:"https://chaw.org/"},
+{id:39,n:"Cleveland Park Neighborhood Library",a:"3310 Connecticut Ave NW",lt:38.9343,ln:-77.058,cat:"Library",ic:"📚",t:25,io:"i",tp:"b",af:0,$:0,d:"Airy 2018 rebuild steps from Cleveland Park Metro; the kids' area keeps the beloved blue cat sculpture from the old building. Handy stop before or after the Zoo.",days:["9-8","9-8","9-8","12-8","10-6","10-6","1-5"],pr:[["Everyone","Free"]],pn:"Combine with the Zoo — it's one Metro stop or a 15-minute walk away",w:"https://www.dclibrary.org/plan-visit/cleveland-park-library"},
+{id:40,n:"East City Bookshop",a:"645 Pennsylvania Ave SE",lt:38.8843,ln:-76.9961,cat:"Bookstore",ic:"📖",t:25,io:"i",tp:"b",af:1,$:0,d:"Capitol Hill indie a block from Eastern Market with a lower level packed with board and picture books. Thursday 11:30 am storytime (ages 0-4) is a neighborhood toddler institution.",days:["11-7","11-7","11-7","11-7","11-7","10-7","11-6"],pr:[["Storytime","Free"],["Browsing","Free"]],pn:"Storytime Thursdays 11:30 am, ages 0-4 with caregiver",w:"https://www.eastcitybookshop.com/"},
+{id:41,n:"Hill Center at the Old Naval Hospital",a:"921 Pennsylvania Ave SE",lt:38.883,ln:-76.9933,cat:"Classes",ic:"🎼",t:25,io:"i",tp:"c",af:1,$:25,d:"Restored Civil War-era hospital packed with rotating toddler classes — Music Together mixed-age, music lessons, art — run by local providers.",days:["v","v","v","v","v","v","v"],pr:[["Varies by provider","~$20-30/class"]],pn:"Register directly with each class provider",w:"https://www.hillcenterdc.org/"},
+{id:42,n:"Kennedy Center (NSO Family & Young Audiences)",a:"2700 F St NW",lt:38.8955,ln:-77.0556,cat:"Music",ic:"🎻",t:25,io:"i",tp:"p",af:1,$:20,d:"NSO family shows mix puppets and storytelling with real orchestra musicians, plus free Millennium Stage performances most evenings. Free shuttle from Foggy Bottom Metro.",days:["v","v","v","v","v","v","v"],pr:[["NSO Family/Young Audiences","$15-25"],["Millennium Stage","Free"]],pn:"Millennium Stage shows are free (book online or same-day at the box office); free shuttle from Foggy Bottom Metro",w:"https://www.kennedy-center.org/"},
+{id:43,n:"Levine Music (DC Campus NW)",a:"2801 Upton St NW",lt:38.942,ln:-77.0648,cat:"Music",ic:"🎶",t:25,io:"i",tp:"c",af:0,$:30,d:"First Music early-childhood classes from infancy to age 5: singing, drumming, and movement taught by working musicians. Short walk from Van Ness-UDC Metro.",days:["1-8","1-8","1-8","1-8","1-6","9-5","v"],pr:[["First Music","semester tuition"]],pn:"Enrollment is by semester, not drop-in — inquire about trial classes",w:"https://www.levinemusic.org/"},
+{id:44,n:"Levine Music (NW Campus)",a:"2801 Upton St NW",lt:38.943,ln:-77.0563,cat:"Music",ic:"🎵",t:25,io:"i",tp:"c",af:0,$:27,d:"First Music classes for ages 0-5 taught by real musicians in a grand old mansion by Rock Creek Park. Play-based but musically serious.",days:["v","v","v","v","v","v","v"],pr:[["Semester (~15 wks)","~$400"]],pn:"Semester enrollment; financial aid available",w:"https://www.levinemusic.org/"},
+{id:45,n:"Loyalty Bookstores (Petworth)",a:"4203 9th St NW",lt:38.9421,ln:-77.0247,cat:"Bookstore",ic:"📖",t:25,io:"i",tp:"b",af:1,$:0,d:"Cozy Black- and queer-owned Petworth indie with a strong picture-book selection and kids' storytime and sing-along events. Small but mighty for a toddler browse.",days:[null,"11-7","11-7","11-7","11-8","9-8","12-6"],pr:[["Storytime","Free"],["Browsing","Free"]],pn:"Closed Mondays; storytime dates are on their events page",w:"https://loyaltybookstores.com/"},
+{id:46,n:"Mt. Pleasant Neighborhood Library",a:"3160 16th St NW",lt:38.9313,ln:-77.0366,cat:"Library",ic:"📚",t:25,io:"i",tp:"b",af:0,$:0,d:"Historic 1925 Carnegie branch with a lovely children's room and weekly story times. A neighborhood toddler hub for Mt. Pleasant and Columbia Heights families.",days:["9-8","9-8","9-8","12-8","10-6","10-6","1-5"],pr:[["Everyone","Free"]],pn:"Also serving Petworth families while that branch is closed for renovation",w:"https://www.dclibrary.org/plan-visit/mt-pleasant-library"},
+{id:47,n:"Mulberry Lane at The Roost",a:"1401 Pennsylvania Ave SE",lt:38.8797,ln:-76.9848,cat:"Play Cafe",ic:"☕",t:25,io:"i",tp:"b",af:1,$:19,d:"Supervised play room inside The Roost food hall: pretend play, crafts, and story time for ages 1-6 while you eat or answer email steps away. One block from Potomac Ave Metro.",days:["10-8","10-8","10-8","10-8","10-8","10-8","10-8"],pr:[["Play pass (1 hr)","$19"],["10-hr pass","$179"]],pn:"Book a slot online; staff supervise but a parent stays on site",w:"https://www.mulberrylanedmv.com/"},
+{id:48,n:"National Museum of African American History and Culture",a:"1400 Constitution Ave NW",lt:38.8911,ln:-77.0327,cat:"Museum",ic:"🏛️",t:25,io:"i",tp:"p",af:1,$:0,d:"A serious museum, but stroller-friendly and stunning inside — best tackled with a napping toddler in the carrier. Sweet Home Cafe is one of the Mall's best lunches.",days:["10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30","10-5:30"],pr:[["Everyone","Free"]],pn:"Free timed passes required on weekends and peak weekday mornings — same-day passes online at 8:15am; weekday walk-up entry often allowed",w:"https://nmaahc.si.edu"},
+{id:49,n:"Northeast Neighborhood Library",a:"330 7th St NE",lt:38.8947,ln:-76.9962,cat:"Library",ic:"📚",t:25,io:"i",tp:"b",af:0,$:0,d:"Handsome renovated Capitol Hill branch with a big children's room and regular birth-to-5 story times. Easy pairing with the H Street corridor.",days:["9-8","9-8","9-8","12-8","10-6","10-6","1-5"],pr:[["Everyone","Free"]],pn:"Summer story times sometimes move off-site — check the branch calendar",w:"https://www.dclibrary.org/plan-visit/northeast-library"},
+{id:50,n:"Smithsonian National Zoo",a:"3001 Connecticut Ave NW",lt:38.9296,ln:-77.0498,cat:"Zoo",ic:"🐼",t:25,io:"b",tp:"p",af:1,$:0,d:"Pandas up top, Kids' Farm goats at the bottom of the hill. It's all downhill on the way in — save energy for the climb back to the Metro.",days:["8-6","8-6","8-6","8-6","8-6","8-6","8-6"],pr:[["Everyone","Free"]],pn:"Free timed entry passes required (even for babies); parking $30 in advance, $40 day-of; closes 4pm mid-Sept to mid-Mar",w:"https://nationalzoo.si.edu"},
+{id:51,n:"Solid State Books (H Street)",a:"600 H St NE",lt:38.9002,ln:-76.9985,cat:"Bookstore",ic:"📖",t:25,io:"i",tp:"b",af:1,$:0,d:"Indie bookstore with a carpeted kids' corner to sprawl in and free story time Thursday, Saturday and Sunday at 10:30 am — Thursday is the baby/toddler session. Coffee bar for the grown-ups.",days:["10-9","10-9","10-9","10-9","10-9","9-9","9-9"],pr:[["Storytime","Free"],["Browsing","Free"]],pn:"Thursday 10:30 am story time is specifically for babies and toddlers",w:"https://www.solidstatebooksdc.com/"},
+{id:52,n:"Theodore Roosevelt Island",a:"GW Memorial Pkwy, Arlington VA",lt:38.8963,ln:-77.0627,cat:"Nature Park",ic:"🦆",t:25,io:"o",tp:"p",af:1,$:0,d:"Car-free island in the Potomac with a marsh boardwalk loop — turtles, herons, sometimes deer. 15-minute walk over the footbridge from Rosslyn Metro.",days:["6a-10p","6a-10p","6a-10p","6a-10p","6a-10p","6a-10p","6a-10p"],pr:[["Everyone","Free"]],pn:"Gravel and boardwalk trails; jogging strollers do best",w:"https://www.nps.gov/this"},
+{id:53,n:"Washington Monument",a:"2 15th St NW",lt:38.8895,ln:-77.0353,cat:"Landmark",ic:"🗼",t:25,io:"b",tp:"p",af:1,$:0,d:"A 70-second elevator ride to the top — toddlers treat it like a theme-park ride, and you get the best view in DC. Grass all around for post-ride running.",days:["9-5","9-5","9-5","9-5","9-5","9-5","9-5"],pr:[["Everyone","Free"]],pn:"Free same-day tickets at the lodge from 8:45am, or reserve online 30 days ahead ($1 fee); closed one day a month for maintenance",w:"https://www.nps.gov/wamo/"},
+{id:54,n:"Wilson Aquatic Center (DPR)",a:"4551 Fort Dr NW",lt:38.9481,ln:-77.0785,cat:"Swim",ic:"💦",t:25,io:"i",tp:"b",af:1,$:0,d:"Free DPR indoor pool a block from Tenleytown Metro with a zero-entry kids' pool and fountains. DPR runs parent-child swim programs here too.",days:["6a-9p","6a-9p","6a-9p","6a-9p","6a-9p","10a-5p","10a-5p"],pr:[["DC residents","Free"],["Non-residents","Aquatics pass required"]],pn:"Free for DC residents — bring photo ID",w:"https://dpr.dc.gov/page/wilson-aquatic-center"},
+{id:55,n:"Bluemont Local",a:"376A Calvert Ave, Alexandria VA",lt:38.8302,ln:-77.0527,cat:"Play Cafe",ic:"🚂",t:30,io:"i",tp:"p",af:0,$:22,d:"Del Ray play cafe (opened Nov 2025) with a nature-inspired play structure custom-built in England for ages 0-6. You get a cozy couch and bottomless coffee for the 2-hour session.",days:["8:30-6:30","8:30-6:30","8:30-6:30","8:30-6:30","8:30-6:30","8:30-6:30","8:30-6:30"],pr:[["Child 2 hr (wkdy)","$22"],["Child 2 hr (wknd)","$28"],["Sibling","$18-23"],["Under 1","Free"]],pn:"Shoes off for everyone; free coffee and tea for grown-ups; run by two clinical psychologists",w:"https://www.bluemontlocal.com/"},
+{id:56,n:"Georgetown Waterfront Park Fountain",a:"3303 Water St NW",lt:38.904,ln:-77.0663,cat:"Play Space",ic:"⛲",t:30,io:"o",tp:"p",af:1,$:0,d:"Arching sprinkler-style fountain kids dash through all summer, with river views, kayaks, and rowing crews to watch. Georgetown gelato and bakeries a short stroll uphill.",days:["v","v","v","v","v","v","v"],pr:[["Everyone","Free"]],pn:"Fountain runs warm months only; lit up at night",w:"https://www.nps.gov/places/georgetown-waterfront-park.htm"},
+{id:57,n:"Junior Playland (Ballston Quarter)",a:"4238 Wilson Blvd, Arlington VA",lt:38.879,ln:-77.1107,cat:"Play Space",ic:"🍭",t:30,io:"i",tp:"p",af:0,$:16,d:"Candy-themed soft play inside Ballston Quarter mall: ball-pit slide, pretend grocery store, fire truck. Metro to Ballston — no car needed.",days:["9-7","9-7","9-7","9-7","9-7","9-7","9-7"],pr:[["Mon-Thu","$16"],["Fri-Sun","$20"],["2 adults","Free"]],pn:"Friday counts as weekend pricing",w:"https://juniorplayland.com"},
+{id:58,n:"Tenley-Friendship Neighborhood Library",a:"4450 Wisconsin Ave NW",lt:38.9481,ln:-77.0797,cat:"Library",ic:"📚",t:30,io:"i",tp:"b",af:0,$:0,d:"Two-story glass branch with a dedicated children's room, directly across from Tenleytown Metro. Dependable story times and lots of space to crawl around.",days:["9-8","9-8","9-8","12-8","10-6","10-6","1-5"],pr:[["Everyone","Free"]],pn:"Right at Tenleytown Metro on the Red Line — no bus transfer needed",w:"https://www.dclibrary.org/plan-visit/tenley-friendship-library"},
+{id:59,n:"Aquatic Resources Education Center",a:"1500 Anacostia Dr SE",lt:38.8747,ln:-76.976,cat:"Aquarium",ic:"🐟",t:35,io:"i",tp:"b",af:0,$:0,d:"Free mini-aquarium in Anacostia Park: tanks of local fish, turtles, and eels run by DC's environment agency. Tiny but a reliable toddler hit.",days:[null,"1-3","1-3","1-3","1-3",null,null],pr:[["Everyone","Free"]],pn:"Walk-ins Tue-Fri 1-3pm only; groups of 8+ must book ahead",w:"https://doee.dc.gov/arec"},
+{id:60,n:"Cabin John Regional Park",a:"7400 Tuckerman Ln, Bethesda MD",lt:39.0344,ln:-77.1505,cat:"Park",ic:"🚂",t:35,io:"o",tp:"p",af:1,$:0,d:"15-minute miniature train ride through the woods plus a giant playground. Classic toddler double feature.",days:["dawn-dusk","dawn-dusk","dawn-dusk","dawn-dusk","dawn-dusk","dawn-dusk","dawn-dusk"],pr:[["Park","Free"],["Train ride","$4"],["Under 2","Free on lap"]],pn:"Train runs April-Oct; weekends only in spring and fall",w:"https://montgomeryparks.org/parks-and-trails/cabin-john-regional-park/"},
+{id:61,n:"Clemyjontri Park",a:"6317 Georgetown Pike, McLean VA",lt:38.9447,ln:-77.1567,cat:"Park",ic:"🛝",t:35,io:"o",tp:"p",af:0,$:0,d:"Two acres of rubber-surfaced, fully accessible playground plus its own carousel. Worth the drive; zero mulch, zero grass stains.",days:["7am-dusk","7am-dusk","7am-dusk","7am-dusk","7am-dusk","7am-dusk","7am-dusk"],pr:[["Playground","Free"],["Carousel ride","$4 weekday / $5 weekend"]],pn:"No Metro access — drive or rideshare; carousel runs spring-fall",w:"https://www.fairfaxcounty.gov/parks/clemyjontri"},
+{id:62,n:"Georgetown Neighborhood Library",a:"3260 R St NW",lt:38.9128,ln:-77.0653,cat:"Library",ic:"📚",t:35,io:"i",tp:"b",af:0,$:0,d:"Stately branch at the top of Georgetown with a large children's room and popular baby/toddler story times. Book Hill Park's grassy slope is next door for post-story wiggles.",days:["9-8","9-8","9-8","12-8","10-6","10-6","1-5"],pr:[["Everyone","Free"]],pn:"Baby & toddler story time requires pre-registration — no walk-ins",w:"https://www.dclibrary.org/plan-visit/georgetown-library"},
+{id:63,n:"Hillwood Estate, Museum & Gardens",a:"4155 Linnean Ave NW",lt:38.9422,ln:-77.0533,cat:"Garden",ic:"🌷",t:35,io:"b",tp:"p",af:1,$:0,d:"Manicured gardens, a Russian dacha, and a greenhouse full of orchids. More of a stroll than a romp — good for a calm morning.",days:[null,"10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Under 6","Free"],["Child 6-18","$5"],["Adult","$20 suggested"]],pn:"Kids under 6 free; closed Mondays and several weeks in January",w:"https://hillwoodmuseum.org"},
+{id:64,n:"Imagination Stage",a:"4908 Auburn Ave, Bethesda MD",lt:38.9857,ln:-77.0968,cat:"Theater",ic:"🎭",t:35,io:"i",tp:"b",af:1,$:15,d:"Children's theater with caregiver-and-me drama and music classes from 12 months, plus drop-in Saturday Song Circle and Sunday Fun Day weekends.",days:["v","v","v","v","v","v","v"],pr:[["Drop-in Song Circle","~$15"],["6-wk class","~$180"]],pn:"Check calendar — drop-in weekends are select dates",w:"https://imaginationstage.org/"},
+{id:65,n:"Lincoln Memorial",a:"2 Lincoln Memorial Cir NW",lt:38.8893,ln:-77.0502,cat:"Landmark",ic:"🎩",t:35,io:"o",tp:"p",af:1,$:0,d:"Big steps to climb, a giant Lincoln to stare at, and endless space to toddle. Pair with duck-watching along the Reflecting Pool.",days:["24h","24h","24h","24h","24h","24h","24h"],pr:[["Everyone","Free"]],pn:"Lots of steps — baby carrier beats the stroller here",w:"https://www.nps.gov/linc/"},
+{id:66,n:"Mulberry Lane (Del Ray)",a:"2016 Mt Vernon Ave, Alexandria VA",lt:38.8243,ln:-77.0586,cat:"Play Cafe",ic:"🫐",t:35,io:"i",tp:"b",af:1,$:19,d:"The original Del Ray play cafe: supervised play for ages 1-6 with art workshops and story time, plus a coworking cafe so you can actually get something done.",days:["v","v","v","v","v","v","v"],pr:[["Play pass (1 hr)","$19"],["10-hr pass","$179"]],pn:"Book online; posted hours vary by source and weekends sometimes close for private parties — check the site",w:"https://www.mulberrylanedmv.com/"},
+{id:67,n:"Music Center at Strathmore",a:"5301 Tuckerman Ln, North Bethesda MD",lt:39.0329,ln:-77.1099,cat:"Music",ic:"🎷",t:35,io:"b",tp:"p",af:1,$:0,d:"Free summer Live from the Lawn concerts plus Thursday-evening Cool Concerts for Kids, and ticketed family shows in the big hall. Covered walkway straight from Grosvenor-Strathmore Metro.",days:["v","v","v","v","v","v","v"],pr:[["Lawn & kids concerts","Free"],["Ticketed shows","varies"]],pn:"Summer outdoor concerts are free — bring a blanket; Cool Concerts for Kids run Thursday evenings in July",w:"https://www.strathmore.org/"},
+{id:68,n:"Politics and Prose",a:"5015 Connecticut Ave NW",lt:38.9546,ln:-77.0699,cat:"Bookstore",ic:"📖",t:35,io:"i",tp:"b",af:1,$:0,d:"DC's flagship indie with a serious downstairs children's department and free Monday 10:30 am story time (ages 0-4) during the school year. Cafe downstairs for snacks and coffee.",days:["9-9","9-9","9-9","9-9","9-9","9-9","10-8"],pr:[["Storytime","Free"],["Browsing","Free"]],pn:"Story time Mondays 10:30 am during the school year — free, no signup",w:"https://politics-prose.com/"},
+{id:69,n:"Scramble Alexandria",a:"5412 Eisenhower Ave, Alexandria VA",lt:38.8,ln:-77.1274,cat:"Play Space",ic:"🧸",t:35,io:"i",tp:"p",af:0,$:10,d:"Thoughtfully zoned indoor play with a gated infant/toddler area, big-kid climbing beyond it, and a cafe with real coffee. Short walk from Van Dorn St Metro.",days:["9-5","9-5","9-5","9-5","9-8","9-8","9-6"],pr:[["Toddler 1-4 weekday","$7-10"],["Toddler 1-4 weekend","$16"],["Two adults","Free weekdays; $3 each weekends"]],pn:"Socks required for everyone",w:"https://www.goscramble.com"},
+{id:70,n:"U.S. National Arboretum",a:"3501 New York Ave NE",lt:38.9126,ln:-76.9694,cat:"Garden",ic:"🌳",t:35,io:"o",tp:"p",af:1,$:0,d:"446 acres with the old Capitol columns standing in a meadow — endless room to run. Bonsai museum is a quick, quiet stop.",days:["8-5","8-5","8-5","8-5","8-5","8-5","8-5"],pr:[["Everyone","Free"]],pn:"Free parking on grounds; easiest with a car — New York Ave gate closes early, use the R St gate",w:"https://www.usna.usda.gov"},
+{id:71,n:"Adventure Theatre MTC",a:"7300 MacArthur Blvd, Glen Echo MD",lt:38.966,ln:-77.1391,cat:"Theater",ic:"🐭",t:40,io:"i",tp:"p",af:0,$:27,d:"Hour-or-less musicals of picture-book classics, steps from the Puppet Co. in Glen Echo Park. Make a day of it with the playground and carousel.",days:["v","v","v","v","v","v","v"],pr:[["Single ticket","$26-28"],["Flexpass (10 tix)","$185"]],pn:"Weekend shows sell out; Flexpass cuts per-show cost",w:"https://adventuretheatre-mtc.org/"},
+{id:72,n:"College Park Aviation Museum",a:"1985 Corporal Frank Scott Dr, College Park MD",lt:38.9781,ln:-76.9222,cat:"Museum",ic:"✈️",t:40,io:"b",tp:"p",af:1,$:0,d:"Real planes at kid height, dress-up flight gear, and a toddler play corner — on the world's oldest operating airport, so you can watch small planes take off out the windows.",days:[null,"10-4","10-4","10-4","10-4","10-4","10-4"],pr:[["Everyone","Free in 2026"]],pn:"Free all of 2026 via county PastPort program; normally just a few dollars",w:"https://www.pgparks.com/facilities/college-park-aviation-museum"},
+{id:73,n:"Kenilworth Park & Aquatic Gardens",a:"1550 Anacostia Ave NE",lt:38.9123,ln:-76.9427,cat:"Garden",ic:"🪷",t:40,io:"o",tp:"p",af:1,$:0,d:"Boardwalks over lotus and lily ponds — frogs, turtles, and herons everywhere. Go in the morning in July for peak bloom.",days:["8-4","8-4","8-4","8-4","8-4","8-4","8-4"],pr:[["Everyone","Free"]],pn:"Free Lotus & Water Lily Festival every July",w:"https://www.nps.gov/keaq"},
+{id:74,n:"Rock Creek Park Nature Center",a:"5200 Glover Rd NW",lt:38.96,ln:-77.0505,cat:"Nature Center",ic:"🦉",t:40,io:"b",tp:"b",af:1,$:0,d:"Small free nature center with live turtles, snakes, and a beehive, plus a kid-sized planetarium. Easy woodland trails out back.",days:[null,null,"9-5","9-5","9-5","9-5","9-5"],pr:[["Everyone","Free"]],pn:"Free planetarium shows; closed Mon-Tue",w:"https://www.nps.gov/rocr/planyourvisit/nature-center-and-planetarium.htm"},
+{id:75,n:"Scramble Indoor Play (Alexandria)",a:"5412 Eisenhower Ave, Alexandria VA",lt:38.8,ln:-77.1288,cat:"Play Space",ic:"🤸",t:40,io:"i",tp:"p",af:0,$:16,d:"European-style play center with separate gated zones for crawlers, toddlers, and big kids, plus a real cafe. The age-gating keeps 2-year-olds from getting trampled.",days:["9-5","9-5","9-5","9-5","9-8","9-8","9-6"],pr:[["Toddler (1-4 yr)","$7-16"],["Kids (5-12 yr)","$10-22"],["Infant (5-11 mo)","$5-7"],["Adults","First 2 free, then $3"]],pn:"Socks required; entry covers 2 hours; short walk from Van Dorn St Metro",w:"https://www.goscramble.com/"},
+{id:76,n:"The Puppet Co. Playhouse",a:"7300 MacArthur Blvd, Glen Echo MD",lt:38.9664,ln:-77.1387,cat:"Puppet Theater",ic:"🎭",t:40,io:"i",tp:"p",af:0,$:10,d:"Tiny Tots shows: about 30 minutes, lights stay on, built for 18 months to 4 years. Glen Echo playground and carousel right outside for after.",days:[null,null,"v","v","v","v","v"],pr:[["Tiny Tots","$10"],["Main stage","~$15"]],pn:"Tickets required for all ages, even babies; most shows are mornings, Wed-Sun",w:"https://thepuppetco.org/"},
+{id:77,n:"Wonderland Books",a:"7920 Norfolk Ave, Bethesda MD",lt:38.9881,ln:-77.0975,cat:"Bookstore",ic:"📖",t:40,io:"i",tp:"b",af:0,$:0,d:"All-ages Bethesda indie (opened December 2024) with a big children's section, a kid-sized hidey-hole to crawl into, and regular storytimes. Worth the Red Line ride if you're doing a Bethesda day.",days:["10-7","10-7","10-7","10-7","10-7","10-7","10-5"],pr:[["Storytime","Free"],["Browsing","Free"]],pn:"Check the events page for storytimes and kid-author visits",w:"https://www.wonderlandbooks.com/"},
+{id:78,n:"Brookside Gardens",a:"1800 Glenallan Ave, Wheaton MD",lt:39.0602,ln:-77.0455,cat:"Garden",ic:"🦋",t:45,io:"b",tp:"p",af:1,$:0,d:"Free conservatory plus 50 acres of gardens with ponds and boardwalks; grounds open sunrise to sunset. Seasonal butterfly house is a toddler favorite.",days:["10-5","10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Everyone","Free"]],pn:"Seasonal Wings of Fancy butterfly exhibit charges a small fee",w:"https://montgomeryparks.org/parks-and-trails/brookside-gardens/"},
+{id:79,n:"Cabin John Miniature Train",a:"7410 Tuckerman Ln, Rockville MD",lt:39.0366,ln:-77.1508,cat:"Adventure",ic:"🚂",t:45,io:"o",tp:"p",af:0,$:4,d:"Scaled-down train winds two miles through the woods, about 15 minutes round trip. Pair it with the giant tree-house playground in the same park.",days:[null,null,null,null,"10-1","9:30-4:30","9:30-4:30"],pr:[["Per rider","$4"],["10-ride card","$36"]],pn:"Runs April-Oct; train doesn't run in rain; under 2 free with paying adult",w:"https://montgomeryparks.org/parks-and-trails/cabin-john-regional-park/miniature-train/"},
+{id:80,n:"Clay Cafe Studios",a:"101 N Maple Ave, Falls Church VA",lt:38.8835,ln:-77.1724,cat:"Art Studio",ic:"🎨",t:45,io:"i",tp:"p",af:1,$:20,d:"Big, relaxed paint-your-own-pottery studio that genuinely welcomes little kids. Nobody flinches at a handprint plate or a half-painted dino.",days:["11-7","11-7","11-7","11-7","11-9","11-9","12-5"],pr:[["Studio fee","$7/painter"],["Pottery piece","~$16-30"]],pn:"Walk-ins welcome, no appointment; pieces fired in about a week",w:"https://www.claywire.com/"},
+{id:81,n:"Frying Pan Farm Park",a:"2709 West Ox Rd, Herndon VA",lt:38.9351,ln:-77.3965,cat:"Farm",ic:"🐐",t:45,io:"o",tp:"b",af:1,$:0,d:"Free working 1930s farm: pigs, goats, cows, chickens, peacocks, plus wagon rides. Toddlers do a full lap of the barns; worth the drive.",days:["9-5","9-5","9-5","9-5","9-5","9-5","9-5"],pr:[["Everyone","Free"]],pn:"Admission and parking free except special events; daily cow milking at 4pm",w:"https://www.fairfaxcounty.gov/parks/frying-pan-park"},
+{id:82,n:"Glen Echo Park Dentzel Carousel",a:"7300 MacArthur Blvd, Glen Echo MD",lt:38.9669,ln:-77.1395,cat:"Carousel",ic:"🎠",t:45,io:"b",tp:"p",af:1,$:2,d:"Hand-carved 1921 Dentzel carousel with a working Wurlitzer band organ, $2 a ride, May-Sept. Playground and picnic tables steps away in the old trolley-era amusement park.",days:[null,null,"10-2","10-2","10-2","11-5","11-5"],pr:[["Per ride","$2"],["All-day pass","$5"]],pn:"Every rider needs a ticket, including lap infants",w:"https://glenechopark.org/carousel"},
+{id:83,n:"Hyper Kidz Alexandria",a:"7005 Manchester Blvd, Alexandria VA",lt:38.7665,ln:-77.1541,cat:"Play Space",ic:"🎪",t:45,io:"i",tp:"p",af:0,$:14,d:"Big winter-themed indoor playground with climbing structures and a fenced zone just for the littlest kids. Big and loud — great for burning off a whole nap-skipped morning.",days:["9-8","9-8","9-8","9-8","9-8","9-8","9-7"],pr:[["1-2 yr","$13.99-18.99"],["3-13 yr","$15.99-20.99"],["Infant (0-11 mo)","Free w/ paid sibling"],["2 adults","Free"]],pn:"$11.99 unlimited-play Wednesdays for all ages; weekend rates apply Fri-Sun and federal holidays",w:"https://alexandria.hyperkidzplay.com/"},
+{id:84,n:"Jolly Yolly Kids",a:"7101 Democracy Blvd, Bethesda MD",lt:39.0242,ln:-77.1461,cat:"Play Space",ic:"🐠",t:45,io:"i",tp:"p",af:0,$:12,d:"Indoor play center in Westfield Montgomery Mall with a gated baby zone for under-2s and a kid zone for ages 2-7. Pair it with mall errands.",days:["10-8:45","10-8:45","10-8:45","10-8:45","10-8:45","10-8:45","10-7"],pr:[["Ages 0-2 (wkdy)","$11.95"],["Ages 3-13 (wkdy)","$13.95"],["1 adult","Free; extra adults $3-5"]],pn:"Lower level of the mall (Space 1530); weekend sessions are 2 hours; socks required",w:"https://www.jollyyollykids.com/bethesda/"},
+{id:85,n:"Long Branch Nature Center",a:"625 S Carlin Springs Rd, Arlington VA",lt:38.863,ln:-77.1183,cat:"Nature Center",ic:"🐢",t:45,io:"b",tp:"b",af:1,$:0,d:"Indoor discovery room with live turtles and snakes, a pond and nature play area outside. Free and rarely crowded.",days:[null,"10-6","10-6","10-6","11-7","11-7","1-5"],pr:[["Everyone","Free"]],pn:"Closed Mondays; toddler nature programs fill fast",w:"https://www.arlingtonva.us/Government/Departments/Parks-Recreation/Locations/Nature-Centers/Long-Branch-Nature-Center"},
+{id:86,n:"National Capital Trolley Museum",a:"1313 Bonifant Rd, Colesville MD",lt:39.0958,ln:-77.0314,cat:"Museum",ic:"🚋",t:45,io:"b",tp:"p",af:1,$:10,d:"Admission includes unlimited rides on real vintage streetcars through the woods. Heaven for a transit-obsessed 2-year-old; driving is the practical way out.",days:[null,null,null,null,"v","12-5",null],pr:[["Child 2-13","$10"],["Adult","$15"],["Under 2","Free"]],pn:"Saturdays noon-5 year-round, plus seasonal Fridays; check calendar before going",w:"https://www.dctrolley.org"},
+{id:87,n:"Oxon Hill Farm (Oxon Cove Park)",a:"6411 Oxon Hill Rd, Oxon Hill MD",lt:38.803,ln:-76.9898,cat:"Farm",ic:"🐄",t:45,io:"o",tp:"b",af:1,$:0,d:"Working NPS farm with cows, pigs, horses, and chickens; ranger-led feeding and milking programs most mornings. Not a petting zoo, but plenty to watch.",days:["8-4:30","8-4:30","8-4:30","8-4:30","8-4:30","8-4:30","8-4:30"],pr:[["Everyone","Free"]],pn:"Check program schedule for milking and chicken-feeding times",w:"https://www.nps.gov/oxhi"},
+{id:88,n:"Scramble Indoor Play (Falls Church)",a:"130 E Fairfax St, Falls Church VA",lt:38.8808,ln:-77.1723,cat:"Play Space",ic:"⚽",t:45,io:"i",tp:"p",af:0,$:18,d:"Downtown Falls Church branch of Scramble: gated crawler and toddler areas, an on-site cafe, and a book nook for wind-down time.",days:["9-6","9-6","9-8","9-8","9-8","9-8","9-6"],pr:[["Toddler (1-4 yr)","$10-18"],["Kids (5-12 yr)","$12-27"],["Infant (5-11 mo)","$5-10"],["Adults","First 2 free, then $3"]],pn:"Socks required; hours and prices differ from the Alexandria branch",w:"https://www.goscramble.com/"},
+{id:89,n:"Spirit Park Carousel at National Harbor",a:"137 National Plaza, National Harbor MD",lt:38.7822,ln:-77.0167,cat:"Carousel",ic:"🎠",t:45,io:"o",tp:"p",af:0,$:7,d:"36-foot carousel with 28 hand-painted animals, and the $7 kids' wristband is good for unlimited rides all day. Fenced playground with shaded picnic tables right next to it.",days:[null,null,null,null,"12-8","12-8","12-8"],pr:[["Child all-day wristband","$7"]],pn:"Open Fri-Sun 12-8; check the seasonal calendar before you go",w:"https://thecapitalwheel.com/spirit-park-carousel/"},
+{id:90,n:"The Capital Wheel",a:"141 American Way, Oxon Hill MD",lt:38.7826,ln:-77.0176,cat:"Adventure",ic:"🎡",t:45,io:"b",tp:"p",af:1,$:13.5,d:"180-foot Ferris wheel over the Potomac with enclosed, climate-controlled gondolas, so it works in rain or cold. Three slow revolutions per ride; DC monuments visible on clear days.",days:["v","v","v","v","v","v","v"],pr:[["Age 2 & under","Free"],["Child","$13.50 + tax"],["Adult","$17.50 + tax"]],pn:"Hours vary by season (shorter weekday hours off-peak); buy online to skip the ticket-booth line",w:"https://thecapitalwheel.com/"},
+{id:91,n:"The Little Towns",a:"4931 Wyaconda Rd, North Bethesda MD",lt:39.0454,ln:-77.0989,cat:"Play Space",ic:"🏘️",t:45,io:"i",tp:"p",af:0,$:25,d:"A children's museum built as a child-size town of tiny buildings — grocery store, fire station, and more. Pure pretend-play heaven for a 2-year-old.",days:["v","v","v","v","v","v","v"],pr:[["Child (open play)","$25"],["Early bird / happy hour","$12.50-15"],["Adult","Free"]],pn:"Reservations required — capacity-limited sessions; daily schedule varies, check the site",w:"https://www.thelittletownsmd.com/"},
+{id:92,n:"The Toy Nest",a:"125 N Washington St, Falls Church VA",lt:38.8829,ln:-77.1708,cat:"Play / Retail",ic:"🧸",t:45,io:"i",tp:"b",af:0,$:12,d:"Toy library meets playroom: book a calm 55-minute session where your toddler test-drives every toy, then borrow favorites instead of buying them.",days:[null,"10-6","10-6","10-6","9-5","9-5",null],pr:[["Play session (1 hr)","$12"]],pn:"Reserve a 55-minute play slot online; closed Sun-Mon; ground level",w:"https://www.thetoynest.com/"},
+{id:93,n:"Wheaton Miniature Train & Carousel",a:"2002 Shorefield Rd, Wheaton MD",lt:39.0523,ln:-77.0432,cat:"Carousel",ic:"🎠",t:45,io:"o",tp:"p",af:0,$:4,d:"Miniature train ride and a brand-new carousel (opened 2025) side by side, $4 each. Big Shorefield playground and free Brookside Gardens in the same park.",days:[null,null,null,"12-5","12-5","9:30-4:30","9:30-4:30"],pr:[["Train ride","$4"],["Carousel ride","$4"]],pn:"Season runs April-Oct; weekends only outside summer; 10-ride discount cards $36",w:"https://montgomeryparks.org/parks-and-trails/wheaton-regional-park/wheaton-miniature-train/"},
+{id:94,n:"Woodend Nature Sanctuary",a:"8940 Jones Mill Rd, Chevy Chase MD",lt:38.989,ln:-77.0695,cat:"Nature Sanctuary",ic:"🐦",t:45,io:"o",tp:"b",af:1,$:0,d:"40-acre Nature Forward sanctuary with a giant wood-thrush climbing structure in the nature play space, plus stroller-friendly trails past a pond.",days:["dawn-dusk","dawn-dusk","dawn-dusk","dawn-dusk","dawn-dusk","dawn-dusk","dawn-dusk"],pr:[["Everyone","Free"]],pn:"Play space occasionally closes for camps; check calendar",w:"https://natureforward.org/visit/"}
+];
+
+// Category groups — colored like subway lines
+const GC={play:"#FF6319",museum:"#0039A6",nature:"#00933C",books:"#B933AD",classes:"#FCCC0A",shows:"#6CBE45"};
+function grp(v){
+  const c=v.cat;
+  if(/Museum|Landmark|Immersive/.test(c))return"museum";
+  if(/Zoo|Aquarium|Nature|Garden|Farm|Animals/.test(c))return"nature";
+  if(/Library|Bookstore/.test(c))return"books";
+  if(/Gym|Classes|Swim|Yoga|Sports|Workshop|Cooking|Community/.test(c))return"classes";
+  if(/Music|Theater|Dance/.test(c))return"shows";
+  return"play";
+}
+function bullet(v,extra){const g=grp(v);const fg=g==="classes"?"#1A1A1A":"#fff";return`<div class="bullet ${extra||''}" style="background:${GC[g]};color:${fg}">${v.id}</div>`;}
+
+function isOpenDay(v,di){if(di==="any")return true;const h=v.days[parseInt(di)];return h!==null&&h!=="v";}
+function matchF(v){
+  if(filters.fav&&!favs.has(v.id))return false;
+  if(filters.g!=="any"&&grp(v)!==filters.g)return false;
+  if(filters.day!=="any"&&!isOpenDay(v,filters.day))return false;
+  if(filters.t<99&&v.t>filters.t)return false;
+  if(filters.io==="indoor"&&v.io==="o")return false;
+  if(filters.io==="outdoor"&&v.io==="i")return false;
+  if(filters.tp==="play"&&v.tp==="c")return false;
+  if(filters.tp==="class"&&v.tp==="p")return false;
+  if(filters.pr<100&&v.$>filters.pr)return false;
+  if(filters.af==="1"&&!v.af)return false;
+  return true;
+}
+function openSt(v){const h=v.days[todayIdx];if(!h)return{o:false,t:"Closed today"};if(h==="v")return{o:true,t:"Check schedule"};return{o:true,t:"Open "+h+" today"};}
+function fmtP(v){return v.$===0?"Free":"$"+v.$;}
+
+const map=L.map('map',{zoomControl:false}).setView([38.8983,-77.0219],12);
+L.control.zoom({position:'topright'}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OSM &copy; CARTO',maxZoom:19}).addTo(map);
+L.marker([38.8983,-77.0219],{icon:L.divIcon({className:'',html:'<div class="cm home">🌸</div>',iconSize:[40,40],iconAnchor:[20,20],popupAnchor:[0,-20]}),zIndexOffset:1000}).addTo(map).bindPopup('<div style="padding:12px 16px;text-align:center;font-size:13px"><b>Gallery Place &amp; 7th St</b><br><span style="color:#6F6857;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Home base</span></div>');
+
+const MK={};
+D.forEach(v=>{
+  const g=grp(v);const fg=g==="classes"?"#1A1A1A":"#fff";
+  const mk=L.marker([v.lt,v.ln],{icon:L.divIcon({className:'',html:`<div class="cm" style="background:${GC[g]};color:${fg}">${v.id}</div>`,iconSize:[30,30],iconAnchor:[15,15]})}).addTo(map);
+  mk.on('click',()=>select(v,'map'));
+  MK[v.id]=mk;
+});
+
+// ── Detail sheet ──
+const sheet=document.getElementById('sheet');
+let selId=null;
+function clearSel(){
+  selId=null;
+  document.querySelectorAll('.vc.on').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.cm.sel').forEach(x=>x.classList.remove('sel'));
+}
+function closeSheet(){
+  const wasOpen=sheet.classList.contains('open');
+  const card=selId!=null?document.querySelector(`.vc[data-id="${selId}"] .nm`):null;
+  sheet.classList.remove('open');clearSel();
+  if(wasOpen&&sheet.contains(document.activeElement))(card||document.getElementById('fav-only')).focus({preventScroll:true});
+}
+function updateSheetSave(){
+  const b=sheet.querySelector('.btn.save');
+  if(!b||selId==null)return;
+  const on=favs.has(selId);
+  b.classList.toggle('on',on);
+  b.innerHTML=on?'&hearts; Saved':'&#9825; Save';
+  b.setAttribute('aria-pressed',on);
+}
+function renderSheet(v){
+  const s=openSt(v);
+  const hH=v.days.map((h,i)=>`<div class="hr-row${i===todayIdx?' tdy':''}"><span class="d">${DAYS[i]}</span>${h===null?'<span class="closed">Closed</span>':h==="v"?"Varies":h}</div>`).join('');
+  const pH=v.pr.map(([l,val])=>`<div class="pr-row"><span>${l}</span><span class="v">${val}</span></div>`).join('');
+  const ioL=v.io==="i"?"Indoor":v.io==="o"?"Outdoor":"Indoor + Outdoor";
+  const tpL=v.tp==="p"?"Open Play":v.tp==="c"?"Classes":"Play + Classes";
+  sheet.innerHTML=`
+  <div class="sh-h">${bullet(v)}<div class="sh-t"><h3>${v.n}</h3><div class="cat">${v.cat} &middot; ${ioL} &middot; ${tpL}</div></div><button class="sh-x" aria-label="Close">&#x2715;</button></div>
+  <div class="sh-b">
+    <div class="desc">${v.d}</div>
+    <div class="sh-meta"><span class="${s.o?'ok':'no'}">${s.t}</span><span>${v.t} min from home</span><span>${v.a}</span></div>
+    <div class="sh-cols">
+      <div><h4>Hours</h4>${hH}</div>
+      <div><h4>Pricing</h4>${pH}${v.pn?`<div class="note">${v.pn}</div>`:''}</div>
+    </div>
+  </div>
+  <div class="sh-f"><button class="btn save${favs.has(v.id)?' on':''}" aria-pressed="${favs.has(v.id)}">${favs.has(v.id)?'&hearts; Saved':'&#9825; Save'}</button><a class="btn" href="${v.w}" target="_blank" rel="noopener">Website &rarr;</a><a class="btn alt" href="https://www.google.com/maps/dir/?api=1&destination=${v.lt},${v.ln}" target="_blank" rel="noopener">Directions &rarr;</a></div>`;
+  sheet.querySelector('.sh-x').onclick=closeSheet;
+  sheet.querySelector('.btn.save').onclick=()=>toggleFav(v.id);
+}
+function select(v,from){
+  clearSel();
+  selId=v.id;
+  const c=document.querySelector(`.vc[data-id="${v.id}"]`);
+  if(c){c.classList.add('on');if(from==='map')c.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  const el=MK[v.id].getElement();
+  if(el&&el.firstChild)el.firstChild.classList.add('sel');
+  MK[v.id].setZIndexOffset(900);
+  map.flyTo([v.lt,v.ln],Math.max(map.getZoom(),14),{duration:.4});
+  renderSheet(v);
+  sheet.classList.add('open');
+  sheet.focus({preventScroll:true});
+}
+map.on('click',closeSheet);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheet();closePanel();}});
+
+let searchQ='';
+
+function passes(v){
+  if(searchQ&&!v.n.toLowerCase().includes(searchQ)&&!v.d.toLowerCase().includes(searchQ)&&!v.cat.toLowerCase().includes(searchQ)&&!v.a.toLowerCase().includes(searchQ))return false;
+  return matchF(v);
+}
+
+function render(){
+  const g=document.getElementById('grid');g.innerHTML='';
+  const f=D.filter(passes);
+  const fset=new Set(f.map(v=>v.id));
+  if(selId!=null&&!fset.has(selId)&&sheet.classList.contains('open'))closeSheet();
+  document.getElementById('count').textContent=f.length;
+  D.forEach(v=>{const m=MK[v.id];const show=fset.has(v.id);if(show){if(!map.hasLayer(m))m.addTo(map);if(v.id===selId){const el=m.getElement();if(el&&el.firstChild)el.firstChild.classList.add('sel');}}else{if(map.hasLayer(m))map.removeLayer(m);}});
+  if(!f.length){
+    const msg=filters.fav&&!favs.size
+      ?'<span>&hearts;</span>No saved stops yet.<br>Tap the &#9825; on any stop to save it.'
+      :'<span>!</span>No stops match your filters.<br>Try widening the search.';
+    g.innerHTML=`<div class="empty-msg" style="grid-column:1/-1">${msg}</div>`;return;
+  }
+  if(sortBy==="near")f.sort((a,b)=>a.t-b.t||a.id-b.id);
+  else if(sortBy==="price")f.sort((a,b)=>a.$-b.$||a.t-b.t);
+  else f.sort((a,b)=>a.n.localeCompare(b.n));
+  f.forEach(v=>{
+    const s=openSt(v);
+    const io=v.io==='b'?'In + Out':v.io==='i'?'Indoor':'Outdoor';
+    const tp=v.tp==='b'?'Play & Classes':v.tp==='p'?'Open Play':'Classes';
+    const c=document.createElement('div');c.className='vc';c.dataset.id=v.id;c.style.setProperty('--gc',GC[grp(v)]);
+    const isFav=favs.has(v.id);
+    c.innerHTML=`
+      <div class="vc-top">
+        ${bullet(v)}
+        <div class="vc-title"><button class="nm">${v.n}</button><div class="cat-line">${v.cat} &middot; ${v.a}</div></div>
+        <div class="vc-price ${v.$===0?'free':''}">${fmtP(v)}</div>
+        <button class="fav-btn${isFav?' on':''}" aria-label="Save ${v.n}" aria-pressed="${isFav}">${isFav?'&hearts;':'&#9825;'}</button>
+      </div>
+      <div class="desc-line">${v.d}</div>
+      <div class="meta">
+        <span class="${s.o?'ok':'no'}">${s.t}</span>
+        <span>${v.t} min</span>
+        <span>${io}</span>
+        <span>${tp}</span>
+        ${v.af?'<span>Adults too</span>':''}
+      </div>`;
+    if(v.id===selId)c.classList.add('on');
+    c.onclick=()=>select(v,'list');
+    c.querySelector('.fav-btn').onclick=e=>{e.stopPropagation();closePanel();toggleFav(v.id);};
+    g.appendChild(c);
+  });
+  const fn=document.createElement('div');fn.className='foot-note';fn.textContent='Hours and prices drift — check the website before heading out';g.appendChild(fn);
+}
+
+// Quick-toggle + filter-count sync
+function syncQuick(){
+  const ot=document.getElementById('open-today');
+  const otOn=filters.day===String(todayIdx);
+  ot.classList.toggle('on',otOn);ot.setAttribute('aria-pressed',otOn);
+  const fr=document.getElementById('free-only');
+  fr.classList.toggle('on',filters.pr===0);fr.setAttribute('aria-pressed',filters.pr===0);
+  const fv=document.getElementById('fav-only');
+  fv.classList.toggle('on',filters.fav);fv.setAttribute('aria-pressed',filters.fav);
+  const fvc=document.getElementById('favcount');
+  fvc.hidden=!favs.size;fvc.textContent=favs.size;
+  const n=(filters.day!=="any")+(filters.t<99)+(filters.io!=="any")+(filters.tp!=="any")+(filters.pr<100)+(filters.af==="1");
+  const fc=document.getElementById('fcount');
+  fc.hidden=!n;fc.textContent=n;
+}
+
+// Filter pills
+document.querySelectorAll('.pill[data-g]').forEach(b=>{b.onclick=()=>{const gr=b.dataset.g;
+  if(gr==='af'){// toggle
+    b.classList.toggle('on');filters.af=b.classList.contains('on')?"1":"any";
+  }else{
+    document.querySelectorAll(`.pill[data-g="${gr}"]`).forEach(x=>x.classList.remove('on'));b.classList.add('on');
+    filters[gr]=gr==='t'?parseInt(b.dataset.v):b.dataset.v;
+  }
+  syncQuick();render();
+};});
+
+// Mark today's day pill
+const tdPill=document.querySelector(`.pill[data-g="day"][data-v="${todayIdx}"]`);
+if(tdPill)tdPill.classList.add('today');
+
+// "Open today" quick toggle mirrors the day filter
+document.getElementById('open-today').onclick=()=>{
+  const v=filters.day===String(todayIdx)?"any":String(todayIdx);
+  filters.day=v;
+  document.querySelectorAll('.pill[data-g="day"]').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
+  syncQuick();render();
+};
+
+// "Free" quick toggle mirrors the price slider
+document.getElementById('free-only').onclick=()=>{
+  filters.pr=filters.pr===0?100:0;
+  ps.value=filters.pr;
+  pl.textContent=filters.pr===0?'Free only':'Any price';
+  syncQuick();render();
+};
+
+// "Saved" quick toggle
+document.getElementById('fav-only').onclick=()=>{
+  filters.fav=!filters.fav;
+  syncQuick();render();
+};
+
+// Surprise me — pick a random stop matching the current filters
+document.getElementById('surprise').onclick=()=>{
+  const f=D.filter(passes);
+  if(!f.length)return;
+  const v=f[Math.floor(Math.random()*f.length)];
+  select(v,'map');
+};
+
+// Filters panel
+const fbtn=document.getElementById('fbtn');
+const fpanel=document.getElementById('fpanel');
+function closePanel(){fpanel.hidden=true;fbtn.classList.remove('on');}
+fbtn.onclick=()=>{fpanel.hidden=!fpanel.hidden;fbtn.classList.toggle('on',!fpanel.hidden);};
+document.getElementById('fdone').onclick=closePanel;
+document.addEventListener('click',e=>{if(!fpanel.hidden&&!e.target.closest('.toolbar'))closePanel();});
+
+// Price slider
+const ps=document.getElementById('price-slider');
+const pl=document.getElementById('price-lbl');
+ps.addEventListener('input',()=>{
+  filters.pr=parseInt(ps.value);
+  pl.textContent=filters.pr>=100?'Any price':filters.pr===0?'Free only':'Up to $'+filters.pr;
+  syncQuick();render();
+});
+
+// Reset all (keeps category + search)
+document.getElementById('freset').onclick=()=>{
+  filters={...filters,day:"any",io:"any",tp:"any",pr:100,af:"any",t:99,fav:false};
+  ['day','t','io','tp'].forEach(gr=>{
+    const def=gr==='t'?'99':'any';
+    document.querySelectorAll(`.pill[data-g="${gr}"]`).forEach(x=>x.classList.toggle('on',x.dataset.v===def));
+  });
+  document.querySelector('.pill[data-g="af"]').classList.remove('on');
+  ps.value=100;pl.textContent='Any price';
+  syncQuick();render();
+};
+
+// Sort
+document.getElementById('sort').addEventListener('change',e=>{sortBy=e.target.value;render();});
+
+// Search
+const qEl=document.getElementById('q');
+const qClear=document.getElementById('q-clear');
+qEl.addEventListener('input',()=>{searchQ=qEl.value.toLowerCase().trim();qClear.hidden=!qEl.value;render();});
+qClear.onclick=()=>{qEl.value='';searchQ='';qClear.hidden=true;qEl.focus();render();};
+
+syncQuick();render();
+</script>
+</body>
+</html>
