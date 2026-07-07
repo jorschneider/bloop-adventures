@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2 Year Old Adventures: DC — 94 rainy-day stops for toddlers</title>
-<meta name="description" content="94 rainy-day stops for toddlers around Washington, DC — play spaces, museums, animals, books, classes, and shows, mapped from Gallery Place.">
+<title>2 Year Old Adventures: DC — 94 rain-or-shine stops for toddlers</title>
+<meta name="description" content="94 rain-or-shine stops for toddlers around Washington, DC — play spaces, museums, animals, books, classes, and shows, mapped from Gallery Place.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23EE352E'/><text x='50' y='72' font-size='52' text-anchor='middle'>&#x1F338;</text></svg>">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
@@ -181,7 +181,7 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
 <body>
 <div class="hdr">
   <span class="logo">&#x1F338;</span>
-  <div><h1>2 Year Old Adventures</h1><div class="sub">Gallery Pl&ndash;Chinatown &middot; 94 rainy-day stops for toddlers</div></div>
+  <div><h1>2 Year Old Adventures</h1><div class="sub">Gallery Pl&ndash;Chinatown &middot; 94 rain-or-shine stops for toddlers</div></div>
   <nav class="city-nav" aria-label="City"><a class="city" href="index.html">NYC</a><a class="city on" href="dc.html" aria-current="page">DC</a></nav>
   <span class="cnt-badge" aria-live="polite" aria-atomic="true"><b id="count">94</b> <small>STOPS</small></span>
   <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="q" placeholder="Search stops, places, addresses&hellip;" aria-label="Search stops, places, addresses"><button class="q-x" id="q-clear" aria-label="Clear search" hidden>&#x2715;</button></div>
@@ -197,6 +197,8 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
     <button class="pill" data-g="g" data-v="shows"><span class="dot" style="background:#6CBE45"></span>Shows</button>
     <span class="spacer"></span>
     <button class="pill" id="open-today" aria-pressed="false">Open today</button>
+    <button class="pill" id="io-indoor" aria-pressed="false">&#x1F3E0; Indoor</button>
+    <button class="pill" id="io-outdoor" aria-pressed="false">&#x2600;&#xFE0F; Outdoor</button>
     <button class="pill" id="free-only" aria-pressed="false">Free</button>
     <button class="pill fav-pill" id="fav-only" aria-pressed="false">&hearts; Saved <span class="fcount" id="favcount" hidden></span></button>
     <button class="pill" id="fbtn">Filters <span class="fcount" id="fcount" hidden></span> &#x25BE;</button>
@@ -518,6 +520,11 @@ function syncQuick(){
   const ot=document.getElementById('open-today');
   const otOn=filters.day===String(todayIdx);
   ot.classList.toggle('on',otOn);ot.setAttribute('aria-pressed',otOn);
+  const ind=document.getElementById('io-indoor');
+  ind.classList.toggle('on',filters.io==='indoor');ind.setAttribute('aria-pressed',filters.io==='indoor');
+  const out=document.getElementById('io-outdoor');
+  out.classList.toggle('on',filters.io==='outdoor');out.setAttribute('aria-pressed',filters.io==='outdoor');
+  document.querySelectorAll('.pill[data-g="io"]').forEach(x=>x.classList.toggle('on',x.dataset.v===filters.io));
   const fr=document.getElementById('free-only');
   fr.classList.toggle('on',filters.pr===0);fr.setAttribute('aria-pressed',filters.pr===0);
   const fv=document.getElementById('fav-only');
@@ -549,6 +556,16 @@ document.getElementById('open-today').onclick=()=>{
   const v=filters.day===String(todayIdx)?"any":String(todayIdx);
   filters.day=v;
   document.querySelectorAll('.pill[data-g="day"]').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
+  syncQuick();render();
+};
+
+// Indoor / Outdoor quick toggles mirror the Space filter
+document.getElementById('io-indoor').onclick=()=>{
+  filters.io=filters.io==='indoor'?'any':'indoor';
+  syncQuick();render();
+};
+document.getElementById('io-outdoor').onclick=()=>{
+  filters.io=filters.io==='outdoor'?'any':'outdoor';
   syncQuick();render();
 };
 
