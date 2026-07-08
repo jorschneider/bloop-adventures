@@ -34,6 +34,7 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 - **Surprise me** — picks a random stop matching your current filters, for
   when nobody can decide.
 - **Search** — matches names, descriptions, categories, and addresses.
+- **Dark mode** — follows your system theme, including the map tiles.
 
 ## Data
 
