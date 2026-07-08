@@ -2,53 +2,76 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Bloop Adventures — 200 rainy-day stops for toddlers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2 Year Old Adventures — 222 rain-or-shine stops for toddlers</title>
+<meta name="description" content="222 rain-or-shine stops for toddlers around NYC — play spaces, museums, animals, books, classes, and shows, mapped from 79 St &amp; Broadway.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23EE352E'/><text x='50' y='72' font-size='52' text-anchor='middle'>&#x1F353;</text></svg>">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --ink:#1A1A1A;--paper:#F5F1E8;--card:#FFFFFF;
-  --red:#EE352E;--orange:#FF6319;--yellow:#FCCC0A;--green:#00933C;
+  --red:#EE352E;--red-deep:#C7241E;--orange:#FF6319;--yellow:#FCCC0A;--green:#00933C;
   --blue:#0039A6;--purple:#B933AD;--lgreen:#6CBE45;
   --muted:#6F6857;--rule:#1A1A1A;
+  --line:#DFD8C6;--hov:#EFE9DB;--body:#3D3A30;--mapbg:#EAE6DB;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --ink:#ECE8DC;--paper:#17161B;--card:#211F26;
+    --muted:#A39B89;--rule:#ECE8DC;
+    --line:#38352E;--hov:#2C2A32;--body:#C9C4B6;--mapbg:#23222B;
+    --green:#2FB765;--red:#F0453C;
+  }
 }
 html,body{height:100dvh;overflow:hidden}
 body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
 
 /* ── HEADER: station signage ── */
-.hdr{background:var(--ink);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:14px;position:relative;z-index:1001;border-bottom:4px solid #fff}
+.hdr{background:#1A1A1A;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:14px;position:relative;z-index:1001;border-bottom:4px solid #fff}
 .hdr .logo{width:42px;height:42px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:2px solid #fff}
 .hdr h1{font-size:21px;font-weight:700;letter-spacing:-.5px;line-height:1.1}
 .hdr .sub{font-size:9px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#B8B2A4;margin-top:3px}
 .search{margin-left:auto;display:flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:7px 14px;min-width:0}
-.search svg{width:14px;height:14px;color:var(--ink);flex-shrink:0}
-.search input{border:0;background:0;outline:0;font:inherit;font-size:13px;font-weight:500;color:var(--ink);width:160px;min-width:0}
+.search svg{width:14px;height:14px;color:#1A1A1A;flex-shrink:0}
+.search input{border:0;background:0;outline:0;font:inherit;font-size:13px;font-weight:500;color:#1A1A1A;width:160px;min-width:0}
 .search input::placeholder{color:#999}
-.cnt-badge{background:#fff;color:var(--ink);font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;flex-shrink:0;white-space:nowrap}
+.q-x{border:0;background:0;cursor:pointer;font-size:12px;font-weight:700;color:#6F6857;flex-shrink:0;font-family:inherit;line-height:1;width:26px;height:26px;margin:-4px -8px -4px 0;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.q-x:hover{color:#1A1A1A;background:#EFE9DB}
+.q-x[hidden]{display:none}
+.city-nav{display:flex;gap:5px;margin-left:2px;flex-shrink:0}
+.city{font-size:10px;font-weight:700;letter-spacing:1px;padding:5px 11px;border-radius:999px;border:1.5px solid #fff;color:#fff;text-decoration:none;transition:background .12s,color .12s}
+.city:hover{background:var(--red);border-color:var(--red)}
+.city.on{background:#fff;color:var(--ink)}
+.city.on:hover{background:#fff;color:var(--ink);border-color:#fff}
+.cnt-badge{background:var(--card);color:var(--ink);border:1px solid var(--line);font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;flex-shrink:0;white-space:nowrap}
 .cnt-badge small{font-weight:500;font-size:10px;letter-spacing:.5px}
 
 /* ── TOOLBAR ── */
-.toolbar{background:var(--paper);border-bottom:2px solid var(--ink);position:relative;z-index:1001}
+.toolbar{background:var(--paper);border-bottom:2px solid var(--rule);position:relative;z-index:1001}
 .trow{display:flex;flex-wrap:wrap;gap:6px;padding:9px 20px;align-items:center}
+.trow.cats{padding-bottom:6px}
+.trow.utils{padding-top:6px;border-top:1px solid var(--line)}
 .trow .spacer{flex:1;min-width:8px}
-.pill{padding:6px 13px;border-radius:999px;font-size:12px;font-weight:700;border:1.5px solid var(--ink);background:var(--card);color:var(--ink);cursor:pointer;white-space:nowrap;transition:background .12s,color .12s;flex-shrink:0;font-family:inherit;display:flex;align-items:center;gap:7px}
-.pill:hover{background:#EFE9DB}
-.pill.on{background:var(--ink);color:#fff}
+.pill{padding:6px 13px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--ink);background:var(--card);color:var(--ink);cursor:pointer;white-space:nowrap;transition:background .12s,color .12s;flex-shrink:0;font-family:inherit;display:flex;align-items:center;gap:7px}
+.pill:hover{background:var(--hov)}
+.pill.on{background:var(--ink);color:var(--paper)}
 .pill .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.15)}
 .pill[data-v="play"].on{background:var(--orange);border-color:var(--orange);color:#fff}
 .pill[data-v="museum"].on{background:var(--blue);border-color:var(--blue);color:#fff}
 .pill[data-v="nature"].on{background:var(--green);border-color:var(--green);color:#fff}
 .pill[data-v="books"].on{background:var(--purple);border-color:var(--purple);color:#fff}
-.pill[data-v="classes"].on{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.pill[data-v="classes"].on{background:var(--yellow);border-color:var(--yellow);color:#1A1A1A}
 .pill[data-v="shows"].on{background:var(--lgreen);border-color:var(--lgreen);color:#fff}
 .pill.on .dot{border-color:rgba(255,255,255,.6)}
 .pill.today::after{content:"";display:block;width:5px;height:5px;border-radius:50%;background:var(--red)}
 .pill.today.on::after{background:#fff}
-.fcount{background:var(--red);color:#fff;border-radius:999px;font-size:10px;font-weight:700;min-width:17px;height:17px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.fcount{background:var(--red-deep);color:#fff;border-radius:999px;font-size:10px;font-weight:700;min-width:17px;height:17px;display:flex;align-items:center;justify-content:center;padding:0 4px}
 .fcount[hidden]{display:none}
-.pill.on .fcount{background:#fff;color:var(--ink)}
+.pill.on .fcount{background:#fff;color:#1A1A1A}
+.fav-pill.on{background:var(--red-deep);border-color:var(--red-deep);color:#fff}
+#surprise{background:var(--red);border-color:var(--red);color:#fff}
+#surprise:hover{background:var(--red-deep);border-color:var(--red-deep)}
 .fpanel{position:absolute;left:0;right:0;top:100%;background:var(--paper);border-bottom:2px solid var(--ink);padding:14px 20px 16px;display:flex;flex-wrap:wrap;gap:16px 30px;z-index:1100;box-shadow:0 10px 20px rgba(26,26,26,.12)}
 .fpanel[hidden]{display:none}
 .fgrp h5{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
@@ -59,50 +82,55 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
 .slider{-webkit-appearance:none;width:90px;height:4px;border-radius:2px;background:var(--ink);outline:none;cursor:pointer}
 .slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--ink);cursor:pointer}
 .slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--ink);cursor:pointer}
-.sortsel{font:inherit;font-size:12px;font-weight:700;border:1.5px solid var(--ink);border-radius:999px;background:var(--card);color:var(--ink);padding:6px 10px;cursor:pointer;flex-shrink:0;-webkit-appearance:none;appearance:none}
+.sortsel{font:inherit;font-size:12px;font-weight:700;border:1px solid var(--ink);border-radius:999px;background:var(--card);color:var(--ink);padding:6px 10px;cursor:pointer;flex-shrink:0;-webkit-appearance:none;appearance:none}
 
 /* ── LAYOUT ── */
 .main{display:flex;flex-direction:column;flex:1;min-height:0}
 #map{height:38%;min-height:200px;flex-shrink:0;border-bottom:2px solid var(--ink)}
 .list-wrap{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
-.grid{display:grid;gap:12px}
-.foot-note{grid-column:1/-1;text-align:center;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;padding:18px 0 8px}
+.grid{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+.foot-note{grid-column:1/-1;text-align:center;font-size:12px;font-weight:500;color:var(--muted);padding:18px 0 8px}
 
 /* ── CARDS ── */
-.vc{background:var(--card);border:1.5px solid var(--ink);border-radius:2px;padding:14px 16px;cursor:pointer;transition:box-shadow .12s,transform .12s;display:flex;flex-direction:column;gap:9px;position:relative}
-.vc::before{content:"";position:absolute;left:-1.5px;top:-1.5px;bottom:-1.5px;width:5px;background:var(--gc,var(--ink))}
-.vc:hover{box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}
-.vc.on{box-shadow:4px 4px 0 var(--gc,var(--ink));transform:translate(-2px,-2px);border-width:2px}
-.vc .vc-top{display:flex;align-items:center;gap:11px}
-.bullet{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.vc{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px 12px;cursor:pointer;transition:box-shadow .15s,transform .15s,border-color .15s;display:flex;flex-direction:column;gap:8px;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.vc::before{content:"";position:absolute;left:-1px;top:-1px;bottom:-1px;width:4px;background:var(--gc,var(--ink));border-radius:8px 0 0 8px}
+.vc:hover{box-shadow:0 6px 16px rgba(0,0,0,.10);transform:translateY(-1px)}
+.vc.on{border-color:var(--gc,var(--ink));box-shadow:0 6px 16px rgba(0,0,0,.12),inset 0 0 0 1px var(--gc,var(--ink))}
+.fav-btn{position:relative;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);cursor:pointer;font-size:13px;line-height:1;color:var(--muted);flex-shrink:0;font-family:inherit;padding:0;display:flex;align-items:center;justify-content:center;transition:background .12s,color .12s}
+.fav-btn::after{content:"";position:absolute;inset:-9px;border-radius:50%}
+.fav-btn:hover{background:var(--hov);color:var(--red);border-color:var(--muted)}
+.fav-btn.on{background:var(--red);border-color:var(--red);color:#fff}
+.vc .vc-top{display:flex;align-items:flex-start;gap:11px}
+.bullet{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
 .vc .vc-title{flex:1;min-width:0}
-.vc .nm{font-size:15px;font-weight:700;letter-spacing:-.2px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vc .cat-line{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vc .vc-price{text-align:right;flex-shrink:0;font-size:16px;font-weight:800;letter-spacing:-.3px}
-.vc .vc-price.free{color:var(--green)}
-.vc .desc-line{font-size:13px;color:#3D3A30;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.vc .meta{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px}
+.vc .nm{font-size:15px;font-weight:700;letter-spacing:-.2px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;width:100%;max-width:100%;background:none;border:0;padding:0;color:inherit;font-family:inherit;text-align:left;cursor:pointer}
+.vc .nm:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.vc .cat-line{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vc .desc-line{font-size:13px;color:var(--body);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vc .meta{font-size:11.5px;font-weight:600;color:var(--muted);display:flex;flex-wrap:wrap;gap:3px 10px;align-items:baseline}
+.vc .meta .vc-price{font-weight:800;font-size:12.5px;color:var(--ink)}
+.vc .meta .vc-price.free{color:var(--green)}
 .vc .meta .ok{color:var(--green)}
 .vc .meta .no{color:var(--red)}
 
 /* ── HOME POPUP ── */
-.leaflet-popup-content-wrapper{border-radius:2px!important;box-shadow:5px 5px 0 rgba(26,26,26,.85)!important;padding:0!important;overflow:hidden;border:2px solid var(--ink)!important}
+.leaflet-popup-content-wrapper{border-radius:4px!important;box-shadow:0 8px 24px rgba(0,0,0,.3)!important;padding:0!important;overflow:hidden;border:2px solid #1A1A1A!important}
 .leaflet-popup-tip{display:none}
 .leaflet-popup-content{margin:0!important;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
 
 /* ── DETAIL SHEET ── */
-#sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:2px solid var(--ink);z-index:1200;transform:translateY(108%);transition:transform .22s ease,visibility .22s;max-height:62dvh;display:flex;flex-direction:column;visibility:hidden}
-#sheet.open{transform:translateY(0);visibility:visible}
-.sh-h{background:var(--ink);color:#fff;padding:13px 16px;display:flex;gap:11px;align-items:center;flex-shrink:0}
+#sheet{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:4px solid var(--ink);z-index:1200;transform:translateY(108%);transition:transform .22s ease,visibility 0s .22s;max-height:62dvh;display:flex;flex-direction:column;visibility:hidden}
+#sheet.open{transform:translateY(0);visibility:visible;transition:transform .22s ease}
+.sh-h{background:#1A1A1A;color:#fff;padding:13px 16px;display:flex;gap:11px;align-items:center;flex-shrink:0}
 .sh-h .bullet{border:2px solid #fff;width:32px;height:32px}
 .sh-t{flex:1;min-width:0}
 .sh-h h3{font-size:16px;font-weight:700;line-height:1.25;letter-spacing:-.2px}
 .sh-h .cat{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:#B8B2A4;margin-top:3px;font-weight:700}
 .sh-x{flex-shrink:0;width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;line-height:1;font-family:inherit;padding:0}
 .sh-x:hover{background:var(--red);border-color:var(--red)}
-.sh-b{padding:14px 16px;overflow-y:auto;font-size:13px;line-height:1.55;color:#3D3A30}
+.sh-b{padding:14px 16px;overflow-y:auto;font-size:13px;line-height:1.55;color:var(--body)}
 .sh-b .desc{margin-bottom:12px}
-.sh-meta{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px;margin-bottom:13px;padding-bottom:13px;border-bottom:1.5px solid var(--ink)}
+.sh-meta{font-size:12px;font-weight:600;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px;margin-bottom:13px;padding-bottom:13px;border-bottom:1px solid var(--line)}
 .sh-meta .ok{color:var(--green)}
 .sh-meta .no{color:var(--red)}
 .sh-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
@@ -115,32 +143,38 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
 .sh-b .pr-row .v{font-weight:700;text-align:right}
 .sh-b .note{font-size:11px;color:var(--green);margin-top:6px;font-weight:700}
 .sh-f{padding:11px 16px;background:var(--paper);border-top:2px solid var(--ink);display:flex;gap:8px;flex-shrink:0}
-.sh-f .btn{flex:1;text-align:center;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;text-decoration:none;padding:9px 12px;background:var(--ink);border-radius:999px;white-space:nowrap}
-.sh-f .btn:hover{background:var(--red)}
-.sh-f .btn.alt{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
-.sh-f .btn.alt:hover{background:var(--ink);color:#fff}
+.sh-f .btn{flex:1;text-align:center;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--paper);text-decoration:none;padding:9px 10px;background:var(--ink);border-radius:999px;white-space:nowrap;border:0;cursor:pointer;font-family:inherit;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.sh-f .btn:hover{background:var(--red);color:#fff}
+.sh-f .btn.alt{background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.sh-f .btn.alt:hover{background:var(--ink);color:var(--paper)}
+.sh-f .btn.save{flex:0 0 auto;min-width:78px;background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.sh-f .btn.save:hover{color:var(--red);box-shadow:inset 0 0 0 1.5px var(--red);background:var(--card)}
+.sh-f .btn.save.on{background:var(--red-deep);color:#fff;box-shadow:none}
+.sh-f .btn.save.on:hover{background:var(--red-deep);color:#fff}
+#sheet:focus{outline:none}
 
 /* ── MAP MARKERS ── */
-.cm{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.35);border:2px solid #fff}
+.cm{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.35);border:2px solid #fff}
 .cm.home{background:var(--red);width:40px;height:40px;font-size:19px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.cm{cursor:pointer;transition:transform .15s}
+.cm{cursor:pointer;transition:transform .15s,width .15s,height .15s,margin .15s,font-size .15s}
 .cm.sel{transform:scale(1.3);box-shadow:0 0 0 3px var(--ink),0 2px 8px rgba(0,0,0,.4)}
-.leaflet-container{background:#EAE6DB;font-family:inherit}
+#map.zo .cm:not(.home):not(.sel){width:14px;height:14px;margin:8px;font-size:0;border-width:1.5px}
+.leaflet-container{background:var(--mapbg);font-family:inherit}
 
-.empty-msg{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;line-height:2}
-.empty-msg span{display:block;width:44px;height:44px;border-radius:50%;background:var(--ink);color:#fff;font-size:22px;line-height:44px;margin:0 auto 14px}
+.empty-msg{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;font-weight:600;line-height:1.9}
+.empty-msg span{display:block;width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--paper);font-size:22px;line-height:44px;margin:0 auto 14px}
 
 /* ── RESPONSIVE ── */
 @media(min-width:769px){
   .main{flex-direction:row}
   #map{height:100%!important;width:46%;flex:none;order:2;border-bottom:0;border-left:2px solid var(--ink)}
   .list-wrap{flex:1;order:1;padding:16px 20px}
-  .grid{grid-template-columns:1fr 1fr}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .search input{width:200px}
-  #sheet{left:auto;right:14px;bottom:14px;width:370px;border:2px solid var(--ink);box-shadow:5px 5px 0 rgba(26,26,26,.85);max-height:calc(100dvh - 200px)}
+  #sheet{left:auto;right:14px;bottom:14px;width:370px;border:2px solid var(--ink);border-top-width:4px;box-shadow:0 12px 32px rgba(0,0,0,.24);max-height:calc(100dvh - 200px)}
 }
 @media(min-width:1500px){
-  .grid{grid-template-columns:1fr 1fr 1fr}
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   #map{width:42%}
 }
 @media(max-width:768px){
@@ -148,25 +182,25 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
   .hdr h1{font-size:17px}
   .hdr .logo{width:34px;height:34px;font-size:17px}
   .hdr .sub{font-size:8px;letter-spacing:1.2px}
-  .cnt-badge{margin-left:auto}
+  .city-nav{margin-left:auto}
   .search{order:5;flex-basis:100%;margin-left:0}
   .search input{flex:1;width:auto}
   .trow{padding:8px 14px;gap:5px}
   .pill{padding:5px 11px;font-size:11px}
   .fpanel{padding:12px 14px 14px;gap:13px 22px}
-  .grid{grid-template-columns:1fr}
+  .grid{grid-template-columns:minmax(0,1fr)}
 }
 </style>
 </head>
 <body>
 <div class="hdr">
   <span class="logo">&#x1F353;</span>
-  <div><h1>Bloop Adventures</h1><div class="sub">79 St&ndash;Broadway &middot; 200 rainy-day stops for toddlers</div></div>
-  <span class="cnt-badge"><b id="count">200</b> <small>STOPS</small></span>
-  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="q" placeholder="Search stops, places, addresses&hellip;"></div>
+  <div><h1>2 Year Old Adventures</h1><div class="sub">79 St&ndash;Broadway &middot; 222 rain-or-shine stops for toddlers</div></div>
+  <nav class="city-nav" aria-label="City"><a class="city on" href="index.html" aria-current="page">NYC</a><a class="city" href="dc.html">DC</a></nav>
+  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="q" placeholder="Search stops, places, addresses&hellip;" aria-label="Search stops, places, addresses"><button class="q-x" id="q-clear" aria-label="Clear search" hidden>&#x2715;</button></div>
 </div>
 <div class="toolbar">
-  <div class="trow">
+  <div class="trow cats">
     <button class="pill on" data-g="g" data-v="any">All stops</button>
     <button class="pill" data-g="g" data-v="play"><span class="dot" style="background:#FF6319"></span>Play</button>
     <button class="pill" data-g="g" data-v="museum"><span class="dot" style="background:#0039A6"></span>Museums</button>
@@ -174,10 +208,18 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
     <button class="pill" data-g="g" data-v="books"><span class="dot" style="background:#B933AD"></span>Books</button>
     <button class="pill" data-g="g" data-v="classes"><span class="dot" style="background:#FCCC0A"></span>Classes</button>
     <button class="pill" data-g="g" data-v="shows"><span class="dot" style="background:#6CBE45"></span>Shows</button>
-    <span class="spacer"></span>
-    <button class="pill" id="open-today">Open today</button>
+  </div>
+  <div class="trow utils">
+    <button class="pill" id="open-today" aria-pressed="false">Open today</button>
+    <button class="pill" id="io-indoor" aria-pressed="false">Indoor</button>
+    <button class="pill" id="io-outdoor" aria-pressed="false">Outdoor</button>
+    <button class="pill" id="free-only" aria-pressed="false">Free</button>
+    <button class="pill fav-pill" id="fav-only" aria-pressed="false">&hearts; Saved <span class="fcount" id="favcount" hidden></span></button>
     <button class="pill" id="fbtn">Filters <span class="fcount" id="fcount" hidden></span> &#x25BE;</button>
+    <span class="spacer"></span>
+    <span class="cnt-badge" aria-live="polite" aria-atomic="true"><b id="count">222</b> <small>STOPS</small></span>
     <select class="sortsel" id="sort" aria-label="Sort by"><option value="near">Sort: Nearest</option><option value="price">Sort: Cheapest</option><option value="name">Sort: A&ndash;Z</option></select>
+    <button class="pill" id="surprise" title="Pick a random stop that matches your filters">Surprise me</button>
   </div>
   <div class="fpanel" id="fpanel" hidden>
     <div class="fgrp"><h5>Day of week</h5><div class="seg">
@@ -214,14 +256,28 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--pa
   <div id="map"></div>
   <div class="list-wrap" id="list-wrap"><div class="grid" id="grid"></div></div>
 </div>
-<div id="sheet" role="dialog" aria-label="Venue details"></div>
+<div id="sheet" role="dialog" aria-label="Venue details" tabindex="-1"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const today=new Date().getDay();
 const todayIdx=today===0?6:today-1;
-let filters={day:"any",io:"any",tp:"any",pr:100,af:"any",g:"any",t:99};
+let filters={day:"any",io:"any",tp:"any",pr:100,af:"any",g:"any",t:99,fav:false};
 let sortBy="near";
+
+// Saved stops — persisted in localStorage
+let favs=new Set();
+try{favs=new Set(JSON.parse(localStorage.getItem('tya-favs-nyc')||'[]'))}catch(e){}
+function saveFavs(){try{localStorage.setItem('tya-favs-nyc',JSON.stringify([...favs]))}catch(e){}}
+function toggleFav(id){
+  if(favs.has(id))favs.delete(id);else favs.add(id);
+  const refocus=document.activeElement&&document.activeElement.classList.contains('fav-btn');
+  saveFavs();syncQuick();render();updateSheetSave();
+  if(refocus){
+    const b=document.querySelector(`.vc[data-id="${id}"] .fav-btn`)||document.getElementById('fav-only');
+    b.focus({preventScroll:true});
+  }
+}
 
 // Venue data: io: i=indoor o=outdoor b=both | tp: p=play c=class b=both | $=basic price (0=free)
 // days: [Mon..Sun] null=closed, string=hours, "v"=varies
@@ -426,7 +482,29 @@ const D=[
 {id:197,n:"South Street Seaport Museum",a:"12 Fulton St",lt:40.7063,ln:-74.0026,cat:"Museum",ic:"\u26f5",t:30,io:"b",tp:"p",$:5,af:1,d:"Maritime galleries + outdoor historic tall ships at Pier 16. Monthly free family craft activities.",days:[null,null,"11-5","11-5","11-5","11-5","11-5"],pr:[["Child","$5"],["Adult","$18"]],pn:"Monthly free family crafts",w:"https://southstreetseaportmuseum.org"},
 {id:198,n:"Gulliver's Gate (reopened)",a:"216 W 44th St",lt:40.7574,ln:-73.9871,cat:"Immersive",ic:"\ud83c\udf0d",t:18,io:"i",tp:"p",$:0,af:1,d:"Miniature world with interactive elements. Under 3 free. Tiny cities, trains, airports mesmerize toddlers.",days:["10-8","10-8","10-8","10-8","10-9","10-9","10-8"],pr:[["Under 3","Free"],["Child 3-12","$29"],["Adult","$39"]],pn:"Interactive keys activate scenes",w:"https://gulliversgate.com"},
 {id:199,n:"Hudson Yards Vessel/Edge",a:"20 Hudson Yards",lt:40.7538,ln:-74.0018,cat:"Landmark",ic:"\ud83c\udfdb\ufe0f",t:20,io:"b",tp:"p",$:0,af:1,d:"Free to walk around the Shops & outdoor areas. Edge observation deck (toddlers may find it thrilling or scary).",days:["10-9","10-9","10-9","10-9","10-9","10-9","10-9"],pr:[["Shops/plaza","Free"],["Edge","$41 (under 6 free)"]],pn:"Shops are free; Edge under 6 free",w:"https://www.hudsonyardsnewyork.com"},
-{id:200,n:"Roosevelt Island Tramway + Playground",a:"E 60th St & 2nd Ave",lt:40.7614,ln:-73.9596,cat:"Adventure",ic:"\ud83d\udea1",t:15,io:"b",tp:"p",$:0,af:1,d:"Aerial tram ride over East River (uses MetroCard). Indoor playground on the island. Toddlers love the ride itself.",days:["6-2am","6-2am","6-2am","6-2am","6-3:30am","6-3:30am","6-2am"],pr:[["Tram","$2.90 MetroCard"],["Playground","Free"]],pn:"Regular MetroCard fare; the ride IS the activity",w:"https://rioc.ny.gov/302/Tram"}
+{id:200,n:"Roosevelt Island Tramway + Playground",a:"E 60th St & 2nd Ave",lt:40.7614,ln:-73.9596,cat:"Adventure",ic:"\ud83d\udea1",t:15,io:"b",tp:"p",$:0,af:1,d:"Aerial tram ride over East River (uses MetroCard). Indoor playground on the island. Toddlers love the ride itself.",days:["6-2am","6-2am","6-2am","6-2am","6-3:30am","6-3:30am","6-2am"],pr:[["Tram","$2.90 MetroCard"],["Playground","Free"]],pn:"Regular MetroCard fare; the ride IS the activity",w:"https://rioc.ny.gov/302/Tram"},
+{id:201,n:"Heckscher Playground",a:"Central Park, mid-park at W 62nd St",lt:40.7681,ln:-73.9762,cat:"Playground",ic:"🛝",t:15,io:"o",tp:"p",af:1,$:0,d:"Central Park's biggest playground with a huge sandbox, gentle slides, tot swings and separate little-kid sprinklers in summer. Loads of shade and benches for grown-ups.",days:["7:30-dusk","7:30-dusk","7:30-dusk","7:30-dusk","7:30-dusk","7:30-dusk","7:30-dusk"],pr:[["Everything","Free"]],pn:"Sprinklers run late June–Labor Day; busiest midday",w:"https://www.centralparknyc.org/locations/heckscher-playground"},
+{id:202,n:"Ancient Playground",a:"Central Park, E 85th St near 5th Ave",lt:40.7793,ln:-73.9601,cat:"Playground",ic:"🏺",t:25,io:"o",tp:"p",af:1,$:0,d:"Egyptian-themed climbing pyramids next to the Met, with tall summer sprinklers and a gentler sandbox-and-trickle area for the littlest ones. Pair it with a museum stop.",days:["7-dusk","7-dusk","7-dusk","7-dusk","7-dusk","7-dusk","7-dusk"],pr:[["Everything","Free"]],pn:"Water features on in warm months; shade is limited",w:"https://www.centralparknyc.org/locations/ancient-playground"},
+{id:203,n:"Diana Ross Playground",a:"Central Park, W 81st St at Central Park West",lt:40.7825,ln:-73.9723,cat:"Playground",ic:"🛝",t:10,io:"o",tp:"p",af:1,$:0,d:"Cozy wooden playground with toddler swings, low climbers and summer spray showers, tucked right by the Natural History Museum. Easy UWS hop.",days:["7-dusk","7-dusk","7-dusk","7-dusk","7-dusk","7-dusk","7-dusk"],pr:[["Everything","Free"]],pn:"Small and shady; great before or after the museum",w:"https://www.centralparknyc.org/locations/diana-ross-playground"},
+{id:204,n:"Billy Johnson Playground",a:"Central Park, E 67th St at 5th Ave",lt:40.7676,ln:-73.9686,cat:"Playground",ic:"🛝",t:25,io:"o",tp:"p",af:1,$:0,d:"Famous 45-foot granite slide plus a new smaller slide sized for toddlers, a rustic net climber, and a mini Gapstow Bridge. Feels woodsy and storybook.",days:["7-dusk","7-dusk","7-dusk","7-dusk","7-dusk","7-dusk","7-dusk"],pr:[["Everything","Free"]],pn:"Bring a piece of cardboard for a faster slide",w:"https://www.centralparknyc.org/locations/billy-johnson-playground"},
+{id:205,n:"Tarr-Coyne Tots Playground",a:"Central Park, W 67th St near Central Park West",lt:40.7739,ln:-73.977,cat:"Playground",ic:"🛝",t:15,io:"o",tp:"p",af:0,$:0,d:"An intimate play space built just for the youngest kids, with sand, tot swings and a small interactive water feature. Right beside the bigger Adventure Playground.",days:["7-dusk","7-dusk","7-dusk","7-dusk","7-dusk","7-dusk","7-dusk"],pr:[["Everything","Free"]],pn:"Enter at W 67th St; fenced and calm for new walkers",w:"https://www.centralparknyc.org/locations/tarr-coyne-tots-playground"},
+{id:206,n:"Hippo Playground",a:"Riverside Park, W 91st St at Riverside Dr",lt:40.792,ln:-73.9769,cat:"Playground",ic:"🦛",t:10,io:"o",tp:"p",af:1,$:0,d:"Beloved UWS spot named for its hippo statues, with a toddler-height water trickle, splashy boulder, sandpit and shady benches. Just-right size for a 2-year-old.",days:["8-dusk","8-dusk","8-dusk","8-dusk","8-dusk","8-dusk","8-dusk"],pr:[["Everything","Free"]],pn:"Restrooms on site; sprinklers seasonal",w:"https://riversideparknyc.org/parks/hippo-playground/"},
+{id:207,n:"Washington Square Park Playground",a:"Washington Square Park, Greenwich Village",lt:40.7308,ln:-73.9973,cat:"Playground",ic:"⛲",t:30,io:"o",tp:"p",af:1,$:0,d:"A dedicated toddler play area with baby swings, a mini slide and low ramps, steps from the iconic fountain where kids splash on hot days. Great people-watching park.",days:["7-9","7-9","7-9","7-9","7-9","7-9","7-9"],pr:[["Everything","Free"]],pn:"Toddler yard is separate from the big-kid playground",w:"https://www.nycgovparks.org/parks/washington-square-park/facilities/playgrounds"},
+{id:208,n:"Evelyn's Playground",a:"Union Square W at 16th St",lt:40.7365,ln:-73.9915,cat:"Playground",ic:"🛝",t:30,io:"o",tp:"p",af:0,$:0,d:"Union Square's fenced playground has a toddler section with familiar equipment plus a gated bank of baby swings and a sandbox. Restroom with a changing table on site.",days:["7-9","7-9","7-9","7-9","7-9","7-9","7-9"],pr:[["Everything","Free"]],pn:"Combine with the Union Square greenmarket (Mon/Wed/Fri/Sat)",w:"https://www.nycgovparks.org/facilities/playgrounds/379"},
+{id:209,n:"Chelsea Waterside Playground",a:"Chelsea Waterside Park, W 23rd St at 11th Ave",lt:40.7489,ln:-74.0075,cat:"Splash Pad",ic:"🌊",t:30,io:"o",tp:"p",af:1,$:0,d:"A wild 64-foot pipefish slide and a full water-play zone with spouting sculptures for hot-day soaking, right on the Hudson. Toddler-scaled features mixed in.",days:["6-12am","6-12am","6-12am","6-12am","6-12am","6-12am","6-12am"],pr:[["Everything","Free"]],pn:"Water on in summer; bring towels and a change of clothes",w:"https://hudsonriverpark.org/activities/chelsea-waterside-playground/"},
+{id:210,n:"Teardrop Park",a:"Teardrop Park, Battery Park City",lt:40.7166,ln:-74.0159,cat:"Playground",ic:"🌿",t:35,io:"o",tp:"p",af:1,$:0,d:"A hidden naturalistic oasis with a long slide, rock-hopping, sand and a summer water-play area, plus a small separate space for the littlest kids. Leafy and calm.",days:["8-dusk","8-dusk","8-dusk","8-dusk","8-dusk","8-dusk","8-dusk"],pr:[["Everything","Free"]],pn:"Tucked between buildings off River Terrace; easy to miss",w:"https://bpca.ny.gov/place/teardrop-park/"},
+{id:211,n:"Nelson A. Rockefeller Park",a:"Rockefeller Park, River Terrace, Battery Park City",lt:40.7178,ln:-74.0165,cat:"Playground",ic:"🌳",t:35,io:"o",tp:"p",af:1,$:0,d:"A destination playground backed by wide riverfront lawns for toddler running-around, with slides, swings, sand and a sheltered pavilion. Big open space and Hudson views.",days:["7-9","7-9","7-9","7-9","7-9","7-9","7-9"],pr:[["Everything","Free"]],pn:"Lots of room to roam; pair with the riverside esplanade",w:"https://bpca.ny.gov/place/rockefeller-park/"},
+{id:212,n:"Pier 25 Playground",a:"Pier 25, Hudson River Park, Tribeca",lt:40.7205,ln:-74.0132,cat:"Playground",ic:"⛵",t:35,io:"o",tp:"p",af:1,$:0,d:"A free waterfront playground with a pretend boat, climbing structures, swings and water features, on a pier with mini golf and a snack bar. Big Hudson River views.",days:["6-1am","6-1am","6-1am","6-1am","6-1am","6-1am","6-1am"],pr:[["Playground","Free"],["Mini golf, kids","$7"]],pn:"Playground free; mini golf is a fun add-on for bigger kids",w:"https://hudsonriverpark.org/activities/pier-25-playground/"},
+{id:213,n:"Pier 51 Water Play",a:"Pier 51, Hudson River Park, Jane St",lt:40.7377,ln:-74.0107,cat:"Splash Pad",ic:"🌊",t:30,io:"o",tp:"p",af:1,$:0,d:"A marine-themed water playground with sturgeon-shaped structures, a boat hull, sand and gentle water jets right on the river. Made for splashing on a hot day.",days:["6-1am","6-1am","6-1am","6-1am","6-1am","6-1am","6-1am"],pr:[["Everything","Free"]],pn:"Water features seasonal; play area open year-round",w:"https://hudsonriverpark.org/locations/pier-51/"},
+{id:214,n:"Central Park Carousel",a:"Central Park, mid-park at 64th St",lt:40.7696,ln:-73.9762,cat:"Carousel",ic:"🎠",t:20,io:"o",tp:"p",af:1,$:4,d:"A classic 1908 carousel with 57 hand-carved horses and a booming band organ, in the heart of the park's Children's District. A toddler rides on a lap or in a chariot.",days:["10-dusk","10-dusk","10-dusk","10-dusk","10-dusk","10-dusk","10-dusk"],pr:[["Per ride","$4"]],pn:"Cash-only booth; runs weather permitting",w:"https://www.centralparknyc.org/visiting-the-carousel-in-central-park"},
+{id:215,n:"Prospect Park Carousel",a:"Prospect Park, 452 Flatbush Ave, Brooklyn",lt:40.6644,ln:-73.9626,cat:"Carousel",ic:"🎠",t:45,io:"o",tp:"p",af:1,$:3,d:"A restored 1912 carousel with hand-carved horses at Prospect Park's Children's Corner, near the zoo and Lefferts House. Cheap and rarely crowded.",days:[null,null,null,"12-5","12-5","12-5","12-5"],pr:[["Per ride","$3"],["5-ride book","$13"]],pn:"Open Thu–Sun in season; closed Mon–Wed",w:"https://www.prospectpark.org/visit-the-park/places-to-go/carousel/"},
+{id:216,n:"Pier 6 Playgrounds",a:"Pier 6, Brooklyn Bridge Park, Atlantic Ave",lt:40.6935,ln:-74,cat:"Playground",ic:"🌊",t:40,io:"o",tp:"p",af:1,$:0,d:"A cluster of themed play zones: Slide Mountain, a giant Sandbox Village and the Water Lab with splashy fountains. Harbor breezes and skyline views for grown-ups.",days:["6-dusk","6-dusk","6-dusk","6-dusk","6-dusk","6-dusk","6-dusk"],pr:[["Everything","Free"]],pn:"Water Lab runs ~10am–7pm on hot summer days",w:"https://brooklynbridgepark.org/places-to-see/pier-6/"},
+{id:217,n:"Domino Park",a:"15 River St, Williamsburg, Brooklyn",lt:40.7143,ln:-73.9679,cat:"Waterfront Park",ic:"🌊",t:40,io:"o",tp:"p",af:1,$:0,d:"A sleek waterfront park with a sugar-themed playground (a toddler centrifuge for ages 2–5) and an 88-jet splash pad with stadium seating for parents. Manhattan skyline views.",days:["6-11pm","6-11pm","6-11pm","6-11pm","6-11pm","6-11pm","6-11pm"],pr:[["Everything","Free"]],pn:"Splash pad runs May–October; taco bar on site",w:"https://www.dominopark.com/"},
+{id:218,n:"Little Island",a:"Pier 55, Hudson River Park, W 13th St",lt:40.742,ln:-74.0107,cat:"Waterfront Park",ic:"🌼",t:30,io:"o",tp:"p",af:1,$:0,d:"A whimsical park on tulip-shaped stilts over the Hudson, with winding paths, lawns and hills perfect for toddler toddling. Free and a delight for grown-ups too.",days:["6-11pm","6-11pm","6-11pm","6-11pm","6-11pm","6-11pm","6-11pm"],pr:[["Everything","Free"]],pn:"Free entry, no ticket needed; busiest on weekend afternoons",w:"https://littleisland.org/"},
+{id:219,n:"Governors Island",a:"Governors Island (ferry from 10 South St)",lt:40.6895,ln:-74.0166,cat:"Landmark",ic:"⛴",t:45,io:"o",tp:"p",af:1,$:0,d:"A car-free island with big lawns, the Hammock Grove, and Slide Hill's tube slides (including a family slide). The short ferry ride is half the fun for a 2-year-old.",days:["7-10pm","7-10pm","7-10pm","7-10pm","7-11pm","7-11pm","7-10pm"],pr:[["Kids 12 & under","Free"],["Adult ferry","$5"]],pn:"Ferry free for everyone before 11am on weekends",w:"https://www.govisland.com/plan-your-visit"},
+{id:220,n:"The High Line",a:"The High Line, Gansevoort St to W 34th St",lt:40.748,ln:-74.0048,cat:"Landmark",ic:"🌿",t:30,io:"o",tp:"p",af:1,$:0,d:"An elevated garden-walkway on old rail tracks with plantings, fountains, water features and peekaboo city views. Flat and stroller-friendly if you use the elevator entrances.",days:["7-10pm","7-10pm","7-10pm","7-10pm","7-10pm","7-10pm","7-10pm"],pr:[["Everything","Free"]],pn:"Elevators at Gansevoort, 14th, 23rd & 30th St",w:"https://www.thehighline.org/visit/"},
+{id:221,n:"The Battery",a:"The Battery, State St, Lower Manhattan",lt:40.7033,ln:-74.017,cat:"Waterfront Park",ic:"🌊",t:40,io:"o",tp:"p",af:1,$:0,d:"A harbor-front park at Manhattan's tip with the Battery Playscape playground, big gardens and the nautilus-shaped SeaGlass Carousel. Boats, gulls and skyline all around.",days:["6-12am","6-12am","6-12am","6-12am","6-12am","6-12am","6-12am"],pr:[["Park","Free"],["SeaGlass ride","$6"]],pn:"Playground and gardens free; carousel ticket extra",w:"https://www.thebattery.org/"},
+{id:222,n:"Queens County Farm Museum",a:"73-50 Little Neck Pkwy, Floral Park, Queens",lt:40.748,ln:-73.718,cat:"City Farm",ic:"🐐",t:45,io:"o",tp:"p",af:1,$:0,d:"A real working farm with goats, sheep, alpacas, cows and hens you can visit, plus seasonal hayrides. Free almost every day and a total toddler hit.",days:["10-5","10-5","10-5","10-5","10-5","10-5","10-5"],pr:[["Everything","Free"]],pn:"Buy a bag of feed at the Farm Store; hayrides Apr–Oct weekends",w:"https://www.queensfarm.org/visit/"}
 ];
 
 // Category groups — colored like subway lines
@@ -440,10 +518,11 @@ function grp(v){
   if(/Music|Theater|Dance/.test(c))return"shows";
   return"play";
 }
-function bullet(v,extra){const g=grp(v);const fg=g==="classes"?"#1A1A1A":"#fff";return`<div class="bullet ${extra||''}" style="background:${GC[g]};color:${fg}">${v.id}</div>`;}
+function bullet(v,extra){const g=grp(v);const fg=g==="classes"?"#1A1A1A":"#fff";return`<div class="bullet ${extra||''}" style="background:${GC[g]};color:${fg}">${v.ic}</div>`;}
 
 function isOpenDay(v,di){if(di==="any")return true;const h=v.days[parseInt(di)];return h!==null&&h!=="v";}
 function matchF(v){
+  if(filters.fav&&!favs.has(v.id))return false;
   if(filters.g!=="any"&&grp(v)!==filters.g)return false;
   if(filters.day!=="any"&&!isOpenDay(v,filters.day))return false;
   if(filters.t<99&&v.t>filters.t)return false;
@@ -455,21 +534,27 @@ function matchF(v){
   if(filters.af==="1"&&!v.af)return false;
   return true;
 }
-function openSt(v){const h=v.days[todayIdx];if(!h)return{o:false,t:"Closed today"};if(h==="v")return{o:true,t:"Check schedule"};return{o:true,t:"Open "+h+" today"};}
+function openSt(v){const h=v.days[todayIdx];if(!h)return{o:false,t:"Closed today"};if(h==="v")return{o:true,t:"Check schedule"};return{o:true,t:"Open today "+h};}
 function fmtP(v){return v.$===0?"Free":"$"+v.$;}
 
 const map=L.map('map',{zoomControl:false}).setView([40.7831,-73.9812],12);
 L.control.zoom({position:'topright'}).addTo(map);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OSM &copy; CARTO',maxZoom:19}).addTo(map);
+const prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+L.tileLayer('https://{s}.basemaps.cartocdn.com/'+(prefersDark?'dark_all':'light_all')+'/{z}/{x}/{y}{r}.png',{attribution:'&copy; OSM &copy; CARTO',maxZoom:19}).addTo(map);
 L.marker([40.7831,-73.9812],{icon:L.divIcon({className:'',html:'<div class="cm home">🍓</div>',iconSize:[40,40],iconAnchor:[20,20],popupAnchor:[0,-20]}),zIndexOffset:1000}).addTo(map).bindPopup('<div style="padding:12px 16px;text-align:center;font-size:13px"><b>79 St &amp; Broadway</b><br><span style="color:#6F6857;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Home base</span></div>');
 
 const MK={};
 D.forEach(v=>{
   const g=grp(v);const fg=g==="classes"?"#1A1A1A":"#fff";
-  const mk=L.marker([v.lt,v.ln],{icon:L.divIcon({className:'',html:`<div class="cm" style="background:${GC[g]};color:${fg}">${v.id}</div>`,iconSize:[30,30],iconAnchor:[15,15]})}).addTo(map);
+  const mk=L.marker([v.lt,v.ln],{icon:L.divIcon({className:'',html:`<div class="cm" style="background:${GC[g]};color:${fg}">${v.ic}</div>`,iconSize:[30,30],iconAnchor:[15,15]})}).addTo(map);
   mk.on('click',()=>select(v,'map'));
   MK[v.id]=mk;
 });
+
+// Declutter: below zoom 14 venue markers collapse to small dots (selected stays full size)
+const mapEl=document.getElementById('map');
+function syncZoom(){mapEl.classList.toggle('zo',map.getZoom()<14);}
+map.on('zoomend',syncZoom);syncZoom();
 
 // ── Detail sheet ──
 const sheet=document.getElementById('sheet');
@@ -479,7 +564,20 @@ function clearSel(){
   document.querySelectorAll('.vc.on').forEach(x=>x.classList.remove('on'));
   document.querySelectorAll('.cm.sel').forEach(x=>x.classList.remove('sel'));
 }
-function closeSheet(){sheet.classList.remove('open');clearSel();}
+function closeSheet(){
+  const wasOpen=sheet.classList.contains('open');
+  const card=selId!=null?document.querySelector(`.vc[data-id="${selId}"] .nm`):null;
+  sheet.classList.remove('open');clearSel();
+  if(wasOpen&&sheet.contains(document.activeElement))(card||document.getElementById('fav-only')).focus({preventScroll:true});
+}
+function updateSheetSave(){
+  const b=sheet.querySelector('.btn.save');
+  if(!b||selId==null)return;
+  const on=favs.has(selId);
+  b.classList.toggle('on',on);
+  b.innerHTML=on?'&hearts; Saved':'&#9825; Save';
+  b.setAttribute('aria-pressed',on);
+}
 function renderSheet(v){
   const s=openSt(v);
   const hH=v.days.map((h,i)=>`<div class="hr-row${i===todayIdx?' tdy':''}"><span class="d">${DAYS[i]}</span>${h===null?'<span class="closed">Closed</span>':h==="v"?"Varies":h}</div>`).join('');
@@ -496,8 +594,10 @@ function renderSheet(v){
       <div><h4>Pricing</h4>${pH}${v.pn?`<div class="note">${v.pn}</div>`:''}</div>
     </div>
   </div>
-  <div class="sh-f"><a class="btn" href="${v.w}" target="_blank" rel="noopener">Website &rarr;</a><a class="btn alt" href="https://www.google.com/maps/dir/?api=1&destination=${v.lt},${v.ln}" target="_blank" rel="noopener">Directions &rarr;</a></div>`;
+  <div class="sh-f"><button class="btn save${favs.has(v.id)?' on':''}" aria-pressed="${favs.has(v.id)}">${favs.has(v.id)?'&hearts; Saved':'&#9825; Save'}</button><a class="btn" href="${v.w}" target="_blank" rel="noopener">Website &rarr;</a><a class="btn alt" href="https://www.google.com/maps/dir/?api=1&destination=${v.lt},${v.ln}" target="_blank" rel="noopener">Directions &rarr;</a></div>`;
+  sheet.style.borderTopColor=GC[grp(v)];
   sheet.querySelector('.sh-x').onclick=closeSheet;
+  sheet.querySelector('.btn.save').onclick=()=>toggleFav(v.id);
 }
 function select(v,from){
   clearSel();
@@ -510,45 +610,56 @@ function select(v,from){
   map.flyTo([v.lt,v.ln],Math.max(map.getZoom(),14),{duration:.4});
   renderSheet(v);
   sheet.classList.add('open');
+  sheet.focus({preventScroll:true});
 }
 map.on('click',closeSheet);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheet();closePanel();}});
 
 let searchQ='';
 
+function passes(v){
+  if(searchQ&&!v.n.toLowerCase().includes(searchQ)&&!v.d.toLowerCase().includes(searchQ)&&!v.cat.toLowerCase().includes(searchQ)&&!v.a.toLowerCase().includes(searchQ))return false;
+  return matchF(v);
+}
+
 function render(){
   const g=document.getElementById('grid');g.innerHTML='';
-  const f=D.filter(v=>{
-    if(searchQ&&!v.n.toLowerCase().includes(searchQ)&&!v.d.toLowerCase().includes(searchQ)&&!v.cat.toLowerCase().includes(searchQ)&&!v.a.toLowerCase().includes(searchQ))return false;
-    return matchF(v);
-  });
+  const f=D.filter(passes);
+  const fset=new Set(f.map(v=>v.id));
+  if(selId!=null&&!fset.has(selId)&&sheet.classList.contains('open'))closeSheet();
   document.getElementById('count').textContent=f.length;
-  D.forEach(v=>{const m=MK[v.id];const show=f.includes(v);if(show){if(!map.hasLayer(m))m.addTo(map);if(v.id===selId){const el=m.getElement();if(el&&el.firstChild)el.firstChild.classList.add('sel');}}else{if(map.hasLayer(m))map.removeLayer(m);}});
-  if(!f.length){g.innerHTML='<div class="empty-msg" style="grid-column:1/-1"><span>!</span>No stops match your filters.<br>Try widening the search.</div>';return;}
+  D.forEach(v=>{const m=MK[v.id];const show=fset.has(v.id);if(show){if(!map.hasLayer(m))m.addTo(map);if(v.id===selId){const el=m.getElement();if(el&&el.firstChild)el.firstChild.classList.add('sel');}}else{if(map.hasLayer(m))map.removeLayer(m);}});
+  if(!f.length){
+    const msg=filters.fav&&!favs.size
+      ?'<span>&hearts;</span>No saved stops yet.<br>Tap the &#9825; on any stop to save it.'
+      :'<span>!</span>No stops match your filters.<br>Try widening the search.';
+    g.innerHTML=`<div class="empty-msg" style="grid-column:1/-1">${msg}</div>`;return;
+  }
   if(sortBy==="near")f.sort((a,b)=>a.t-b.t||a.id-b.id);
   else if(sortBy==="price")f.sort((a,b)=>a.$-b.$||a.t-b.t);
   else f.sort((a,b)=>a.n.localeCompare(b.n));
   f.forEach(v=>{
     const s=openSt(v);
-    const io=v.io==='b'?'In + Out':v.io==='i'?'Indoor':'Outdoor';
-    const tp=v.tp==='b'?'Play & Classes':v.tp==='p'?'Open Play':'Classes';
+    const io=v.io==='b'?'In + out':v.io==='i'?'Indoor':'Outdoor';
     const c=document.createElement('div');c.className='vc';c.dataset.id=v.id;c.style.setProperty('--gc',GC[grp(v)]);
+    const isFav=favs.has(v.id);
     c.innerHTML=`
       <div class="vc-top">
         ${bullet(v)}
-        <div class="vc-title"><div class="nm">${v.n}</div><div class="cat-line">${v.cat} &middot; ${v.a}</div></div>
-        <div class="vc-price ${v.$===0?'free':''}">${fmtP(v)}</div>
+        <div class="vc-title"><button class="nm">${v.n}</button><div class="cat-line">${v.cat} &middot; ${v.a}</div></div>
+        <button class="fav-btn${isFav?' on':''}" aria-label="Save ${v.n}" aria-pressed="${isFav}">${isFav?'&hearts;':'&#9825;'}</button>
       </div>
       <div class="desc-line">${v.d}</div>
       <div class="meta">
+        <span class="vc-price ${v.$===0?'free':''}">${fmtP(v)}</span>
         <span class="${s.o?'ok':'no'}">${s.t}</span>
         <span>${v.t} min</span>
         <span>${io}</span>
-        <span>${tp}</span>
         ${v.af?'<span>Adults too</span>':''}
       </div>`;
     if(v.id===selId)c.classList.add('on');
     c.onclick=()=>select(v,'list');
+    c.querySelector('.fav-btn').onclick=e=>{e.stopPropagation();closePanel();toggleFav(v.id);};
     g.appendChild(c);
   });
   const fn=document.createElement('div');fn.className='foot-note';fn.textContent='Hours and prices drift — check the website before heading out';g.appendChild(fn);
@@ -556,7 +667,20 @@ function render(){
 
 // Quick-toggle + filter-count sync
 function syncQuick(){
-  document.getElementById('open-today').classList.toggle('on',filters.day===String(todayIdx));
+  const ot=document.getElementById('open-today');
+  const otOn=filters.day===String(todayIdx);
+  ot.classList.toggle('on',otOn);ot.setAttribute('aria-pressed',otOn);
+  const ind=document.getElementById('io-indoor');
+  ind.classList.toggle('on',filters.io==='indoor');ind.setAttribute('aria-pressed',filters.io==='indoor');
+  const out=document.getElementById('io-outdoor');
+  out.classList.toggle('on',filters.io==='outdoor');out.setAttribute('aria-pressed',filters.io==='outdoor');
+  document.querySelectorAll('.pill[data-g="io"]').forEach(x=>x.classList.toggle('on',x.dataset.v===filters.io));
+  const fr=document.getElementById('free-only');
+  fr.classList.toggle('on',filters.pr===0);fr.setAttribute('aria-pressed',filters.pr===0);
+  const fv=document.getElementById('fav-only');
+  fv.classList.toggle('on',filters.fav);fv.setAttribute('aria-pressed',filters.fav);
+  const fvc=document.getElementById('favcount');
+  fvc.hidden=!favs.size;fvc.textContent=favs.size;
   const n=(filters.day!=="any")+(filters.t<99)+(filters.io!=="any")+(filters.tp!=="any")+(filters.pr<100)+(filters.af==="1");
   const fc=document.getElementById('fcount');
   fc.hidden=!n;fc.textContent=n;
@@ -585,6 +709,38 @@ document.getElementById('open-today').onclick=()=>{
   syncQuick();render();
 };
 
+// Indoor / Outdoor quick toggles mirror the Space filter
+document.getElementById('io-indoor').onclick=()=>{
+  filters.io=filters.io==='indoor'?'any':'indoor';
+  syncQuick();render();
+};
+document.getElementById('io-outdoor').onclick=()=>{
+  filters.io=filters.io==='outdoor'?'any':'outdoor';
+  syncQuick();render();
+};
+
+// "Free" quick toggle mirrors the price slider
+document.getElementById('free-only').onclick=()=>{
+  filters.pr=filters.pr===0?100:0;
+  ps.value=filters.pr;
+  pl.textContent=filters.pr===0?'Free only':'Any price';
+  syncQuick();render();
+};
+
+// "Saved" quick toggle
+document.getElementById('fav-only').onclick=()=>{
+  filters.fav=!filters.fav;
+  syncQuick();render();
+};
+
+// Surprise me — pick a random stop matching the current filters
+document.getElementById('surprise').onclick=()=>{
+  const f=D.filter(passes);
+  if(!f.length)return;
+  const v=f[Math.floor(Math.random()*f.length)];
+  select(v,'map');
+};
+
 // Filters panel
 const fbtn=document.getElementById('fbtn');
 const fpanel=document.getElementById('fpanel');
@@ -604,7 +760,7 @@ ps.addEventListener('input',()=>{
 
 // Reset all (keeps category + search)
 document.getElementById('freset').onclick=()=>{
-  filters={...filters,day:"any",io:"any",tp:"any",pr:100,af:"any",t:99};
+  filters={...filters,day:"any",io:"any",tp:"any",pr:100,af:"any",t:99,fav:false};
   ['day','t','io','tp'].forEach(gr=>{
     const def=gr==='t'?'99':'any';
     document.querySelectorAll(`.pill[data-g="${gr}"]`).forEach(x=>x.classList.toggle('on',x.dataset.v===def));
@@ -618,9 +774,12 @@ document.getElementById('freset').onclick=()=>{
 document.getElementById('sort').addEventListener('change',e=>{sortBy=e.target.value;render();});
 
 // Search
-document.getElementById('q').addEventListener('input',e=>{searchQ=e.target.value.toLowerCase().trim();render();});
+const qEl=document.getElementById('q');
+const qClear=document.getElementById('q-clear');
+qEl.addEventListener('input',()=>{searchQ=qEl.value.toLowerCase().trim();qClear.hidden=!qEl.value;render();});
+qClear.onclick=()=>{qEl.value='';searchQ='';qClear.hidden=true;qEl.focus();render();};
 
-render();
+syncQuick();render();
 </script>
 </body>
 </html>
